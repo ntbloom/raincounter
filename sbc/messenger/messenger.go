@@ -5,12 +5,12 @@ import (
 	"os"
 	"time"
 
-	"github.com/ntbloom/rainbase/pkg/database"
-	"github.com/ntbloom/rainbase/pkg/paho"
-	"github.com/ntbloom/rainbase/pkg/timer"
+	"github.com/ntbloom/raincounter/common/paho"
+	"github.com/ntbloom/raincounter/common/timer"
+	"github.com/ntbloom/raincounter/sbc/database"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-	"github.com/ntbloom/rainbase/pkg/config/configkey"
+	"github.com/ntbloom/raincounter/config/configkey"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )

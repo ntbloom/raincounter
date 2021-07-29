@@ -6,9 +6,9 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/sirupsen/logrus"
 
-	"github.com/ntbloom/rainbase/pkg/config"
+	"github.com/ntbloom/raincounter/config"
 
-	"github.com/ntbloom/rainbase/pkg/paho"
+	"github.com/ntbloom/raincounter/common/paho"
 )
 
 // reusable paho function

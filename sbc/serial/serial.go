@@ -5,12 +5,12 @@ import (
 	"os"
 	"time"
 
-	"github.com/ntbloom/rainbase/pkg/config/configkey"
+	"github.com/ntbloom/raincounter/config/configkey"
 
-	"github.com/ntbloom/rainbase/pkg/messenger"
+	"github.com/ntbloom/raincounter/sbc/messenger"
 
-	"github.com/ntbloom/rainbase/pkg/exitcodes"
-	"github.com/ntbloom/rainbase/pkg/tlv"
+	"github.com/ntbloom/raincounter/common/exitcodes"
+	"github.com/ntbloom/raincounter/sbc/tlv"
 
 	"github.com/sirupsen/logrus"
 )

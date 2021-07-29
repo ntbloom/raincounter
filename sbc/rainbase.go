@@ -8,13 +8,13 @@ import (
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 
-	"github.com/ntbloom/rainbase/pkg/config"
-	"github.com/ntbloom/rainbase/pkg/config/configkey"
-	"github.com/ntbloom/rainbase/pkg/database"
-	"github.com/ntbloom/rainbase/pkg/messenger"
-	"github.com/ntbloom/rainbase/pkg/paho"
-	"github.com/ntbloom/rainbase/pkg/serial"
-	"github.com/ntbloom/rainbase/pkg/timer"
+	"github.com/ntbloom/raincounter/common/paho"
+	"github.com/ntbloom/raincounter/common/timer"
+	"github.com/ntbloom/raincounter/config"
+	"github.com/ntbloom/raincounter/config/configkey"
+	"github.com/ntbloom/raincounter/sbc/database"
+	"github.com/ntbloom/raincounter/sbc/messenger"
+	"github.com/ntbloom/raincounter/sbc/serial"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )

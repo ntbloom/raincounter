@@ -10,10 +10,10 @@ import (
 
 	"github.com/spf13/viper"
 
-	"github.com/ntbloom/rainbase/pkg/config/configkey"
+	"github.com/ntbloom/raincounter/config/configkey"
 
-	"github.com/ntbloom/rainbase/pkg/config"
-	"github.com/ntbloom/rainbase/pkg/database"
+	"github.com/ntbloom/raincounter/config"
+	"github.com/ntbloom/raincounter/sbc/database"
 )
 
 /* FIXTURES */

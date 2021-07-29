@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ntbloom/rainbase/pkg/tlv"
+	"github.com/ntbloom/raincounter/sbc/tlv"
 
 	"github.com/sirupsen/logrus"
 )

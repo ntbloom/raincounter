@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ntbloom/rainbase/pkg/timer"
+	"github.com/ntbloom/raincounter/common/timer"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )

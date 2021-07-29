@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ntbloom/rainbase/pkg/config/configkey"
+	"github.com/ntbloom/raincounter/config/configkey"
 	"github.com/spf13/viper"
 
 	"github.com/sirupsen/logrus"

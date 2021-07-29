@@ -2,7 +2,7 @@
 package config
 
 import (
-	"github.com/ntbloom/rainbase/pkg/config/configkey"
+	"github.com/ntbloom/raincounter/config/configkey"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
