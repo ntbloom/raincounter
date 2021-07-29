@@ -2,10 +2,11 @@
 .idea/
 *.db
 
-# paho certificates
+# sensitive data
 *.crt
 *.key
 *.pem
+secrets.yml
 
 
 # binaries

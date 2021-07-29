@@ -1,0 +1,49 @@
+logger:
+  level: debug
+
+usb:
+  packet:
+    length:
+      max: 7
+  connection:
+    port: /dev/ttyACM99
+    timeout: 10s
+
+mqtt:
+  scheme: ssl
+  certs:
+    ca: /etc/rainbase/ssl/ca.crt
+    client: /etc/rainbase/ssl/client.crt
+    key: /etc/rainbase/ssl/client.key
+  connection:
+    timeout: 5s
+    quiescence: 1000  # in milliseconds
+  qos: 1
+  status:
+    duration: 10s
+
+sensor:
+  rain:
+    measurement:
+      mm: "0.2794"
+      inches: "0.11"
+
+database:
+  local:
+    prod:
+      file: /etc/rainbase/rainbase-gateway-prod.db
+    dev:
+      file: /tmp/rainbase.db
+
+messenger:
+  status:
+    interval: 60s
+    frequency: 1s
+  temperature:
+    interval: 60s
+    frequency: 1s
+
+main:
+  loop:
+    duration: -1s
+    frequency: -10s

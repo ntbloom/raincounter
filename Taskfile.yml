@@ -1,0 +1,39 @@
+version: '3'
+
+tasks:
+  build:
+    desc: Build the rainbase binary
+    cmds:
+      - go build -v rainbase.go
+
+  lint:
+    desc: Run golangci-lint on the repo
+    cmds:
+      - golangci-lint run
+
+  test:
+    desc: Run the test suite
+    cmds:
+      - go test ./... | grep -v "no test files"
+
+  race:
+    desc: Run test suite with race checker
+    cmds:
+      - go clean -testcache
+      - go test -race ./... | grep -v "no test files"
+
+  short:
+    desc: Run short test suite without caching
+    cmds:
+      - go test -short ./... | grep -v "no test files"
+
+  cover:
+    desc: Run tests with coverage report
+    cmds:
+      - go test -cover ./...
+
+  run:
+    desc: run the binary
+    cmds:
+      - task: build
+      - ./rainbase
