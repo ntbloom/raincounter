@@ -1,0 +1,14 @@
+*.swp
+.idea/
+*.db
+
+# paho certificates
+*.crt
+*.key
+*.pem
+
+
+# binaries
+rainbase
+raincloud
+
