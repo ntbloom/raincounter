@@ -23,7 +23,7 @@ type Messenger struct {
 	Data   chan *Message         // Actual data packets
 }
 
-// NewMessenger get a new messenger
+// NewMessenger gets a new messenger
 func NewMessenger(client mqtt.Client, db *database.DBConnector) *Messenger {
 	state := make(chan uint8)
 	data := make(chan *Message)
@@ -33,7 +33,7 @@ func NewMessenger(client mqtt.Client, db *database.DBConnector) *Messenger {
 	return &Messenger{client, db, state, data}
 }
 
-// Wait for packet to publish or to receive signal interrupt
+// Listen waits for packet to publish or to receive signal interrupt
 func (m *Messenger) Listen() {
 	defer m.client.Disconnect(viper.GetUint(configkey.MQTTQuiescence))
 

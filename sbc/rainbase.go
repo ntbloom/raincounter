@@ -95,9 +95,12 @@ func listen(duration, frequency time.Duration) {
 	go func() {
 		sig := <-sigs
 		logrus.Infof("program received %s signal, exiting", sig)
-		stopLoop(killChannels)
 		t.Kill <- true
+		stopLoop(killChannels)
+		os.Exit(0)
 	}()
+
+	// turn off timer at the end if not running indefinitely
 	<-t.Kill
 }
 

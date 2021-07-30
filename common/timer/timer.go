@@ -25,9 +25,9 @@ type Timer struct {
 
 // NewTimer returns a pointer to a Timer struct
 func NewTimer(interval, frequency time.Duration, action Action) *Timer {
-	if frequency > interval {
+	if interval > 0 && frequency > interval {
 		logrus.Errorf("%s > %s", frequency, interval)
-		panic("frequency must be less than interval")
+		panic("frequency must be less than interval for all positive interval values")
 	}
 	finish := make(chan bool)
 	return &Timer{
