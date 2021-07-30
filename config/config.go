@@ -9,7 +9,7 @@ import (
 
 // config files
 const (
-	configDir     = "/etc/rainbase/"
+	configDir     = "/etc/raincounter/"
 	mainConfig    = "rainbase"
 	secretsConfig = "secrets"
 )

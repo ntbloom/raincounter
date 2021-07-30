@@ -83,7 +83,7 @@ func concatenateBytesToInt(b []byte) int {
 	return value
 }
 
-// NewTLV: make a new TLV packet
+// NewTLV makes a new TLV packet
 func NewTLV(packet []byte) (*TLV, error) {
 	rawTag := packet[0]
 	tag := asciiToInt(rawTag)

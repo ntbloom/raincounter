@@ -26,7 +26,7 @@ type Serial struct {
 	Messenger    *messenger.Messenger
 }
 
-// NewConnection: create a new serial connection with a unix filename
+// NewConnection creates a new serial connection with a unix filename
 func NewConnection(port string, maxPacketLen int, timeout time.Duration, msgr *messenger.Messenger) (*Serial, error) {
 	checkPortStatus(port, timeout)
 	logrus.Infof("opening connection on `%s`", port)
@@ -55,7 +55,7 @@ func NewConnection(port string, maxPacketLen int, timeout time.Duration, msgr *m
 	return uart, nil
 }
 
-// Close: close the serial connection
+// Close closes the serial connection
 func (serial *Serial) Close() {
 	logrus.Infof("closing serial port `%s`", serial.port)
 	err := serial.file.Close()
@@ -64,7 +64,7 @@ func (serial *Serial) Close() {
 	}
 }
 
-// GetTLV: read the file contents
+// GetTLV reads the file contents
 func (serial *Serial) GetTLV() {
 	checkPortStatus(serial.port, serial.timeout)
 
@@ -106,7 +106,7 @@ func (serial *Serial) GetTLV() {
 	}
 }
 
-// HandlePortFailure: what to do when sensor is unresponsive?
+// HandlePortFailure handles what to do when sensor is unresponsive
 func HandlePortFailure(port string) {
 	logrus.Fatalf("unable to locate sensor at `%s`", port)
 
@@ -114,7 +114,6 @@ func HandlePortFailure(port string) {
 	os.Exit(exitcodes.SerialPortNotFound)
 }
 
-// checkPortStatus: keep trying to open a file until timeout is up
 func checkPortStatus(port string, timeout time.Duration) {
 	logrus.Debugf("checking if `%s` exists", port)
 	start := time.Now()
@@ -132,7 +131,6 @@ func checkPortStatus(port string, timeout time.Duration) {
 	}
 }
 
-// reopenConnection: get another file descriptor for the port
 func (serial *Serial) reopenConnection() error {
 	file, err := os.Open(serial.port)
 	if err != nil {

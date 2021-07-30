@@ -90,7 +90,7 @@ func listen(duration, frequency time.Duration) {
 	go t.Loop()
 
 	// kill process with sigint regardless of whether duration is negative
-	sigs := make(chan os.Signal)
+	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
 		sig := <-sigs

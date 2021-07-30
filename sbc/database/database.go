@@ -54,6 +54,7 @@ func NewSqliteDBConnector(fullPath string, clobber bool) (*DBConnector, error) {
 }
 
 /* SQL LOG ENTRIES */
+
 // MakeRainEntry addRecord a rain event
 func (db *DBConnector) MakeRainEntry() {
 	_, err := db.addRecord(tlv.Rain, tlv.RainValue)
@@ -103,6 +104,7 @@ func (db *DBConnector) MakeTemperatureEntry(tempC int) {
 }
 
 /* GETTERS, MOSTLY FOR TESTING */
+
 func (db *DBConnector) GetRainEntries() int {
 	return db.tally(tlv.Rain)
 }
@@ -130,14 +132,12 @@ func (db *DBConnector) GetLastTemperatureEntry() int {
 
 /* SELECTED METHODS EXPORTED FOR TEST/VERIFICATION */
 
-// ForeignKeysAreImplemented, test function to ensure foreign key implementation
+// ForeignKeysAreImplemented tests function to ensure foreign key implementation
 func (db *DBConnector) ForeignKeysAreImplemented() bool {
 	illegal := `INSERT INTO log (tag, value, timestamp) VALUES (99999,1,"timestamp");`
 	res, err := db.enterData(illegal)
 	return res == nil && err != nil
 }
-
-/* HELPER METHODS */
 
 // makeSchema puts the schema in the sqlite file
 func (db *DBConnector) makeSchema() (sql.Result, error) {
@@ -166,8 +166,6 @@ func (db *DBConnector) addRecord(tag, value int) (sql.Result, error) {
 	cmd := fmt.Sprintf("INSERT INTO log (tag, value, timestamp) VALUES (%d, %d, \"%s\");", tag, value, timestamp)
 	return db.enterData(cmd)
 }
-
-/* QUERYING METHODS, MOSTLY FOR TESTING */
 
 // tally runs sql command to count database entries for a given topic
 func (db *DBConnector) tally(tag int) int {

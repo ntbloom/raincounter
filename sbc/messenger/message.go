@@ -74,27 +74,27 @@ type SensorStatus struct {
 	Timestamp time.Time
 }
 
-// SensorEvent.Process turn static value into mqtt payload
+// Process turn static value into mqtt payload
 func (s *SensorEvent) Process() ([]byte, error) {
 	return process(s)
 }
 
-// TemperatureEvent.Process turn temp into mqtt payload
+// Process turn temp into mqtt payload
 func (t *TemperatureEvent) Process() ([]byte, error) {
 	return process(t)
 }
 
-// RainEvent.Process turn rain event into mqtt payload
+// Process turn rain event into mqtt payload
 func (r *RainEvent) Process() ([]byte, error) {
 	return process(r)
 }
 
-// GatewayStatus.Process turn gateway status message into mqtt payload
+// Process turn gateway status message into mqtt payload
 func (gs *GatewayStatus) Process() ([]byte, error) {
 	return process(gs)
 }
 
-// SensorStatus.Process turn sensor status message into mqtt payload
+// Process turn sensor status message into mqtt payload
 func (ss *SensorStatus) Process() ([]byte, error) {
 	return process(ss)
 }

@@ -1,8 +1,20 @@
 HOMEDIR = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 SBC = $(HOMEDIR)sbc
+COMMON = $(HOMEDIR)common
+IGNORE = grep -v "no test files"
 
-rainbase:
+build-rainbase:
 	@go build -v $(SBC)/rainbase.go
 
-test-rainbase:
-	@go test -v $(SBC)/... | grep -v "no test files"
+run-rainbase: build-rainbase
+	./rainbase
+
+test-common:
+	@go test  $(COMMON)/...
+
+test-rainbase: test-common
+	@go test $(SBC)/...
+
+clean:
+	go clean -testcache
+
