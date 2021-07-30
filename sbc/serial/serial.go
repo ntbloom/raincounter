@@ -40,7 +40,7 @@ func NewConnection(port string, maxPacketLen int, timeout time.Duration, msgr *m
 		return nil, err
 	}
 
-	state := make(chan uint8)
+	state := make(chan uint8, 1)
 
 	uart := &Serial{
 		port,
@@ -97,7 +97,7 @@ func (serial *Serial) GetTLV() {
 			if state == configkey.SerialClosed {
 				logrus.Debug("received `Closed` signal, closing serial connection")
 				serial.Close()
-				break
+				return
 			}
 		default:
 			continue

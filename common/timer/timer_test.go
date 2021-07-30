@@ -24,7 +24,7 @@ func (f *fakeAction) DoAction() {
 // TestTimer basic timer should increment a counter every second for 5 seconds and then die
 func TestTimer(t *testing.T) {
 	fake := &fakeAction{counter: 0}
-	countTimer := timer.NewTimer(time.Second, time.Millisecond*200, fake)
+	countTimer := timer.NewTimer("test", time.Second, time.Millisecond*200, fake)
 	var count int
 
 	go countTimer.Loop()

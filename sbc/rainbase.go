@@ -55,6 +55,7 @@ func connectSerialPort(msgr *messenger.Messenger) *serial.Serial {
 func stopLoop(channels []chan uint8) {
 	for _, channel := range channels {
 		channel <- configkey.SerialClosed
+		logrus.Debug("stop loop messages sent")
 	}
 }
 
@@ -69,7 +70,7 @@ func (k *kill) DoAction() {
 
 func startKillTimer(duration, frequency time.Duration, killChannels []chan uint8) *timer.Timer {
 	k := kill{killChannels}
-	t := timer.NewTimer(duration, frequency, &k)
+	t := timer.NewTimer("main-loop", duration, frequency, &k)
 	return t
 }
 

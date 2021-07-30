@@ -25,7 +25,7 @@ type Messenger struct {
 
 // NewMessenger gets a new messenger
 func NewMessenger(client mqtt.Client, db *database.DBConnector) *Messenger {
-	state := make(chan uint8)
+	state := make(chan uint8, 1)
 	data := make(chan *Message)
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
 		logrus.Errorf("unable to connect to MQTT: %s", token.Error())
@@ -40,10 +40,17 @@ func (m *Messenger) Listen() {
 	// configure status messages
 	statusInterval := viper.GetDuration(configkey.MessengerStatusInterval)
 	statusFrequency := viper.GetDuration(configkey.MessengerStatusFrequency)
-	if statusInterval > 0 {
-		statusTimer := timer.NewChannelUint8Timer(statusInterval, statusFrequency, m.State, configkey.SendStatusMessage)
-		go statusTimer.Loop()
+	if statusInterval < 0 || statusInterval < statusFrequency {
+		panic("illegal status interval or frequency")
 	}
+	statusTimer := timer.NewChannelUint8Timer(
+		"messenger-status",
+		statusInterval,
+		statusFrequency,
+		m.State,
+		configkey.SendStatusMessage,
+	)
+	go statusTimer.Loop()
 
 	// loop until signal
 	for {
@@ -51,6 +58,8 @@ func (m *Messenger) Listen() {
 		case state := <-m.State:
 			switch state {
 			case configkey.SerialClosed:
+				// program is exiting
+				statusTimer.Kill <- true
 				logrus.Debug("received `Closed` signal, closing mqtt connection")
 				return
 			case configkey.SendStatusMessage:
