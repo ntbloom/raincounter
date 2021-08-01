@@ -37,7 +37,7 @@ database:
 
 messenger:
   status:
-    interval: 60s
+    interval: 10s
     frequency: 1s
   temperature:
     interval: 60s

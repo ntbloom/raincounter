@@ -59,15 +59,15 @@ func (m *Messenger) Listen() {
 			switch state {
 			case configkey.SerialClosed:
 				// program is exiting
-				statusTimer.Kill <- true
 				logrus.Debug("received `Closed` signal, closing mqtt connection")
+				statusTimer.Kill <- true
 				return
 			case configkey.SendStatusMessage:
 				logrus.Debug("requesting status message")
 				m.SendStatus()
 			}
 		case msg := <-m.Data:
-			logrus.Tracef("received Message from serial port: %s", msg.payload)
+			logrus.Debugf("received Message from serial port: %s", msg.payload)
 			m.Publish(msg)
 		}
 	}

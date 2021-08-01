@@ -97,7 +97,9 @@ func listen(duration, frequency time.Duration) {
 		sig := <-sigs
 		logrus.Infof("program received %s signal, exiting", sig)
 		t.Kill <- true
-		stopLoop(killChannels)
+		msgr.State <- configkey.SerialClosed
+		conn.State <- configkey.SerialClosed
+		//stopLoop(killChannels)
 		os.Exit(0)
 	}()
 

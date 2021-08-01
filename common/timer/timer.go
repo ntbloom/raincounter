@@ -21,6 +21,7 @@ type Timer struct {
 	interval  time.Duration // when to trigger something
 	frequency time.Duration // how often to check the clock
 	action    Action        // function to call when timer is up
+	trigger   chan bool     // send bool to channel to do action
 	Kill      chan bool     // send bool to channel to finish
 }
 
@@ -31,23 +32,22 @@ func NewTimer(name string, interval, frequency time.Duration, action Action) *Ti
 		logrus.Errorf("%s > %s", frequency, interval)
 		panic("frequency must be less than interval for all positive interval values")
 	}
-	finish := make(chan bool)
 	return &Timer{
 		name:      name,
 		start:     time.Now(),
 		interval:  interval,
 		frequency: frequency,
 		action:    action,
-		Kill:      finish,
+		trigger:   make(chan bool, 1),
+		Kill:      make(chan bool, 1),
 	}
 }
 
 // Loop runs an infinite loop, triggering an action. stops when receives message on Kill channel
 func (t *Timer) Loop() {
-	trigger := make(chan bool, 1)
-	kill := make(chan bool, 1)
+	logrus.Debugf("starting a timer for %s: interval=%s, frequency=%s", t.name, t.interval, t.frequency)
 	if t.interval > 0 {
-		go t.checkTimer(trigger, kill)
+		go t.checkTimer()
 	}
 
 	for {
@@ -55,7 +55,7 @@ func (t *Timer) Loop() {
 		case <-t.Kill:
 			logrus.Debugf("received kill signal for %s timer", t.name)
 			return
-		case <-trigger:
+		case <-t.trigger:
 			logrus.Debugf("triggered action for %s timer", t.name)
 			go t.action.DoAction()
 		}
@@ -63,14 +63,15 @@ func (t *Timer) Loop() {
 }
 
 // checkTimer infinitely checks clock every `wait` duration, sends message when trigger is up
-func (t *Timer) checkTimer(trigger, kill chan bool) {
+func (t *Timer) checkTimer() {
 	for {
 		if time.Since(t.start) > t.interval {
 			t.start = time.Now()
-			trigger <- true
+			t.trigger <- true
 		}
 		select {
-		case <-kill:
+		case <-t.Kill:
+			logrus.Debug("checkTimer trigger hit")
 			return
 		default:
 			time.Sleep(t.frequency)
