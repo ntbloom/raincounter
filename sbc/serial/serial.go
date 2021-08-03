@@ -95,6 +95,8 @@ func HandlePortFailure(port string) {
 	os.Exit(exitcodes.SerialPortNotFound)
 }
 
+// checks if a port is open
+// doesn't use a *Serial receiver since we use it before creating *Serial object
 func checkPortStatus(port string, timeout time.Duration) {
 	logrus.Debugf("checking if `%s` exists", port)
 	start := time.Now()
