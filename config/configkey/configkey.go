@@ -24,10 +24,8 @@ const (
 	DatabaseLocalProdFile = "database.local.prod.file"
 	DatabaseLocalDevFile  = "database.local.dev.file"
 
-	MessengerStatusInterval       = "messenger.status.interval"
-	MessengerStatusFrequency      = "messenger.status.frequency"
-	MessengerTemperatureInterval  = "messenger.temperature.interval"
-	MessengerTemperatureFrequency = "messneger.temperature.frequency"
+	MessengerStatusInterval      = "messenger.status.interval"
+	MessengerTemperatureInterval = "messenger.temperature.interval"
 
 	MainLoopDuration  = "main.loop.duration"
 	MainLoopFrequency = "main.loop.frequency"

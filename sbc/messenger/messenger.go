@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/ntbloom/raincounter/common/paho"
-	"github.com/ntbloom/raincounter/common/timer"
 	"github.com/ntbloom/raincounter/sbc/database"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -38,19 +37,7 @@ func (m *Messenger) Listen() {
 	defer m.client.Disconnect(viper.GetUint(configkey.MQTTQuiescence))
 
 	// configure status messages
-	statusInterval := viper.GetDuration(configkey.MessengerStatusInterval)
-	statusFrequency := viper.GetDuration(configkey.MessengerStatusFrequency)
-	if statusInterval < 0 || statusInterval < statusFrequency {
-		panic("illegal status interval or frequency")
-	}
-	statusTimer := timer.NewChannelUint8Timer(
-		"messenger-status",
-		statusInterval,
-		statusFrequency,
-		m.State,
-		configkey.SendStatusMessage,
-	)
-	go statusTimer.Loop()
+	statusTimer := time.NewTicker(viper.GetDuration(configkey.MessengerStatusInterval))
 
 	// loop until signal
 	for {
@@ -60,15 +47,17 @@ func (m *Messenger) Listen() {
 			case configkey.SerialClosed:
 				// program is exiting
 				logrus.Debug("received `Closed` signal, closing mqtt connection")
-				statusTimer.Kill <- true
+				statusTimer.Stop()
 				return
-			case configkey.SendStatusMessage:
-				logrus.Debug("requesting status message")
-				m.SendStatus()
+			default:
+				continue
 			}
 		case msg := <-m.Data:
 			logrus.Debugf("received Message from serial port: %s", msg.payload)
 			m.Publish(msg)
+		case <-statusTimer.C:
+			logrus.Debug("requesting status message")
+			m.SendStatus()
 		}
 	}
 }
