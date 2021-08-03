@@ -32,8 +32,8 @@ func NewMessenger(client mqtt.Client, db *database.DBConnector) *Messenger {
 	return &Messenger{client, db, state, data}
 }
 
-// Listen waits for packet to publish or to receive signal interrupt
-func (m *Messenger) Listen() {
+// Loop waits for packet to publish or to receive signal interrupt
+func (m *Messenger) Loop() {
 	defer m.client.Disconnect(viper.GetUint(configkey.MQTTQuiescence))
 
 	// configure status messages

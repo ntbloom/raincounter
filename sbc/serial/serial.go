@@ -58,8 +58,8 @@ func (serial *Serial) Close() {
 	}
 }
 
-// GetTLV reads the file contents
-func (serial *Serial) GetTLV() {
+// Loop reads the file contents
+func (serial *Serial) Loop() {
 	checkPortStatus(serial.port, serial.timeout)
 
 	logrus.Tracef("reading contents of `%s`", serial.port)

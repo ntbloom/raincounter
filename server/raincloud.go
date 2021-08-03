@@ -8,6 +8,6 @@ import (
 
 func main() {
 	database.NewDatabase("raincloud", "not-a-real-url")
-	//mqtt.Listen()
+	//mqtt.Loop()
 	web.Serve()
 }

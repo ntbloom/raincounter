@@ -58,8 +58,8 @@ func listen() {
 	conn := connectSerialPort(msgr)
 
 	// start the listening threads
-	go msgr.Listen()
-	go conn.GetTLV()
+	go msgr.Loop()
+	go conn.Loop()
 
 	// start a timer if needed
 	var loopTimer *time.Timer
