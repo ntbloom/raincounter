@@ -27,8 +27,7 @@ const (
 	MessengerStatusInterval      = "messenger.status.interval"
 	MessengerTemperatureInterval = "messenger.temperature.interval"
 
-	MainLoopDuration  = "main.loop.duration"
-	MainLoopFrequency = "main.loop.frequency"
+	MainLoopDuration = "main.loop.duration"
 )
 
 // random constants, not tied to config

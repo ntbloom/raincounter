@@ -5,8 +5,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/ntbloom/raincounter/config/configkey"
-
 	"github.com/ntbloom/raincounter/sbc/messenger"
 
 	"github.com/ntbloom/raincounter/common/exitcodes"
@@ -70,6 +68,7 @@ func (serial *Serial) GetTLV() {
 
 	logrus.Tracef("reading contents of `%s`", serial.port)
 	for {
+		logrus.Error("in serial for loop")
 		packet := make([]byte, serial.maxPacketLen)
 		_, err := serial.file.Read(packet)
 		if err != nil {
@@ -91,18 +90,17 @@ func (serial *Serial) GetTLV() {
 		}
 		serial.Messenger.Data <- msg
 
-		// run forever until uninterrupted by close signal
-		select {
-		case state := <-serial.State:
-			if state == configkey.SerialClosed {
-				logrus.Debug("received `Closed` signal, closing serial connection")
-				serial.Close()
-				return
-			}
-		default:
-			continue
-		}
-		return
+		//// run forever until uninterrupted by close signal
+		//select {
+		//case state := <-serial.State:
+		//	if state == configkey.SerialClosed {
+		//		logrus.Debug("received `Closed` signal, closing serial connection")
+		//		serial.Close()
+		//		return
+		//	}
+		//default:
+		//	continue
+		//}
 	}
 }
 

@@ -9,7 +9,6 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 
 	"github.com/ntbloom/raincounter/common/paho"
-	"github.com/ntbloom/raincounter/common/timer"
 	"github.com/ntbloom/raincounter/config"
 	"github.com/ntbloom/raincounter/config/configkey"
 	"github.com/ntbloom/raincounter/sbc/database"
@@ -51,31 +50,8 @@ func connectSerialPort(msgr *messenger.Messenger) *serial.Serial {
 	return conn
 }
 
-// set up a way to kill the process, either through a timer or os.signal
-func stopLoop(channels []chan uint8) {
-	for _, channel := range channels {
-		channel <- configkey.SerialClosed
-		logrus.Debug("stop loop messages sent")
-	}
-}
-
-// struct for killing with timer
-type kill struct{ channels []chan uint8 }
-
-func (k *kill) DoAction() {
-	stopLoop(k.channels)
-	logrus.Info("main loop killed by timer, exiting program")
-	os.Exit(0)
-}
-
-func startKillTimer(duration, frequency time.Duration, killChannels []chan uint8) *timer.Timer {
-	k := kill{killChannels}
-	t := timer.NewTimer("main-loop", duration, frequency, &k)
-	return t
-}
-
 // run main listening loop for number of seconds or indefinitely if duration is negative
-func listen(duration, frequency time.Duration) {
+func listen() {
 	client := connectToMQTT()
 	db := connectToDatabase()
 	msgr := messenger.NewMessenger(client, db)
@@ -85,26 +61,41 @@ func listen(duration, frequency time.Duration) {
 	go msgr.Listen()
 	go conn.GetTLV()
 
-	// start a timer
-	killChannels := []chan uint8{conn.State, msgr.State}
-	t := startKillTimer(duration, frequency, killChannels)
-	go t.Loop()
+	// start a timer if needed
+	var loopTimer *time.Timer
+	var timerChan <-chan time.Time
+	duration := viper.GetDuration(configkey.MainLoopDuration)
+	if duration.Seconds() > 0 {
+		loopTimer = time.NewTimer(viper.GetDuration(configkey.MainLoopDuration))
+		timerChan = loopTimer.C
+	}
 
-	// kill process with sigint regardless of whether duration is negative
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
-	go func() {
-		sig := <-sigs
-		logrus.Infof("program received %s signal, exiting", sig)
-		t.Kill <- true
-		msgr.State <- configkey.SerialClosed
-		conn.State <- configkey.SerialClosed
-		//stopLoop(killChannels)
-		os.Exit(0)
-	}()
+	// look out for terminal input
+	terminalSignals := make(chan os.Signal, 1)
+	signal.Notify(terminalSignals, syscall.SIGINT, syscall.SIGTERM)
 
-	// turn off timer at the end if not running indefinitely
-	<-t.Kill
+	for {
+		select {
+		case sig := <-terminalSignals:
+			logrus.Infof("program received %s signal, exiting", sig)
+			stopProgram(msgr, conn, loopTimer)
+		case <-timerChan:
+			logrus.Infof("program exiting after %s", duration)
+			stopProgram(msgr, conn, loopTimer)
+		}
+	}
+}
+
+func stopProgram(m *messenger.Messenger, c *serial.Serial, timer *time.Timer) {
+	if timer != nil {
+		timer.Stop()
+	}
+	logrus.Error("sending to m.State")
+	m.State <- configkey.SerialClosed
+	logrus.Error("sending to c.State")
+	c.Close()
+	time.Sleep(time.Second * 1)
+	os.Exit(0)
 }
 
 func main() {
@@ -112,7 +103,5 @@ func main() {
 	config.Configure()
 
 	// run the main listening loop
-	duration := viper.GetDuration(configkey.MainLoopDuration)
-	frequency := viper.GetDuration(configkey.MainLoopFrequency)
-	listen(duration, frequency)
+	listen()
 }

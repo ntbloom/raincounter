@@ -44,4 +44,3 @@ messenger:
 main:
   loop:
     duration: -10s
-    frequency: 1s
