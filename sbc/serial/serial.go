@@ -20,7 +20,6 @@ type Serial struct {
 	timeout      time.Duration
 	data         []byte
 	file         *os.File
-	State        chan uint8
 	Messenger    *messenger.Messenger
 }
 
@@ -38,15 +37,12 @@ func NewConnection(port string, maxPacketLen int, timeout time.Duration, msgr *m
 		return nil, err
 	}
 
-	state := make(chan uint8, 1)
-
 	uart := &Serial{
 		port,
 		maxPacketLen,
 		timeout,
 		data,
 		file,
-		state,
 		msgr,
 	}
 
@@ -68,7 +64,6 @@ func (serial *Serial) GetTLV() {
 
 	logrus.Tracef("reading contents of `%s`", serial.port)
 	for {
-		logrus.Error("in serial for loop")
 		packet := make([]byte, serial.maxPacketLen)
 		_, err := serial.file.Read(packet)
 		if err != nil {
@@ -89,18 +84,6 @@ func (serial *Serial) GetTLV() {
 			continue
 		}
 		serial.Messenger.Data <- msg
-
-		//// run forever until uninterrupted by close signal
-		//select {
-		//case state := <-serial.State:
-		//	if state == configkey.SerialClosed {
-		//		logrus.Debug("received `Closed` signal, closing serial connection")
-		//		serial.Close()
-		//		return
-		//	}
-		//default:
-		//	continue
-		//}
 	}
 }
 
