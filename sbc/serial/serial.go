@@ -90,7 +90,6 @@ func (serial *Serial) waitForMessage() {
 	packet := make([]byte, serial.maxPacketLen)
 	_, err := serial.file.Read(packet)
 	serial.waitingForMessage <- true
-	logrus.Errorf("%s", packet)
 	if err != nil {
 		// connection to file was lost, attempt reconnection
 		logrus.Infof("connection lost, attempting reconnection")
