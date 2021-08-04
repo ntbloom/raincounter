@@ -44,7 +44,7 @@ func (m *Messenger) Loop() {
 		select {
 		case state := <-m.State:
 			switch state {
-			case configkey.SerialClosed:
+			case configkey.Kill:
 				// program is exiting
 				logrus.Debug("received `Closed` signal, closing mqtt connection")
 				statusTimer.Stop()

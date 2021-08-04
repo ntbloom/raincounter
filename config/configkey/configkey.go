@@ -34,6 +34,6 @@ const (
 const (
 	DegreesF          = string("\u00B0F")
 	DegreesC          = string("\u00B0C")
-	SerialClosed      = 1
+	Kill              = 1
 	SendStatusMessage = 2
 )

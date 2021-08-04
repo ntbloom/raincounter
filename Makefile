@@ -26,7 +26,7 @@ test-rainbase-race: test-common-race
 run-rainbase: build-rainbase
 	./rainbase
 
-race-rainbase-run: build-rainbase-race
+run-rainbase-race: build-rainbase-race
 	./rainbase-race
 
 
