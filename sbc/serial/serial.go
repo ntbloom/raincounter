@@ -3,6 +3,7 @@ package serial
 
 import (
 	"os"
+	"sync"
 	"time"
 
 	"github.com/ntbloom/raincounter/sbc/messenger"
@@ -15,12 +16,15 @@ import (
 
 // Serial communicates with a serial port
 type Serial struct {
-	port         string
-	maxPacketLen int
-	timeout      time.Duration
-	data         []byte
-	file         *os.File
-	Messenger    *messenger.Messenger
+	port              string               // file descriptor of port
+	maxPacketLen      int                  //how long you expect the packet to be
+	timeout           time.Duration        // how long to wait for enumration
+	data              []byte               //where the data lives
+	file              *os.File             // file descriptor for the port
+	Kill              chan bool            // send a message to kill the serial loop
+	waitingForMessage chan bool            // flag for waiting for message on serial port
+	Messenger         *messenger.Messenger //messenger object
+	sync.RWMutex
 }
 
 // NewConnection creates a new serial connection with a unix filename
@@ -43,7 +47,10 @@ func NewConnection(port string, maxPacketLen int, timeout time.Duration, msgr *m
 		timeout,
 		data,
 		file,
+		make(chan bool, 1),
+		make(chan bool, 1),
 		msgr,
+		sync.RWMutex{},
 	}
 
 	return uart, nil
@@ -62,29 +69,44 @@ func (serial *Serial) Close() {
 func (serial *Serial) Loop() {
 	checkPortStatus(serial.port, serial.timeout)
 
+	// send the waiting loop
+	go serial.waitForMessage()
 	logrus.Tracef("reading contents of `%s`", serial.port)
 	for {
-		packet := make([]byte, serial.maxPacketLen)
-		_, err := serial.file.Read(packet)
-		if err != nil {
-			// connection to file was lost, attempt reconnection
-			logrus.Infof("connection lost, attempting reconnection")
-			checkPortStatus(serial.port, serial.timeout)
-			_ = serial.reopenConnection()
-			continue
+		select {
+		case <-serial.Kill:
+			serial.Close()
+			return
+		case <-serial.waitingForMessage:
+			go serial.waitForMessage()
 		}
-
-		tlvPacket, err := tlv.NewTLV(packet)
-		if err != nil {
-			logrus.Errorf("unexpected TLV packet: %s", err)
-		}
-		msg, err := serial.Messenger.NewMessage(tlvPacket)
-		if err != nil {
-			logrus.Errorf("bad tlv packet, ignoring: %s", err)
-			continue
-		}
-		serial.Messenger.Data <- msg
 	}
+}
+
+func (serial *Serial) waitForMessage() {
+	serial.Lock()
+	defer serial.Unlock()
+
+	packet := make([]byte, serial.maxPacketLen)
+	_, err := serial.file.Read(packet)
+	serial.waitingForMessage <- true
+	logrus.Errorf("%s", packet)
+	if err != nil {
+		// connection to file was lost, attempt reconnection
+		logrus.Infof("connection lost, attempting reconnection")
+		checkPortStatus(serial.port, serial.timeout)
+		_ = serial.reopenConnection()
+	}
+
+	tlvPacket, err := tlv.NewTLV(packet)
+	if err != nil {
+		logrus.Errorf("unexpected TLV packet: %s", err)
+	}
+	msg, err := serial.Messenger.NewMessage(tlvPacket)
+	if err != nil {
+		logrus.Errorf("bad tlv packet, ignoring: %s", err)
+	}
+	serial.Messenger.Data <- msg
 }
 
 // HandlePortFailure handles what to do when sensor is unresponsive
