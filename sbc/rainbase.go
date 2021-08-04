@@ -90,12 +90,12 @@ func stopProgram(m *messenger.Messenger, c *serial.Serial, timer *time.Timer) {
 	if timer != nil {
 		timer.Stop()
 	}
-	logrus.Error("sending to m.State")
+	logrus.Debugf("sending to m.State")
 	m.State <- configkey.Kill
-	logrus.Error("sending to c.State")
-	c.Kill <- true
+	logrus.Debugf("sending to c.State")
+	c.Kill <- struct{}{}
 	time.Sleep(time.Second * 1)
-	logrus.Info("exiting!")
+	logrus.Info("Done!")
 	os.Exit(0)
 }
 

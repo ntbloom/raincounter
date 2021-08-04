@@ -16,15 +16,15 @@ import (
 
 // Serial communicates with a serial port
 type Serial struct {
-	port              string               // file descriptor of port
-	maxPacketLen      int                  //how long you expect the packet to be
-	timeout           time.Duration        // how long to wait for enumration
-	data              []byte               //where the data lives
-	file              *os.File             // file descriptor for the port
-	Kill              chan bool            // send a message to kill the serial loop
-	waitingForMessage chan bool            // flag for waiting for message on serial port
-	Messenger         *messenger.Messenger //messenger object
-	sync.RWMutex
+	port         string               // file descriptor of port
+	maxPacketLen int                  // how long you expect the packet to be
+	timeout      time.Duration        // how long to wait for enumration
+	data         []byte               // where the data lives
+	file         *os.File             // file descriptor for the port
+	Kill         chan struct{}        // send a message to kill the serial loop
+	messageLoop  chan struct{}        // channel for waiting for message on serial port
+	Messenger    *messenger.Messenger // messenger object
+	sync.Mutex
 }
 
 // NewConnection creates a new serial connection with a unix filename
@@ -47,55 +47,51 @@ func NewConnection(port string, maxPacketLen int, timeout time.Duration, msgr *m
 		timeout,
 		data,
 		file,
-		make(chan bool, 1),
-		make(chan bool, 1),
+		make(chan struct{}, 1),
+		make(chan struct{}, 1),
 		msgr,
-		sync.RWMutex{},
+		sync.Mutex{},
 	}
 
 	return uart, nil
-}
-
-// Close closes the serial connection
-func (serial *Serial) Close() {
-	logrus.Infof("closing serial port `%s`", serial.port)
-	err := serial.file.Close()
-	if err != nil {
-		logrus.Errorf("problem closing `%s`: %s", serial.port, err)
-	}
 }
 
 // Loop reads the file contents
 func (serial *Serial) Loop() {
 	checkPortStatus(serial.port, serial.timeout)
 
-	// send the waiting loop
+	// send the first waiting command
 	go serial.waitForMessage()
-	logrus.Tracef("reading contents of `%s`", serial.port)
+
+	// wait for next message or the kill signal
 	for {
 		select {
 		case <-serial.Kill:
-			serial.Close()
+			serial.close()
 			return
-		case <-serial.waitingForMessage:
+		case <-serial.messageLoop:
 			go serial.waitForMessage()
 		}
 	}
 }
 
+// waits for a message, then updates the main loop when it arrives
 func (serial *Serial) waitForMessage() {
 	serial.Lock()
 	defer serial.Unlock()
 
+	logrus.Tracef("waiting to read contents of `%s`", serial.port)
 	packet := make([]byte, serial.maxPacketLen)
+
 	_, err := serial.file.Read(packet)
-	serial.waitingForMessage <- true
 	if err != nil {
 		// connection to file was lost, attempt reconnection
 		logrus.Infof("connection lost, attempting reconnection")
 		checkPortStatus(serial.port, serial.timeout)
 		_ = serial.reopenConnection()
 	}
+	logrus.Trace("a serial message arrived")
+	serial.messageLoop <- struct{}{}
 
 	tlvPacket, err := tlv.NewTLV(packet)
 	if err != nil {
@@ -108,16 +104,27 @@ func (serial *Serial) waitForMessage() {
 	serial.Messenger.Data <- msg
 }
 
-// HandlePortFailure handles what to do when sensor is unresponsive
-func HandlePortFailure(port string) {
-	logrus.Fatalf("unable to locate sensor at `%s`", port)
-
-	// for now...
-	os.Exit(exitcodes.SerialPortNotFound)
+// reopens the serial connection if it gets broken
+func (serial *Serial) reopenConnection() error {
+	file, err := os.Open(serial.port)
+	if err != nil {
+		logrus.Debugf("port `%s` temporarily down: %s", serial.port, err)
+		return err
+	}
+	serial.file = file
+	return nil
 }
 
-// checks if a port is open
-// doesn't use a *Serial receiver since we use it before creating *Serial object
+// closes the serial port, to be used at the end of the program
+func (serial *Serial) close() {
+	logrus.Infof("closing serial port `%s`", serial.port)
+	err := serial.file.Close()
+	if err != nil {
+		logrus.Errorf("problem closing `%s`: %s", serial.port, err)
+	}
+}
+
+// make sure we can access the serial port else fail
 func checkPortStatus(port string, timeout time.Duration) {
 	logrus.Debugf("checking if `%s` exists", port)
 	start := time.Now()
@@ -129,18 +136,16 @@ func checkPortStatus(port string, timeout time.Duration) {
 		}
 		logrus.Tracef("file `%s` doesn't exist on first look, re-checking for %s", port, timeout)
 		if time.Since(start).Milliseconds() > timeout.Milliseconds() {
-			HandlePortFailure(port)
+			handlePortFailure(port)
 			return
 		}
 	}
 }
 
-func (serial *Serial) reopenConnection() error {
-	file, err := os.Open(serial.port)
-	if err != nil {
-		logrus.Debugf("port `%s` temporarily down: %s", serial.port, err)
-		return err
-	}
-	serial.file = file
-	return nil
+// handles what to do when sensor is unresponsive
+func handlePortFailure(port string) {
+	logrus.Fatalf("unable to locate sensor at `%s`", port)
+
+	// for now...
+	os.Exit(exitcodes.SerialPortNotFound)
 }
