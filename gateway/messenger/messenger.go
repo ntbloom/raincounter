@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/ntbloom/raincounter/common/mqtt"
-	"github.com/ntbloom/raincounter/sbc/database"
+	"github.com/ntbloom/raincounter/gateway/database"
 
 	paho "github.com/eclipse/paho.mqtt.golang"
 	"github.com/ntbloom/raincounter/config/configkey"

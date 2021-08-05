@@ -6,10 +6,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ntbloom/raincounter/sbc/messenger"
+	"github.com/ntbloom/raincounter/gateway/messenger"
 
 	"github.com/ntbloom/raincounter/common/exitcodes"
-	"github.com/ntbloom/raincounter/sbc/tlv"
+	"github.com/ntbloom/raincounter/gateway/tlv"
 
 	"github.com/sirupsen/logrus"
 )

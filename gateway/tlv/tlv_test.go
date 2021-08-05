@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ntbloom/raincounter/sbc/tlv"
+	"github.com/ntbloom/raincounter/gateway/tlv"
 )
 
 // Test static packets like rain event, etc.

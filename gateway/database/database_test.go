@@ -13,7 +13,7 @@ import (
 	"github.com/ntbloom/raincounter/config/configkey"
 
 	"github.com/ntbloom/raincounter/config"
-	"github.com/ntbloom/raincounter/sbc/database"
+	"github.com/ntbloom/raincounter/gateway/database"
 )
 
 /* FIXTURES */

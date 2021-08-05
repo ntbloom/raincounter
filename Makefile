@@ -1,5 +1,5 @@
 HOMEDIR = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
-SBC = $(HOMEDIR)sbc
+SBC = $(HOMEDIR)gateway
 COMMON = $(HOMEDIR)common
 
 # common

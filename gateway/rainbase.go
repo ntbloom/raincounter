@@ -11,9 +11,9 @@ import (
 	"github.com/ntbloom/raincounter/common/mqtt"
 	"github.com/ntbloom/raincounter/config"
 	"github.com/ntbloom/raincounter/config/configkey"
-	"github.com/ntbloom/raincounter/sbc/database"
-	"github.com/ntbloom/raincounter/sbc/messenger"
-	"github.com/ntbloom/raincounter/sbc/serial"
+	"github.com/ntbloom/raincounter/gateway/database"
+	"github.com/ntbloom/raincounter/gateway/messenger"
+	"github.com/ntbloom/raincounter/gateway/serial"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
