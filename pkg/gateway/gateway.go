@@ -1,4 +1,4 @@
-package main
+package gateway
 
 import (
 	"os"
@@ -101,7 +101,7 @@ func stopProgram(msgr *messenger2.Messenger, conn *serial2.Serial, timer *time.T
 	os.Exit(0)
 }
 
-func main() {
+func Start() {
 	// read config from the config file
 	config2.Configure()
 
