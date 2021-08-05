@@ -1,6 +1,6 @@
-package paho
+package mqtt
 
-// Configure TLS authentication for paho/mqtt
+// Configure TLS authentication for mqtt/mqtt
 
 import (
 	"crypto/tls"

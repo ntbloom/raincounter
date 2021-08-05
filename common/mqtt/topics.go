@@ -1,4 +1,4 @@
-package paho
+package mqtt
 
 // mqtt topics for events, measurements, status
 const (

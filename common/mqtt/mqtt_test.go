@@ -1,4 +1,4 @@
-package paho_test
+package mqtt_test
 
 import (
 	"testing"
@@ -8,14 +8,14 @@ import (
 
 	"github.com/ntbloom/raincounter/config"
 
-	"github.com/ntbloom/raincounter/common/paho"
+	"github.com/ntbloom/raincounter/common/mqtt"
 )
 
-// reusable paho function
+// reusable mqtt function
 func pahoFixture(t *testing.T) eclipsepaho.Client {
 	config.Configure()
-	pahoConfig := paho.GetConfigFromViper()
-	client, err := paho.NewConnection(pahoConfig)
+	pahoConfig := mqtt.NewBrokerConfig()
+	client, err := mqtt.NewConnection(pahoConfig)
 	if err != nil {
 		t.Fail()
 	}

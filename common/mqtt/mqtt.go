@@ -1,5 +1,5 @@
-// Package paho wraps the Eclipse Paho code for handling eclipsepaho messaging
-package paho
+// Package mqtt wraps the Eclipse Paho code for handling eclipsepaho messaging
+package mqtt
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ import (
 	eclipsepaho "github.com/eclipse/paho.mqtt.golang"
 )
 
-// BrokerConfig configures the paho connection
+// BrokerConfig configures the mqtt connection
 type BrokerConfig struct {
 	scheme            string
 	broker            string
@@ -24,8 +24,8 @@ type BrokerConfig struct {
 	connectionTimeout time.Duration
 }
 
-// GetConfigFromViper get paho configuration details from viper directly
-func GetConfigFromViper() *BrokerConfig {
+// NewBrokerConfig get mqtt configuration details from viper directly
+func NewBrokerConfig() *BrokerConfig {
 	// look for certs locally first
 	return &BrokerConfig{
 		scheme:            viper.GetString(configkey.MQTTScheme),

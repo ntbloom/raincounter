@@ -1,11 +1,11 @@
-// Package messenger ferries data between serial port, paho, and the database
+// Package messenger ferries data between serial port, mqtt, and the database
 package messenger
 
 import (
 	"os"
 	"time"
 
-	"github.com/ntbloom/raincounter/common/paho"
+	"github.com/ntbloom/raincounter/common/mqtt"
 	"github.com/ntbloom/raincounter/sbc/database"
 
 	eclipsepaho "github.com/eclipse/paho.mqtt.golang"
@@ -87,7 +87,7 @@ func (m *Messenger) sendStatus() {
 // get a status message about how the gateway is doing
 func gatewayStatusMessage() (*Message, error) {
 	gs := GatewayStatus{
-		Topic:     paho.GatewayStatus,
+		Topic:     mqtt.GatewayStatus,
 		OK:        true,
 		Timestamp: time.Now(),
 	}
@@ -115,7 +115,7 @@ func sensorStatusMessage() (*Message, error) {
 		up = true
 	}
 	ss := SensorStatus{
-		Topic:     paho.SensorStatus,
+		Topic:     mqtt.SensorStatus,
 		OK:        up,
 		Timestamp: time.Now(),
 	}

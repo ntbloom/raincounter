@@ -9,7 +9,7 @@ import (
 	"github.com/ntbloom/raincounter/config/configkey"
 	"github.com/spf13/viper"
 
-	"github.com/ntbloom/raincounter/common/paho"
+	"github.com/ntbloom/raincounter/common/mqtt"
 
 	"github.com/ntbloom/raincounter/sbc/tlv"
 	"github.com/sirupsen/logrus"
@@ -114,7 +114,7 @@ func (m *Messenger) NewMessage(packet *tlv.TLV) (*Message, error) {
 
 	switch packet.Tag {
 	case tlv.Rain:
-		topic = paho.RainTopic
+		topic = mqtt.RainTopic
 		event = &RainEvent{
 			topic,
 			viper.GetString(configkey.SensorRainMetric),
@@ -122,7 +122,7 @@ func (m *Messenger) NewMessage(packet *tlv.TLV) (*Message, error) {
 		}
 		go m.db.MakeRainEntry()
 	case tlv.Temperature:
-		topic = paho.TemperatureTopic
+		topic = mqtt.TemperatureTopic
 		tempC := packet.Value
 		event = &TemperatureEvent{
 			topic,
@@ -131,7 +131,7 @@ func (m *Messenger) NewMessage(packet *tlv.TLV) (*Message, error) {
 		}
 		go m.db.MakeTemperatureEntry(tempC)
 	case tlv.SoftReset:
-		topic = paho.SensorEvent
+		topic = mqtt.SensorEvent
 		event = &SensorEvent{
 			topic,
 			SensorSoftReset,
@@ -139,7 +139,7 @@ func (m *Messenger) NewMessage(packet *tlv.TLV) (*Message, error) {
 		}
 		go m.db.MakeSoftResetEntry()
 	case tlv.HardReset:
-		topic = paho.SensorEvent
+		topic = mqtt.SensorEvent
 		event = &SensorEvent{
 			topic,
 			SensorHardReset,
@@ -147,7 +147,7 @@ func (m *Messenger) NewMessage(packet *tlv.TLV) (*Message, error) {
 		}
 		go m.db.MakeHardResetEntry()
 	case tlv.Pause:
-		topic = paho.SensorEvent
+		topic = mqtt.SensorEvent
 		event = &SensorEvent{
 			topic,
 			SensorPause,
@@ -155,7 +155,7 @@ func (m *Messenger) NewMessage(packet *tlv.TLV) (*Message, error) {
 		}
 		go m.db.MakePauseEntry()
 	case tlv.Unpause:
-		topic = paho.SensorEvent
+		topic = mqtt.SensorEvent
 		event = &SensorEvent{
 			topic,
 			SensorUnpause,

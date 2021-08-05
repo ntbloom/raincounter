@@ -8,7 +8,7 @@ import (
 
 	eclipsepaho "github.com/eclipse/paho.mqtt.golang"
 
-	"github.com/ntbloom/raincounter/common/paho"
+	"github.com/ntbloom/raincounter/common/mqtt"
 	"github.com/ntbloom/raincounter/config"
 	"github.com/ntbloom/raincounter/config/configkey"
 	"github.com/ntbloom/raincounter/sbc/database"
@@ -18,9 +18,9 @@ import (
 	"github.com/spf13/viper"
 )
 
-// connect to paho
+// connect to mqtt
 func connectToMQTT() eclipsepaho.Client {
-	client, err := paho.NewConnection(paho.GetConfigFromViper())
+	client, err := mqtt.NewConnection(mqtt.NewBrokerConfig())
 	if err != nil {
 		panic(err)
 	}
