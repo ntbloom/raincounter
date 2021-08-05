@@ -1,4 +1,4 @@
-// Package mqtt wraps the Eclipse Paho code for handling eclipsepaho messaging
+// Package mqtt wraps the Eclipse Paho code for handling paho messaging
 package mqtt
 
 import (
@@ -10,7 +10,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	eclipsepaho "github.com/eclipse/paho.mqtt.golang"
+	paho "github.com/eclipse/paho.mqtt.golang"
 )
 
 // BrokerConfig configures the mqtt connection
@@ -39,8 +39,8 @@ func NewBrokerConfig() *BrokerConfig {
 }
 
 // NewConnection creates a new MQTT connection or error
-func NewConnection(config *BrokerConfig) (eclipsepaho.Client, error) {
-	options := eclipsepaho.NewClientOptions()
+func NewConnection(config *BrokerConfig) (paho.Client, error) {
+	options := paho.NewClientOptions()
 
 	// add broker
 	server := fmt.Sprintf("%s://%s:%d", config.scheme, config.broker, config.port)
@@ -57,7 +57,7 @@ func NewConnection(config *BrokerConfig) (eclipsepaho.Client, error) {
 	// miscellaneous options
 	options.SetConnectTimeout(config.connectionTimeout)
 
-	client := eclipsepaho.NewClient(options)
+	client := paho.NewClient(options)
 	return client,
 		nil
 }

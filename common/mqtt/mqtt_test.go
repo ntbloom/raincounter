@@ -3,7 +3,7 @@ package mqtt_test
 import (
 	"testing"
 
-	eclipsepaho "github.com/eclipse/paho.mqtt.golang"
+	paho "github.com/eclipse/paho.mqtt.golang"
 	"github.com/sirupsen/logrus"
 
 	"github.com/ntbloom/raincounter/config"
@@ -12,7 +12,7 @@ import (
 )
 
 // reusable mqtt function
-func pahoFixture(t *testing.T) eclipsepaho.Client {
+func pahoFixture(t *testing.T) paho.Client {
 	config.Configure()
 	pahoConfig := mqtt.NewBrokerConfig()
 	client, err := mqtt.NewConnection(pahoConfig)
