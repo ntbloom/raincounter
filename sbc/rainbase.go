@@ -58,7 +58,7 @@ func run() {
 	conn := connectSerialPort(msgr)
 
 	// start the listening threads
-	go msgr.Loop()
+	go msgr.Start()
 	go conn.Start()
 
 	// start a timer if needed
@@ -90,10 +90,9 @@ func stopProgram(msgr *messenger.Messenger, conn *serial.Serial, timer *time.Tim
 	if timer != nil {
 		timer.Stop()
 	}
-	logrus.Debugf("sending to m.State")
-	msgr.State <- configkey.Kill
-	logrus.Debugf("sending to c.State")
+	msgr.Stop()
 	conn.Stop()
+
 	time.Sleep(time.Second * 1)
 	logrus.Info("Done!")
 	os.Exit(0)

@@ -18,7 +18,7 @@ import (
 type Messenger struct {
 	client mqtt.Client           // MQTT Client object
 	db     *database.DBConnector // Database connector
-	State  chan uint8            // What is the Messenger supposed to do?
+	state  chan uint8            // What is the Messenger supposed to do?
 	Data   chan *Message         // Actual data packets
 }
 
@@ -32,8 +32,8 @@ func NewMessenger(client mqtt.Client, db *database.DBConnector) *Messenger {
 	return &Messenger{client, db, state, data}
 }
 
-// Loop waits for packet to publish or to receive signal interrupt
-func (m *Messenger) Loop() {
+// Start waits for packet to publish or to receive signal interrupt
+func (m *Messenger) Start() {
 	defer m.client.Disconnect(viper.GetUint(configkey.MQTTQuiescence))
 
 	// configure status messages
@@ -42,11 +42,11 @@ func (m *Messenger) Loop() {
 	// loop until signal
 	for {
 		select {
-		case state := <-m.State:
+		case state := <-m.state:
 			switch state {
 			case configkey.Kill:
 				// program is exiting
-				logrus.Debug("received `Closed` signal, closing mqtt connection")
+				logrus.Debug("received `Closed` signal on messenger.state channel")
 				statusTimer.Stop()
 				return
 			default:
@@ -54,28 +54,34 @@ func (m *Messenger) Loop() {
 			}
 		case msg := <-m.Data:
 			logrus.Debugf("received Message from serial port: %s", msg.payload)
-			m.Publish(msg)
+			m.publish(msg)
 		case <-statusTimer.C:
 			logrus.Debug("requesting status message")
-			m.SendStatus()
+			m.sendStatus()
 		}
 	}
 }
 
-// Publish sends a Message over MQTT
-func (m *Messenger) Publish(msg *Message) {
+// Stop kills the main loop
+func (m *Messenger) Stop() {
+	logrus.Info("stopping messenger and closing mqtt connection")
+	m.state <- configkey.Kill
+}
+
+// publish sends a Message over MQTT
+func (m *Messenger) publish(msg *Message) {
 	logrus.Tracef("sending Message over MQTT: %s", msg.payload)
 	m.client.Publish(msg.topic, msg.qos, msg.retained, msg.payload)
 }
 
-// SendStatus sends a status message about the gateway and sensor at regular interval
-func (m *Messenger) SendStatus() {
+// sendStatus sends a status message about the gateway and sensor at regular interval
+func (m *Messenger) sendStatus() {
 	// assume if this code is running that the gateway is up
 	gwStatus, _ := gatewayStatusMessage()
-	m.Publish(gwStatus)
+	m.publish(gwStatus)
 
 	sensorStatus, _ := sensorStatusMessage()
-	m.Publish(sensorStatus)
+	m.publish(sensorStatus)
 }
 
 // get a status message about how the gateway is doing
