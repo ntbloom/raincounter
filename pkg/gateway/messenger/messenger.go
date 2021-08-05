@@ -5,25 +5,27 @@ import (
 	"os"
 	"time"
 
-	"github.com/ntbloom/raincounter/common/mqtt"
-	"github.com/ntbloom/raincounter/gateway/database"
+	mqtt2 "github.com/ntbloom/raincounter/pkg/common/mqtt"
+
+	configkey2 "github.com/ntbloom/raincounter/pkg/config/configkey"
+
+	database2 "github.com/ntbloom/raincounter/pkg/gateway/database"
 
 	paho "github.com/eclipse/paho.mqtt.golang"
-	"github.com/ntbloom/raincounter/config/configkey"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
 // Messenger receives Message from serial port, publishes to paho and stores locally
 type Messenger struct {
-	client paho.Client           // MQTT Client object
-	db     *database.DBConnector // Database connector
-	state  chan uint8            // What is the Messenger supposed to do?
-	Data   chan *Message         // Actual data packets
+	client paho.Client            // MQTT Client object
+	db     *database2.DBConnector // Database connector
+	state  chan uint8             // What is the Messenger supposed to do?
+	Data   chan *Message          // Actual data packets
 }
 
 // NewMessenger gets a new messenger
-func NewMessenger(client paho.Client, db *database.DBConnector) *Messenger {
+func NewMessenger(client paho.Client, db *database2.DBConnector) *Messenger {
 	state := make(chan uint8, 1)
 	data := make(chan *Message, 1)
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
@@ -34,17 +36,17 @@ func NewMessenger(client paho.Client, db *database.DBConnector) *Messenger {
 
 // Start waits for packet to publish or to receive signal interrupt
 func (m *Messenger) Start() {
-	defer m.client.Disconnect(viper.GetUint(configkey.MQTTQuiescence))
+	defer m.client.Disconnect(viper.GetUint(configkey2.MQTTQuiescence))
 
 	// configure status messages
-	statusTimer := time.NewTicker(viper.GetDuration(configkey.MessengerStatusInterval))
+	statusTimer := time.NewTicker(viper.GetDuration(configkey2.MessengerStatusInterval))
 
 	// loop until signal
 	for {
 		select {
 		case state := <-m.state:
 			switch state {
-			case configkey.Kill:
+			case configkey2.Kill:
 				// program is exiting
 				logrus.Debug("received `Closed` signal on messenger.state channel")
 				statusTimer.Stop()
@@ -65,7 +67,7 @@ func (m *Messenger) Start() {
 // Stop kills the main loop
 func (m *Messenger) Stop() {
 	logrus.Info("stopping messenger and closing paho connection")
-	m.state <- configkey.Kill
+	m.state <- configkey2.Kill
 }
 
 // publish sends a Message over MQTT
@@ -87,7 +89,7 @@ func (m *Messenger) sendStatus() {
 // get a status message about how the gateway is doing
 func gatewayStatusMessage() (*Message, error) {
 	gs := GatewayStatus{
-		Topic:     mqtt.GatewayStatus,
+		Topic:     mqtt2.GatewayStatus,
 		OK:        true,
 		Timestamp: time.Now(),
 	}
@@ -107,7 +109,7 @@ func gatewayStatusMessage() (*Message, error) {
 // get a status message about how the sensor is doing
 func sensorStatusMessage() (*Message, error) {
 	var up bool
-	port := viper.GetString(configkey.USBConnectionPort)
+	port := viper.GetString(configkey2.USBConnectionPort)
 	_, err := os.Stat(port)
 	if err != nil {
 		up = false
@@ -115,7 +117,7 @@ func sensorStatusMessage() (*Message, error) {
 		up = true
 	}
 	ss := SensorStatus{
-		Topic:     mqtt.SensorStatus,
+		Topic:     mqtt2.SensorStatus,
 		OK:        up,
 		Timestamp: time.Now(),
 	}

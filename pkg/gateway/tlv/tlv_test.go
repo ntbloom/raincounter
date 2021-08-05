@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ntbloom/raincounter/gateway/tlv"
+	tlv2 "github.com/ntbloom/raincounter/pkg/gateway/tlv"
 )
 
 // Test static packets like rain event, etc.
@@ -71,7 +71,7 @@ func TestMinus24(t *testing.T) {
 }
 
 func verifyValToInt(raw []byte, expected int) bool {
-	tlvPacket, err := tlv.NewTLV(raw)
+	tlvPacket, err := tlv2.NewTLV(raw)
 	if tlvPacket == nil {
 		fmt.Printf("error making tlvPacket: %s\n", err)
 		return false

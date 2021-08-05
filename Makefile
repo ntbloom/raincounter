@@ -1,6 +1,6 @@
 HOMEDIR = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
-SBC = $(HOMEDIR)gateway
-COMMON = $(HOMEDIR)common
+GW = $(HOMEDIR)pkg/gateway
+COMMON = $(HOMEDIR)pkg/common
 
 # common
 test-common:
@@ -12,17 +12,17 @@ test-common-race:
 
 # rainbase
 build-rainbase:
-	@go build -v $(SBC)/rainbase.go
+	@go build -v $(GW)/rainbase.go
 
 build-rainbase-race: clean
-	@go build -race -o rainbase-race -v $(SBC)/rainbase.go
+	@go build -race -o rainbase-race -v $(GW)/rainbase.go
 
 test-rainbase: test-common
-	@go test $(SBC)/...
+	@go test $(GW)/...
 
 test-rainbase-race: clean-test test-common-race
 	@go clean -testcache
-	@go test -race $(SBC)/...
+	@go test -race $(GW)/...
 
 run-rainbase: build-rainbase
 	./rainbase

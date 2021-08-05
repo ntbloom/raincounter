@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ntbloom/raincounter/gateway/tlv"
+	tlv2 "github.com/ntbloom/raincounter/pkg/gateway/tlv"
 
 	"github.com/sirupsen/logrus"
 )
@@ -57,7 +57,7 @@ func NewSqliteDBConnector(fullPath string, clobber bool) (*DBConnector, error) {
 
 // MakeRainEntry addRecord a rain event
 func (db *DBConnector) MakeRainEntry() {
-	_, err := db.addRecord(tlv.Rain, tlv.RainValue)
+	_, err := db.addRecord(tlv2.Rain, tlv2.RainValue)
 	if err != nil {
 		logrus.Error(err)
 	}
@@ -65,7 +65,7 @@ func (db *DBConnector) MakeRainEntry() {
 
 // MakeSoftResetEntry addRecord a soft reset event
 func (db *DBConnector) MakeSoftResetEntry() {
-	_, err := db.addRecord(tlv.SoftReset, tlv.SoftResetValue)
+	_, err := db.addRecord(tlv2.SoftReset, tlv2.SoftResetValue)
 	if err != nil {
 		logrus.Error(err)
 	}
@@ -73,7 +73,7 @@ func (db *DBConnector) MakeSoftResetEntry() {
 
 // MakeHardResetEntry addRecord a hard reset event
 func (db *DBConnector) MakeHardResetEntry() {
-	_, err := db.addRecord(tlv.HardReset, tlv.HardResetValue)
+	_, err := db.addRecord(tlv2.HardReset, tlv2.HardResetValue)
 	if err != nil {
 		logrus.Error(err)
 	}
@@ -81,7 +81,7 @@ func (db *DBConnector) MakeHardResetEntry() {
 
 // MakePauseEntry addRecord a pause event
 func (db *DBConnector) MakePauseEntry() {
-	_, err := db.addRecord(tlv.Pause, tlv.Unpause)
+	_, err := db.addRecord(tlv2.Pause, tlv2.Unpause)
 	if err != nil {
 		logrus.Error(err)
 	}
@@ -89,7 +89,7 @@ func (db *DBConnector) MakePauseEntry() {
 
 // MakeUnpauseEntry addRecord an unpause event
 func (db *DBConnector) MakeUnpauseEntry() {
-	_, err := db.addRecord(tlv.Unpause, tlv.UnpauseValue)
+	_, err := db.addRecord(tlv2.Unpause, tlv2.UnpauseValue)
 	if err != nil {
 		logrus.Error(err)
 	}
@@ -97,7 +97,7 @@ func (db *DBConnector) MakeUnpauseEntry() {
 
 // MakeTemperatureEntry addRecord a temperature measurement
 func (db *DBConnector) MakeTemperatureEntry(tempC int) {
-	_, err := db.addRecord(tlv.Temperature, tempC)
+	_, err := db.addRecord(tlv2.Temperature, tempC)
 	if err != nil {
 		logrus.Error(err)
 	}
@@ -106,28 +106,28 @@ func (db *DBConnector) MakeTemperatureEntry(tempC int) {
 /* GETTERS, MOSTLY FOR TESTING */
 
 func (db *DBConnector) GetRainEntries() int {
-	return db.tally(tlv.Rain)
+	return db.tally(tlv2.Rain)
 }
 
 func (db *DBConnector) GetSoftResetEntries() int {
-	return db.tally(tlv.SoftReset)
+	return db.tally(tlv2.SoftReset)
 }
 
 func (db *DBConnector) GetHardResetEntries() int {
-	return db.tally(tlv.HardReset)
+	return db.tally(tlv2.HardReset)
 }
 
 func (db *DBConnector) GetPauseEntries() int {
-	return db.tally(tlv.Pause)
+	return db.tally(tlv2.Pause)
 }
 
 func (db *DBConnector) GetUnpauseEntries() int {
-	return db.tally(tlv.Unpause)
+	return db.tally(tlv2.Unpause)
 }
 
 // GetLastTemperatureEntry returns last temp reading, sorted by primary key
 func (db *DBConnector) GetLastTemperatureEntry() int {
-	return db.getLastRecord(tlv.Temperature)
+	return db.getLastRecord(tlv2.Temperature)
 }
 
 /* SELECTED METHODS EXPORTED FOR TEST/VERIFICATION */

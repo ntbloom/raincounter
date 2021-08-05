@@ -2,7 +2,7 @@
 package config
 
 import (
-	"github.com/ntbloom/raincounter/config/configkey"
+	configkey2 "github.com/ntbloom/raincounter/pkg/config/configkey"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -43,7 +43,7 @@ func SetLogger(level ...string) {
 
 	switch params {
 	case 0:
-		lev, err = logrus.ParseLevel(viper.GetString(configkey.Loglevel))
+		lev, err = logrus.ParseLevel(viper.GetString(configkey2.Loglevel))
 		if err != nil {
 			panic(err)
 		}

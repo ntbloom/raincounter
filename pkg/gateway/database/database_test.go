@@ -6,33 +6,33 @@ import (
 	"testing"
 	"testing/quick"
 
+	config2 "github.com/ntbloom/raincounter/pkg/config"
+	configkey2 "github.com/ntbloom/raincounter/pkg/config/configkey"
+
+	database2 "github.com/ntbloom/raincounter/pkg/gateway/database"
+
 	"github.com/sirupsen/logrus"
 
 	"github.com/spf13/viper"
-
-	"github.com/ntbloom/raincounter/config/configkey"
-
-	"github.com/ntbloom/raincounter/config"
-	"github.com/ntbloom/raincounter/gateway/database"
 )
 
 /* FIXTURES */
 
 // reusable configs
 func getConfig() {
-	config.Configure()
+	config2.Configure()
 }
 
 // sqliteConnectionFixture makes a reusable DBConnector object
-func sqliteConnectionFixture() *database.DBConnector {
+func sqliteConnectionFixture() *database2.DBConnector {
 	getConfig()
-	sqliteFile := viper.GetString(configkey.DatabaseLocalDevFile)
-	db, _ := database.NewSqliteDBConnector(sqliteFile, true)
+	sqliteFile := viper.GetString(configkey2.DatabaseLocalDevFile)
+	db, _ := database2.NewSqliteDBConnector(sqliteFile, true)
 	return db
 }
 
 // Property-based test for creating a bunch of rows and making sure the data get put in
-func testRainEntry(db *database.DBConnector, t *testing.T) {
+func testRainEntry(db *database2.DBConnector, t *testing.T) {
 	maxCount := 5
 	if testing.Short() {
 		logrus.Info("skipping property tests")
@@ -62,7 +62,7 @@ func testRainEntry(db *database.DBConnector, t *testing.T) {
 }
 
 // Tests all the various entries work (except temperature). Also tests concurrent use of database
-func testStaticSQLEntries(db *database.DBConnector, t *testing.T) {
+func testStaticSQLEntries(db *database2.DBConnector, t *testing.T) {
 	count := 5
 
 	// asynchronously make an entry for each type
@@ -102,7 +102,7 @@ func testStaticSQLEntries(db *database.DBConnector, t *testing.T) {
 }
 
 // tests that we can enter temperature
-func testTemperatureEntries(db *database.DBConnector, t *testing.T) {
+func testTemperatureEntries(db *database2.DBConnector, t *testing.T) {
 	vals := []int{-100, -25, -15, -1, 0, 1, 2, 20, 24, 100}
 	for _, expected := range vals {
 		db.MakeTemperatureEntry(expected)
@@ -120,14 +120,14 @@ func testTemperatureEntries(db *database.DBConnector, t *testing.T) {
 // create and destroy sqlite file 5 times, get DBCOnnector struct
 func TestSqliteDataPrep(t *testing.T) {
 	getConfig()
-	sqliteFile := viper.GetString(configkey.DatabaseLocalDevFile)
+	sqliteFile := viper.GetString(configkey2.DatabaseLocalDevFile)
 
 	// clean up when finished
 	defer func() { _ = os.Remove(sqliteFile) }()
 
 	// create and destroy 5 times
 	for i := 0; i < 5; i++ {
-		db, err := database.NewSqliteDBConnector(sqliteFile, true)
+		db, err := database2.NewSqliteDBConnector(sqliteFile, true)
 		if err != nil || db == nil {
 			logrus.Error("database not created")
 			t.Error(err)

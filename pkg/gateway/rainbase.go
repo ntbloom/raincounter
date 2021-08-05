@@ -6,21 +6,24 @@ import (
 	"syscall"
 	"time"
 
+	mqtt2 "github.com/ntbloom/raincounter/pkg/common/mqtt"
+
+	config2 "github.com/ntbloom/raincounter/pkg/config"
+	configkey2 "github.com/ntbloom/raincounter/pkg/config/configkey"
+
+	database2 "github.com/ntbloom/raincounter/pkg/gateway/database"
+	messenger2 "github.com/ntbloom/raincounter/pkg/gateway/messenger"
+	serial2 "github.com/ntbloom/raincounter/pkg/gateway/serial"
+
 	paho "github.com/eclipse/paho.mqtt.golang"
 
-	"github.com/ntbloom/raincounter/common/mqtt"
-	"github.com/ntbloom/raincounter/config"
-	"github.com/ntbloom/raincounter/config/configkey"
-	"github.com/ntbloom/raincounter/gateway/database"
-	"github.com/ntbloom/raincounter/gateway/messenger"
-	"github.com/ntbloom/raincounter/gateway/serial"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
 // connect to mqtt
 func connectToMQTT() paho.Client {
-	client, err := mqtt.NewConnection(mqtt.NewBrokerConfig())
+	client, err := mqtt2.NewConnection(mqtt2.NewBrokerConfig())
 	if err != nil {
 		panic(err)
 	}
@@ -28,8 +31,8 @@ func connectToMQTT() paho.Client {
 }
 
 // connect to the sqlite database
-func connectToDatabase() *database.DBConnector {
-	db, err := database.NewSqliteDBConnector(viper.GetString(configkey.DatabaseLocalDevFile), true)
+func connectToDatabase() *database2.DBConnector {
+	db, err := database2.NewSqliteDBConnector(viper.GetString(configkey2.DatabaseLocalDevFile), true)
 	if err != nil {
 		panic(err)
 	}
@@ -37,11 +40,11 @@ func connectToDatabase() *database.DBConnector {
 }
 
 // get a serial connection
-func connectSerialPort(msgr *messenger.Messenger) *serial.Serial {
-	conn, err := serial.NewConnection(
-		viper.GetString(configkey.USBConnectionPort),
-		viper.GetInt(configkey.USBPacketLengthMax),
-		viper.GetDuration(configkey.USBConnectionTimeout),
+func connectSerialPort(msgr *messenger2.Messenger) *serial2.Serial {
+	conn, err := serial2.NewConnection(
+		viper.GetString(configkey2.USBConnectionPort),
+		viper.GetInt(configkey2.USBPacketLengthMax),
+		viper.GetDuration(configkey2.USBConnectionTimeout),
 		msgr,
 	)
 	if err != nil {
@@ -54,7 +57,7 @@ func connectSerialPort(msgr *messenger.Messenger) *serial.Serial {
 func run() {
 	client := connectToMQTT()
 	db := connectToDatabase()
-	msgr := messenger.NewMessenger(client, db)
+	msgr := messenger2.NewMessenger(client, db)
 	conn := connectSerialPort(msgr)
 
 	// start the listening threads
@@ -64,9 +67,9 @@ func run() {
 	// start a timer if needed
 	var loopTimer *time.Timer
 	var timerChan <-chan time.Time
-	duration := viper.GetDuration(configkey.MainLoopDuration)
+	duration := viper.GetDuration(configkey2.MainLoopDuration)
 	if duration.Seconds() > 0 {
-		loopTimer = time.NewTimer(viper.GetDuration(configkey.MainLoopDuration))
+		loopTimer = time.NewTimer(viper.GetDuration(configkey2.MainLoopDuration))
 		timerChan = loopTimer.C
 	}
 
@@ -86,7 +89,7 @@ func run() {
 	}
 }
 
-func stopProgram(msgr *messenger.Messenger, conn *serial.Serial, timer *time.Timer) {
+func stopProgram(msgr *messenger2.Messenger, conn *serial2.Serial, timer *time.Timer) {
 	if timer != nil {
 		timer.Stop()
 	}
@@ -100,7 +103,7 @@ func stopProgram(msgr *messenger.Messenger, conn *serial.Serial, timer *time.Tim
 
 func main() {
 	// read config from the config file
-	config.Configure()
+	config2.Configure()
 
 	// run the main listening loop
 	run()

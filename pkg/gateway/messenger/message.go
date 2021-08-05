@@ -6,12 +6,14 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/ntbloom/raincounter/config/configkey"
+	mqtt2 "github.com/ntbloom/raincounter/pkg/common/mqtt"
+
+	configkey2 "github.com/ntbloom/raincounter/pkg/config/configkey"
+
+	tlv2 "github.com/ntbloom/raincounter/pkg/gateway/tlv"
+
 	"github.com/spf13/viper"
 
-	"github.com/ntbloom/raincounter/common/mqtt"
-
-	"github.com/ntbloom/raincounter/gateway/tlv"
 	"github.com/sirupsen/logrus"
 )
 
@@ -107,22 +109,22 @@ type Message struct {
 }
 
 // NewMessage makes a new message from a tlv packet mqtt topic and logs the entry to the database in the background
-func (m *Messenger) NewMessage(packet *tlv.TLV) (*Message, error) {
+func (m *Messenger) NewMessage(packet *tlv2.TLV) (*Message, error) {
 	now := time.Now()
 	var event Payload
 	var topic string
 
 	switch packet.Tag {
-	case tlv.Rain:
-		topic = mqtt.RainTopic
+	case tlv2.Rain:
+		topic = mqtt2.RainTopic
 		event = &RainEvent{
 			topic,
-			viper.GetString(configkey.SensorRainMetric),
+			viper.GetString(configkey2.SensorRainMetric),
 			now,
 		}
 		go m.db.MakeRainEntry()
-	case tlv.Temperature:
-		topic = mqtt.TemperatureTopic
+	case tlv2.Temperature:
+		topic = mqtt2.TemperatureTopic
 		tempC := packet.Value
 		event = &TemperatureEvent{
 			topic,
@@ -130,32 +132,32 @@ func (m *Messenger) NewMessage(packet *tlv.TLV) (*Message, error) {
 			now,
 		}
 		go m.db.MakeTemperatureEntry(tempC)
-	case tlv.SoftReset:
-		topic = mqtt.SensorEvent
+	case tlv2.SoftReset:
+		topic = mqtt2.SensorEvent
 		event = &SensorEvent{
 			topic,
 			SensorSoftReset,
 			now,
 		}
 		go m.db.MakeSoftResetEntry()
-	case tlv.HardReset:
-		topic = mqtt.SensorEvent
+	case tlv2.HardReset:
+		topic = mqtt2.SensorEvent
 		event = &SensorEvent{
 			topic,
 			SensorHardReset,
 			now,
 		}
 		go m.db.MakeHardResetEntry()
-	case tlv.Pause:
-		topic = mqtt.SensorEvent
+	case tlv2.Pause:
+		topic = mqtt2.SensorEvent
 		event = &SensorEvent{
 			topic,
 			SensorPause,
 			now,
 		}
 		go m.db.MakePauseEntry()
-	case tlv.Unpause:
-		topic = mqtt.SensorEvent
+	case tlv2.Unpause:
+		topic = mqtt2.SensorEvent
 		event = &SensorEvent{
 			topic,
 			SensorUnpause,
@@ -174,7 +176,7 @@ func (m *Messenger) NewMessage(packet *tlv.TLV) (*Message, error) {
 	msg := Message{
 		topic:    topic,
 		retained: false,
-		qos:      byte(viper.GetInt(configkey.MQTTQos)),
+		qos:      byte(viper.GetInt(configkey2.MQTTQos)),
 		payload:  payload,
 	}
 	return &msg, nil

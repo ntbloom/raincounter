@@ -6,7 +6,8 @@ import (
 	"os/exec"
 	"testing"
 
-	"github.com/ntbloom/raincounter/server/database"
+	database2 "github.com/ntbloom/raincounter/pkg/server/database"
+
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -61,7 +62,7 @@ type DatabaseTestSuite struct {
 	suite.Suite
 	containerName string
 	dbName        string
-	conn          *database.PgConnector
+	conn          *database2.PgConnector
 }
 
 // run once at startup
@@ -95,6 +96,6 @@ func TestPostgresSuite(t *testing.T) {
 	dbTest.dbName = "raincloud_test"
 
 	const url = "postgresql://postgres:password@localhost:5432/raincloud_test"
-	dbTest.conn = database.NewDatabase(dbTest.dbName, url)
+	dbTest.conn = database2.NewDatabase(dbTest.dbName, url)
 	suite.Run(t, dbTest)
 }
