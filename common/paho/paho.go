@@ -1,4 +1,4 @@
-// Package paho wraps the Eclipse Paho code for handling mqtt messaging
+// Package paho wraps the Eclipse Paho code for handling eclipsepaho messaging
 package paho
 
 import (
@@ -10,11 +10,11 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	mqtt "github.com/eclipse/paho.mqtt.golang"
+	eclipsepaho "github.com/eclipse/paho.mqtt.golang"
 )
 
-// MqttConfig configures the paho connection
-type MqttConfig struct {
+// BrokerConfig configures the paho connection
+type BrokerConfig struct {
 	scheme            string
 	broker            string
 	port              int
@@ -25,9 +25,9 @@ type MqttConfig struct {
 }
 
 // GetConfigFromViper get paho configuration details from viper directly
-func GetConfigFromViper() *MqttConfig {
+func GetConfigFromViper() *BrokerConfig {
 	// look for certs locally first
-	return &MqttConfig{
+	return &BrokerConfig{
 		scheme:            viper.GetString(configkey.MQTTScheme),
 		broker:            viper.GetString(configkey.MQTTBrokerIP),
 		port:              viper.GetInt(configkey.MQTTBrokerPort),
@@ -39,8 +39,8 @@ func GetConfigFromViper() *MqttConfig {
 }
 
 // NewConnection creates a new MQTT connection or error
-func NewConnection(config *MqttConfig) (mqtt.Client, error) {
-	options := mqtt.NewClientOptions()
+func NewConnection(config *BrokerConfig) (eclipsepaho.Client, error) {
+	options := eclipsepaho.NewClientOptions()
 
 	// add broker
 	server := fmt.Sprintf("%s://%s:%d", config.scheme, config.broker, config.port)
@@ -57,7 +57,7 @@ func NewConnection(config *MqttConfig) (mqtt.Client, error) {
 	// miscellaneous options
 	options.SetConnectTimeout(config.connectionTimeout)
 
-	client := mqtt.NewClient(options)
+	client := eclipsepaho.NewClient(options)
 	return client,
 		nil
 }

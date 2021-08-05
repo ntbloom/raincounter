@@ -6,7 +6,7 @@ import (
 	"syscall"
 	"time"
 
-	mqtt "github.com/eclipse/paho.mqtt.golang"
+	eclipsepaho "github.com/eclipse/paho.mqtt.golang"
 
 	"github.com/ntbloom/raincounter/common/paho"
 	"github.com/ntbloom/raincounter/config"
@@ -19,7 +19,7 @@ import (
 )
 
 // connect to paho
-func connectToMQTT() mqtt.Client {
+func connectToMQTT() eclipsepaho.Client {
 	client, err := paho.NewConnection(paho.GetConfigFromViper())
 	if err != nil {
 		panic(err)

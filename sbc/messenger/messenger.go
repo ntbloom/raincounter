@@ -8,22 +8,22 @@ import (
 	"github.com/ntbloom/raincounter/common/paho"
 	"github.com/ntbloom/raincounter/sbc/database"
 
-	mqtt "github.com/eclipse/paho.mqtt.golang"
+	eclipsepaho "github.com/eclipse/paho.mqtt.golang"
 	"github.com/ntbloom/raincounter/config/configkey"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
-// Messenger receives Message from serial port, publishes to mqtt and stores locally
+// Messenger receives Message from serial port, publishes to eclipsepaho and stores locally
 type Messenger struct {
-	client mqtt.Client           // MQTT Client object
+	client eclipsepaho.Client    // MQTT Client object
 	db     *database.DBConnector // Database connector
 	state  chan uint8            // What is the Messenger supposed to do?
 	Data   chan *Message         // Actual data packets
 }
 
 // NewMessenger gets a new messenger
-func NewMessenger(client mqtt.Client, db *database.DBConnector) *Messenger {
+func NewMessenger(client eclipsepaho.Client, db *database.DBConnector) *Messenger {
 	state := make(chan uint8, 1)
 	data := make(chan *Message, 1)
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
@@ -64,7 +64,7 @@ func (m *Messenger) Start() {
 
 // Stop kills the main loop
 func (m *Messenger) Stop() {
-	logrus.Info("stopping messenger and closing mqtt connection")
+	logrus.Info("stopping messenger and closing eclipsepaho connection")
 	m.state <- configkey.Kill
 }
 
