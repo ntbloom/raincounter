@@ -50,8 +50,8 @@ func connectSerialPort(msgr *messenger.Messenger) *serial.Serial {
 	return conn
 }
 
-// run main listening loop for number of seconds or indefinitely if duration is negative
-func listen() {
+// run launches program for seconds or indefinitely if duration is negative
+func run() {
 	client := connectToMQTT()
 	db := connectToDatabase()
 	msgr := messenger.NewMessenger(client, db)
@@ -59,7 +59,7 @@ func listen() {
 
 	// start the listening threads
 	go msgr.Loop()
-	go conn.Loop()
+	go conn.Start()
 
 	// start a timer if needed
 	var loopTimer *time.Timer
@@ -86,14 +86,14 @@ func listen() {
 	}
 }
 
-func stopProgram(m *messenger.Messenger, c *serial.Serial, timer *time.Timer) {
+func stopProgram(msgr *messenger.Messenger, conn *serial.Serial, timer *time.Timer) {
 	if timer != nil {
 		timer.Stop()
 	}
 	logrus.Debugf("sending to m.State")
-	m.State <- configkey.Kill
+	msgr.State <- configkey.Kill
 	logrus.Debugf("sending to c.State")
-	c.Kill <- struct{}{}
+	conn.Stop()
 	time.Sleep(time.Second * 1)
 	logrus.Info("Done!")
 	os.Exit(0)
@@ -104,5 +104,5 @@ func main() {
 	config.Configure()
 
 	// run the main listening loop
-	listen()
+	run()
 }

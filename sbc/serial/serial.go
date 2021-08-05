@@ -16,14 +16,14 @@ import (
 
 // Serial communicates with a serial port
 type Serial struct {
-	port         string               // file descriptor of port
-	maxPacketLen int                  // how long you expect the packet to be
-	timeout      time.Duration        // how long to wait for enumration
-	data         []byte               // where the data lives
-	file         *os.File             // file descriptor for the port
-	Kill         chan struct{}        // send a message to kill the serial loop
-	messageLoop  chan struct{}        // channel for waiting for message on serial port
-	Messenger    *messenger.Messenger // messenger object
+	port            string               // file descriptor of port
+	maxPacketLen    int                  // how long you expect the packet to be
+	timeout         time.Duration        // how long to wait for enumration
+	data            []byte               // where the data lives
+	file            *os.File             // file descriptor for the port
+	kill            chan struct{}        // send a message to kill the serial loop
+	messageReceived chan struct{}        // channel for waiting for message on serial port
+	Messenger       *messenger.Messenger // messenger object
 	sync.Mutex
 }
 
@@ -56,8 +56,8 @@ func NewConnection(port string, maxPacketLen int, timeout time.Duration, msgr *m
 	return uart, nil
 }
 
-// Loop reads the file contents
-func (serial *Serial) Loop() {
+// Start runs the main loop of listening on the serial port
+func (serial *Serial) Start() {
 	checkPortStatus(serial.port, serial.timeout)
 
 	// send the first waiting command
@@ -66,13 +66,18 @@ func (serial *Serial) Loop() {
 	// wait for next message or the kill signal
 	for {
 		select {
-		case <-serial.Kill:
+		case <-serial.kill:
 			serial.close()
 			return
-		case <-serial.messageLoop:
+		case <-serial.messageReceived:
 			go serial.waitForMessage()
 		}
 	}
+}
+
+// Stop stops the main loop listening on the serial port
+func (serial *Serial) Stop() {
+	serial.kill <- struct{}{}
 }
 
 // waits for a message, then updates the main loop when it arrives
@@ -91,7 +96,7 @@ func (serial *Serial) waitForMessage() {
 		_ = serial.reopenConnection()
 	}
 	logrus.Trace("a serial message arrived")
-	serial.messageLoop <- struct{}{}
+	serial.messageReceived <- struct{}{}
 
 	tlvPacket, err := tlv.NewTLV(packet)
 	if err != nil {

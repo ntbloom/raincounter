@@ -14,13 +14,14 @@ test-common-race:
 build-rainbase:
 	@go build -v $(SBC)/rainbase.go
 
-build-rainbase-race:
+build-rainbase-race: clean
 	@go build -race -o rainbase-race -v $(SBC)/rainbase.go
 
 test-rainbase: test-common
 	@go test $(SBC)/...
 
-test-rainbase-race: test-common-race
+test-rainbase-race: clean-test test-common-race
+	@go clean -testcache
 	@go test -race $(SBC)/...
 
 run-rainbase: build-rainbase
@@ -30,9 +31,11 @@ run-rainbase-race: build-rainbase-race
 	./rainbase-race
 
 
+clean-test:
+	go clean -testcache
 
+clean-files:
+	- rm rainbase rainbase-race
 
-clean:
-	@- go clean -testcache
-	@- rm rainbase rainbase-race
+clean: clean-test clean-files
 
