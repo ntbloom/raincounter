@@ -1,5 +1,6 @@
 HOMEDIR = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 GW = $(HOMEDIR)pkg/gateway
+SERVER = $(HOMEDIR)pkg/server
 COMMON = $(HOMEDIR)pkg/common
 EXE = ./raincounter
 
@@ -29,6 +30,13 @@ test-gateway-race: clean-test test-common-race
 	@go clean -testcache
 	@go test -race $(GW)/...
 
+# server
+test-server: test-common
+	@go test $(SERVER)/...
+
+test-server0race: clean-test test-common-race
+	@go clean -testcache
+	@go test -race $(SERVER)/...
 
 ### RUN ###
 
@@ -45,7 +53,7 @@ clean-test:
 	go clean -testcache
 
 clean-files:
-	- rm raincounter
+	- rm raincounter raincounter-race
 
 clean: clean-test clean-files
 

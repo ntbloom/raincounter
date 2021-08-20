@@ -16,7 +16,8 @@ import (
 // VARIOUS HELPER FUNCTIONS
 
 const (
-	podman = "/usr/bin/podman"
+	docker = "/usr/bin/docker"
+	image  = "postgres"
 )
 
 // run a generic command
@@ -45,15 +46,15 @@ func launchDatabase(container string, database string) {
 		fmt.Sprintf("POSTGRES_DB=%s", database),
 		"-p",
 		"5432:5432",
-		"docker.io/library/postgres",
+		image,
 	}
-	bashCommand(podman, args)
+	bashCommand(docker, args)
 }
 
 // kill the database
 func killDatabase(name string) {
 	args := []string{"kill", name}
-	bashCommand(podman, args)
+	bashCommand(docker, args)
 }
 
 // FIXTURES
