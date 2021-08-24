@@ -6,12 +6,13 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/ntbloom/raincounter/pkg/gateway/sqlite"
+
 	mqtt2 "github.com/ntbloom/raincounter/pkg/common/mqtt"
 
 	config2 "github.com/ntbloom/raincounter/pkg/config"
 	configkey2 "github.com/ntbloom/raincounter/pkg/config/configkey"
 
-	database2 "github.com/ntbloom/raincounter/pkg/gateway/database"
 	messenger2 "github.com/ntbloom/raincounter/pkg/gateway/messenger"
 	serial2 "github.com/ntbloom/raincounter/pkg/gateway/serial"
 
@@ -31,8 +32,8 @@ func connectToMQTT() paho.Client {
 }
 
 // connect to the sqlite database
-func connectToDatabase() *database2.DBConnector {
-	db, err := database2.NewSqliteDBConnector(viper.GetString(configkey2.DatabaseLocalDevFile), true)
+func connectToDatabase() *sqlite.Sqlite {
+	db, err := sqlite.NewSqlite(viper.GetString(configkey2.DatabaseLocalDevFile), true)
 	if err != nil {
 		panic(err)
 	}

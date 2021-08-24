@@ -1,10 +1,10 @@
-package database
+package sqlite
 
 // Schema for logging data in rainbase, should work for both postgresql and sqlite
 
 const (
 	//nolint
-	sqlschema = `
+	sqliteSchema = `
 BEGIN TRANSACTION;
 DROP TABLE IF EXISTS mappings;
 CREATE TABLE mappings (

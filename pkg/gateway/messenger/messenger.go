@@ -5,11 +5,11 @@ import (
 	"os"
 	"time"
 
+	"github.com/ntbloom/raincounter/pkg/gateway/sqlite"
+
 	mqtt2 "github.com/ntbloom/raincounter/pkg/common/mqtt"
 
 	configkey2 "github.com/ntbloom/raincounter/pkg/config/configkey"
-
-	database2 "github.com/ntbloom/raincounter/pkg/gateway/database"
 
 	paho "github.com/eclipse/paho.mqtt.golang"
 	"github.com/sirupsen/logrus"
@@ -18,14 +18,14 @@ import (
 
 // Messenger receives Message from serial port, publishes to paho and stores locally
 type Messenger struct {
-	client paho.Client            // MQTT Client object
-	db     *database2.DBConnector // Database connector
-	state  chan uint8             // What is the Messenger supposed to do?
-	Data   chan *Message          // Actual data packets
+	client paho.Client    // MQTT Client object
+	db     *sqlite.Sqlite // DBWrapper connector
+	state  chan uint8     // What is the Messenger supposed to do?
+	Data   chan *Message  // Actual data packets
 }
 
 // NewMessenger gets a new messenger
-func NewMessenger(client paho.Client, db *database2.DBConnector) *Messenger {
+func NewMessenger(client paho.Client, db *sqlite.Sqlite) *Messenger {
 	state := make(chan uint8, 1)
 	data := make(chan *Message, 1)
 	if token := client.Connect(); token.Wait() && token.Error() != nil {

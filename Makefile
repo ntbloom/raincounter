@@ -51,6 +51,7 @@ run-gateway-race: build-race
 
 clean-test:
 	go clean -testcache
+	rm /tmp/rainbase.db
 
 clean-files:
 	- rm raincounter raincounter-race

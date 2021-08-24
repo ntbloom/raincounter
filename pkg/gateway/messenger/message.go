@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/ntbloom/raincounter/pkg/common/database"
+
 	mqtt2 "github.com/ntbloom/raincounter/pkg/common/mqtt"
 
 	configkey2 "github.com/ntbloom/raincounter/pkg/config/configkey"
@@ -122,7 +124,7 @@ func (m *Messenger) NewMessage(packet *tlv2.TLV) (*Message, error) {
 			viper.GetString(configkey2.SensorRainMetric),
 			now,
 		}
-		go m.db.MakeRainEntry()
+		go database.MakeRainEntry(m.db)
 	case tlv2.Temperature:
 		topic = mqtt2.TemperatureTopic
 		tempC := packet.Value
@@ -131,7 +133,7 @@ func (m *Messenger) NewMessage(packet *tlv2.TLV) (*Message, error) {
 			tempC,
 			now,
 		}
-		go m.db.MakeTemperatureEntry(tempC)
+		go database.MakeTemperatureEntry(m.db, tempC)
 	case tlv2.SoftReset:
 		topic = mqtt2.SensorEvent
 		event = &SensorEvent{
@@ -139,7 +141,7 @@ func (m *Messenger) NewMessage(packet *tlv2.TLV) (*Message, error) {
 			SensorSoftReset,
 			now,
 		}
-		go m.db.MakeSoftResetEntry()
+		go database.MakeSoftResetEntry(m.db)
 	case tlv2.HardReset:
 		topic = mqtt2.SensorEvent
 		event = &SensorEvent{
@@ -147,7 +149,7 @@ func (m *Messenger) NewMessage(packet *tlv2.TLV) (*Message, error) {
 			SensorHardReset,
 			now,
 		}
-		go m.db.MakeHardResetEntry()
+		go database.MakeHardResetEntry(m.db)
 	case tlv2.Pause:
 		topic = mqtt2.SensorEvent
 		event = &SensorEvent{
@@ -155,7 +157,7 @@ func (m *Messenger) NewMessage(packet *tlv2.TLV) (*Message, error) {
 			SensorPause,
 			now,
 		}
-		go m.db.MakePauseEntry()
+		go database.MakePauseEntry(m.db)
 	case tlv2.Unpause:
 		topic = mqtt2.SensorEvent
 		event = &SensorEvent{
@@ -163,7 +165,7 @@ func (m *Messenger) NewMessage(packet *tlv2.TLV) (*Message, error) {
 			SensorUnpause,
 			now,
 		}
-		go m.db.MakeUnpauseEntry()
+		go database.MakeUnpauseEntry(m.db)
 	default:
 		logrus.Errorf("unsupported tag %d", packet.Tag)
 		return nil, nil

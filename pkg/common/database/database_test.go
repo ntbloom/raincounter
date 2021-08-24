@@ -6,10 +6,12 @@ import (
 	"testing"
 	"testing/quick"
 
+	"github.com/ntbloom/raincounter/pkg/gateway/sqlite"
+
+	"github.com/ntbloom/raincounter/pkg/common/database"
+
 	config2 "github.com/ntbloom/raincounter/pkg/config"
 	configkey2 "github.com/ntbloom/raincounter/pkg/config/configkey"
-
-	database2 "github.com/ntbloom/raincounter/pkg/gateway/database"
 
 	"github.com/sirupsen/logrus"
 
@@ -23,16 +25,16 @@ func getConfig() {
 	config2.Configure()
 }
 
-// sqliteConnectionFixture makes a reusable DBConnector object
-func sqliteConnectionFixture() *database2.DBConnector {
+// sqliteConnectionFixture makes a reusable Sqlite object
+func sqliteConnectionFixture() *sqlite.Sqlite {
 	getConfig()
 	sqliteFile := viper.GetString(configkey2.DatabaseLocalDevFile)
-	db, _ := database2.NewSqliteDBConnector(sqliteFile, true)
+	db, _ := sqlite.NewSqlite(sqliteFile, true)
 	return db
 }
 
 // Property-based test for creating a bunch of rows and making sure the data get put in
-func testRainEntry(db *database2.DBConnector, t *testing.T) {
+func testRainEntry(db *sqlite.Sqlite, t *testing.T) {
 	maxCount := 5
 	if testing.Short() {
 		logrus.Info("skipping property tests")
@@ -43,10 +45,10 @@ func testRainEntry(db *database2.DBConnector, t *testing.T) {
 	test := func(reps uint8) bool {
 		count := int(reps)
 		for i := 0; i < count; i++ {
-			db.MakeRainEntry()
+			database.MakeRainEntry(db)
 		}
 		var val int
-		if val = db.GetRainEntries(); val == -1 {
+		if val = database.GetRainEntries(db); val == -1 {
 			logrus.Error("gave -1")
 			return false
 		}
@@ -62,51 +64,51 @@ func testRainEntry(db *database2.DBConnector, t *testing.T) {
 }
 
 // Tests all the various entries work (except temperature). Also tests concurrent use of database
-func testStaticSQLEntries(db *database2.DBConnector, t *testing.T) {
+func testStaticSQLEntries(db *sqlite.Sqlite, t *testing.T) {
 	count := 5
 
 	// asynchronously make an entry for each type
 	var wg sync.WaitGroup
 	wg.Add(5 * count)
-	type addFunction func()
-	checkAdd := func(callable addFunction) {
+	type addFunction func(db database.DBWrapper)
+	checkAdd := func(callable addFunction, arg database.DBWrapper) {
 		defer wg.Done()
-		callable()
+		callable(arg)
 	}
 	for i := 0; i < count; i++ {
-		go checkAdd(db.MakeRainEntry)
-		go checkAdd(db.MakeSoftResetEntry)
-		go checkAdd(db.MakeHardResetEntry)
-		go checkAdd(db.MakePauseEntry)
-		go checkAdd(db.MakeUnpauseEntry)
+		go checkAdd(database.MakeRainEntry, db)
+		go checkAdd(database.MakeSoftResetEntry, db)
+		go checkAdd(database.MakeHardResetEntry, db)
+		go checkAdd(database.MakePauseEntry, db)
+		go checkAdd(database.MakeUnpauseEntry, db)
 	}
 	// wait for entries to finish
 	wg.Wait()
 
 	// verify counts
 	wg.Add(5)
-	type getFunction func() int
-	checkGet := func(callable getFunction) {
+	type getFunction func(db database.DBWrapper) int
+	checkGet := func(callable getFunction, arg database.DBWrapper) {
 		defer wg.Done()
-		tally := callable()
+		tally := callable(arg)
 		if tally != count {
 			t.Fail()
 		}
 	}
-	go checkGet(db.GetRainEntries)
-	go checkGet(db.GetSoftResetEntries)
-	go checkGet(db.GetHardResetEntries)
-	go checkGet(db.GetPauseEntries)
-	go checkGet(db.GetUnpauseEntries)
+	go checkGet(database.GetRainEntries, db)
+	go checkGet(database.GetSoftResetEntries, db)
+	go checkGet(database.GetHardResetEntries, db)
+	go checkGet(database.GetPauseEntries, db)
+	go checkGet(database.GetUnpauseEntries, db)
 	wg.Wait()
 }
 
 // tests that we can enter temperature
-func testTemperatureEntries(db *database2.DBConnector, t *testing.T) {
+func testTemperatureEntries(db *sqlite.Sqlite, t *testing.T) {
 	vals := []int{-100, -25, -15, -1, 0, 1, 2, 20, 24, 100}
 	for _, expected := range vals {
-		db.MakeTemperatureEntry(expected)
-		if actual := db.GetLastTemperatureEntry(); expected != actual {
+		database.MakeTemperatureEntry(db, expected)
+		if actual := database.GetLastTemperatureEntry(db); expected != actual {
 			logrus.Errorf("expected=%d, actual=%d", expected, actual)
 			t.Fail()
 		}
@@ -127,7 +129,7 @@ func TestSqliteDataPrep(t *testing.T) {
 
 	// create and destroy 5 times
 	for i := 0; i < 5; i++ {
-		db, err := database2.NewSqliteDBConnector(sqliteFile, true)
+		db, err := sqlite.NewSqlite(sqliteFile, true)
 		if err != nil || db == nil {
 			logrus.Error("database not created")
 			t.Error(err)
