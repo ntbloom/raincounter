@@ -4,7 +4,7 @@ package database
 import (
 	"database/sql"
 
-	tlv2 "github.com/ntbloom/raincounter/pkg/gateway/tlv"
+	"github.com/ntbloom/raincounter/pkg/gateway/tlv"
 
 	"github.com/sirupsen/logrus"
 )
@@ -34,7 +34,7 @@ type DBWrapper interface {
 
 // MakeRainEntry AddRecord a rain event
 func MakeRainEntry(db DBWrapper) {
-	_, err := db.AddRecord(tlv2.Rain, tlv2.RainValue)
+	_, err := db.AddRecord(tlv.Rain, tlv.RainValue)
 	if err != nil {
 		logrus.Error(err)
 	}
@@ -42,7 +42,7 @@ func MakeRainEntry(db DBWrapper) {
 
 // MakeSoftResetEntry AddRecord a soft reset event
 func MakeSoftResetEntry(db DBWrapper) {
-	_, err := db.AddRecord(tlv2.SoftReset, tlv2.SoftResetValue)
+	_, err := db.AddRecord(tlv.SoftReset, tlv.SoftResetValue)
 	if err != nil {
 		logrus.Error(err)
 	}
@@ -50,7 +50,7 @@ func MakeSoftResetEntry(db DBWrapper) {
 
 // MakeHardResetEntry AddRecord a hard reset event
 func MakeHardResetEntry(db DBWrapper) {
-	_, err := db.AddRecord(tlv2.HardReset, tlv2.HardResetValue)
+	_, err := db.AddRecord(tlv.HardReset, tlv.HardResetValue)
 	if err != nil {
 		logrus.Error(err)
 	}
@@ -58,7 +58,7 @@ func MakeHardResetEntry(db DBWrapper) {
 
 // MakePauseEntry AddRecord a pause event
 func MakePauseEntry(db DBWrapper) {
-	_, err := db.AddRecord(tlv2.Pause, tlv2.Unpause)
+	_, err := db.AddRecord(tlv.Pause, tlv.Unpause)
 	if err != nil {
 		logrus.Error(err)
 	}
@@ -66,7 +66,7 @@ func MakePauseEntry(db DBWrapper) {
 
 // MakeUnpauseEntry AddRecord an unpause event
 func MakeUnpauseEntry(db DBWrapper) {
-	_, err := db.AddRecord(tlv2.Unpause, tlv2.UnpauseValue)
+	_, err := db.AddRecord(tlv.Unpause, tlv.UnpauseValue)
 	if err != nil {
 		logrus.Error(err)
 	}
@@ -74,7 +74,7 @@ func MakeUnpauseEntry(db DBWrapper) {
 
 // MakeTemperatureEntry AddRecord a temperature measurement
 func MakeTemperatureEntry(db DBWrapper, tempC int) {
-	_, err := db.AddRecord(tlv2.Temperature, tempC)
+	_, err := db.AddRecord(tlv.Temperature, tempC)
 	if err != nil {
 		logrus.Error(err)
 	}
@@ -83,26 +83,26 @@ func MakeTemperatureEntry(db DBWrapper, tempC int) {
 /* GETTERS, MOSTLY FOR TESTING */
 
 func GetRainEntries(db DBWrapper) int {
-	return db.Tally(tlv2.Rain)
+	return db.Tally(tlv.Rain)
 }
 
 func GetSoftResetEntries(db DBWrapper) int {
-	return db.Tally(tlv2.SoftReset)
+	return db.Tally(tlv.SoftReset)
 }
 
 func GetHardResetEntries(db DBWrapper) int {
-	return db.Tally(tlv2.HardReset)
+	return db.Tally(tlv.HardReset)
 }
 
 func GetPauseEntries(db DBWrapper) int {
-	return db.Tally(tlv2.Pause)
+	return db.Tally(tlv.Pause)
 }
 
 func GetUnpauseEntries(db DBWrapper) int {
-	return db.Tally(tlv2.Unpause)
+	return db.Tally(tlv.Unpause)
 }
 
 // GetLastTemperatureEntry returns last temp reading, sorted by primary key
 func GetLastTemperatureEntry(db DBWrapper) int {
-	return db.GetLastRecord(tlv2.Temperature)
+	return db.GetLastRecord(tlv.Temperature)
 }

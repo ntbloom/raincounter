@@ -6,29 +6,29 @@ import (
 	"sync"
 	"time"
 
-	exitcodes2 "github.com/ntbloom/raincounter/pkg/common/exitcodes"
+	"github.com/ntbloom/raincounter/pkg/common/exitcodes"
 
-	messenger2 "github.com/ntbloom/raincounter/pkg/gateway/messenger"
-	tlv2 "github.com/ntbloom/raincounter/pkg/gateway/tlv"
+	"github.com/ntbloom/raincounter/pkg/gateway/messenger"
+	"github.com/ntbloom/raincounter/pkg/gateway/tlv"
 
 	"github.com/sirupsen/logrus"
 )
 
 // Serial communicates with a serial port
 type Serial struct {
-	port            string                // file descriptor of port
-	maxPacketLen    int                   // how long you expect the packet to be
-	timeout         time.Duration         // how long to wait for enumration
-	data            []byte                // where the data lives
-	file            *os.File              // file descriptor for the port
-	kill            chan struct{}         // send a message to kill the serial loop
-	messageReceived chan struct{}         // channel for waiting for message on serial port
-	Messenger       *messenger2.Messenger // messenger object
+	port            string               // file descriptor of port
+	maxPacketLen    int                  // how long you expect the packet to be
+	timeout         time.Duration        // how long to wait for enumration
+	data            []byte               // where the data lives
+	file            *os.File             // file descriptor for the port
+	kill            chan struct{}        // send a message to kill the serial loop
+	messageReceived chan struct{}        // channel for waiting for message on serial port
+	Messenger       *messenger.Messenger // messenger object
 	sync.Mutex
 }
 
 // NewConnection creates a new serial connection with a unix filename
-func NewConnection(port string, maxPacketLen int, timeout time.Duration, msgr *messenger2.Messenger) (*Serial, error) {
+func NewConnection(port string, maxPacketLen int, timeout time.Duration, msgr *messenger.Messenger) (*Serial, error) {
 	checkPortStatus(port, timeout)
 	logrus.Infof("opening connection on `%s`", port)
 	var data []byte
@@ -98,7 +98,7 @@ func (serial *Serial) waitForMessage() {
 	logrus.Trace("a serial message arrived")
 	serial.messageReceived <- struct{}{}
 
-	tlvPacket, err := tlv2.NewTLV(packet)
+	tlvPacket, err := tlv.NewTLV(packet)
 	if err != nil {
 		logrus.Errorf("unexpected TLV packet: %s", err)
 	}
@@ -152,5 +152,5 @@ func handlePortFailure(port string) {
 	logrus.Fatalf("unable to locate sensor at `%s`", port)
 
 	// for now...
-	os.Exit(exitcodes2.SerialPortNotFound)
+	os.Exit(exitcodes.SerialPortNotFound)
 }

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	configkey2 "github.com/ntbloom/raincounter/pkg/config/configkey"
+	"github.com/ntbloom/raincounter/pkg/config/configkey"
 
 	"github.com/spf13/viper"
 
@@ -29,13 +29,13 @@ type BrokerConfig struct {
 func NewBrokerConfig() *BrokerConfig {
 	// look for certs locally first
 	return &BrokerConfig{
-		scheme:            viper.GetString(configkey2.MQTTScheme),
-		broker:            viper.GetString(configkey2.MQTTBrokerIP),
-		port:              viper.GetInt(configkey2.MQTTBrokerPort),
-		caCert:            viper.GetString(configkey2.MQTTCaCert),
-		clientCert:        viper.GetString(configkey2.MQTTClientCert),
-		clientKey:         viper.GetString(configkey2.MQTTClientKey),
-		connectionTimeout: viper.GetDuration(configkey2.MQTTConnectionTimeout),
+		scheme:            viper.GetString(configkey.MQTTScheme),
+		broker:            viper.GetString(configkey.MQTTBrokerIP),
+		port:              viper.GetInt(configkey.MQTTBrokerPort),
+		caCert:            viper.GetString(configkey.MQTTCaCert),
+		clientCert:        viper.GetString(configkey.MQTTClientCert),
+		clientKey:         viper.GetString(configkey.MQTTClientKey),
+		connectionTimeout: viper.GetDuration(configkey.MQTTConnectionTimeout),
 	}
 }
 

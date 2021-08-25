@@ -3,9 +3,9 @@ package mqtt_test
 import (
 	"testing"
 
-	mqtt2 "github.com/ntbloom/raincounter/pkg/common/mqtt"
+	"github.com/ntbloom/raincounter/pkg/common/mqtt"
 
-	config2 "github.com/ntbloom/raincounter/pkg/config"
+	"github.com/ntbloom/raincounter/pkg/config"
 
 	paho "github.com/eclipse/paho.mqtt.golang"
 	"github.com/sirupsen/logrus"
@@ -13,9 +13,9 @@ import (
 
 // reusable mqtt function
 func pahoFixture(t *testing.T) paho.Client {
-	config2.Configure()
-	pahoConfig := mqtt2.NewBrokerConfig()
-	client, err := mqtt2.NewConnection(pahoConfig)
+	config.Configure()
+	pahoConfig := mqtt.NewBrokerConfig()
+	client, err := mqtt.NewConnection(pahoConfig)
 	if err != nil {
 		t.Fail()
 	}

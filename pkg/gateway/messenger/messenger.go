@@ -7,9 +7,9 @@ import (
 
 	"github.com/ntbloom/raincounter/pkg/gateway/sqlite"
 
-	mqtt2 "github.com/ntbloom/raincounter/pkg/common/mqtt"
+	"github.com/ntbloom/raincounter/pkg/common/mqtt"
 
-	configkey2 "github.com/ntbloom/raincounter/pkg/config/configkey"
+	"github.com/ntbloom/raincounter/pkg/config/configkey"
 
 	paho "github.com/eclipse/paho.mqtt.golang"
 	"github.com/sirupsen/logrus"
@@ -36,17 +36,17 @@ func NewMessenger(client paho.Client, db *sqlite.Sqlite) *Messenger {
 
 // Start waits for packet to publish or to receive signal interrupt
 func (m *Messenger) Start() {
-	defer m.client.Disconnect(viper.GetUint(configkey2.MQTTQuiescence))
+	defer m.client.Disconnect(viper.GetUint(configkey.MQTTQuiescence))
 
 	// configure status messages
-	statusTimer := time.NewTicker(viper.GetDuration(configkey2.MessengerStatusInterval))
+	statusTimer := time.NewTicker(viper.GetDuration(configkey.MessengerStatusInterval))
 
 	// loop until signal
 	for {
 		select {
 		case state := <-m.state:
 			switch state {
-			case configkey2.Kill:
+			case configkey.Kill:
 				// program is exiting
 				logrus.Debug("received `Closed` signal on messenger.state channel")
 				statusTimer.Stop()
@@ -67,7 +67,7 @@ func (m *Messenger) Start() {
 // Stop kills the main loop
 func (m *Messenger) Stop() {
 	logrus.Info("stopping messenger and closing paho connection")
-	m.state <- configkey2.Kill
+	m.state <- configkey.Kill
 }
 
 // publish sends a Message over MQTT
@@ -89,7 +89,7 @@ func (m *Messenger) sendStatus() {
 // get a status message about how the gateway is doing
 func gatewayStatusMessage() (*Message, error) {
 	gs := GatewayStatus{
-		Topic:     mqtt2.GatewayStatus,
+		Topic:     mqtt.GatewayStatus,
 		OK:        true,
 		Timestamp: time.Now(),
 	}
@@ -109,7 +109,7 @@ func gatewayStatusMessage() (*Message, error) {
 // get a status message about how the sensor is doing
 func sensorStatusMessage() (*Message, error) {
 	var up bool
-	port := viper.GetString(configkey2.USBConnectionPort)
+	port := viper.GetString(configkey.USBConnectionPort)
 	_, err := os.Stat(port)
 	if err != nil {
 		up = false
@@ -117,7 +117,7 @@ func sensorStatusMessage() (*Message, error) {
 		up = true
 	}
 	ss := SensorStatus{
-		Topic:     mqtt2.SensorStatus,
+		Topic:     mqtt.SensorStatus,
 		OK:        up,
 		Timestamp: time.Now(),
 	}
