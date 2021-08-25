@@ -28,7 +28,7 @@ type connection struct {
 type Sqlite struct {
 	file     *os.File        // pointer to actual file
 	fullPath string          // full POSIX path of sqlite file
-	driver   string          // change the type of database connection
+	driver   string          // change the type of postgresql connection
 	ctx      context.Context // background context
 }
 
@@ -73,7 +73,7 @@ func (db *Sqlite) newConnection() (*connection, error) {
 	case sqlite:
 		database, err = sql.Open("sqlite", db.fullPath)
 		if err != nil {
-			logrus.Error("unable to open database")
+			logrus.Error("unable to open postgresql")
 			return nil, err
 		}
 

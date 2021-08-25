@@ -1,4 +1,4 @@
-package database_test
+package postgresql_test
 
 import (
 	"bytes"
@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"testing"
 
-	database2 "github.com/ntbloom/raincounter/pkg/server/database"
+	database2 "github.com/ntbloom/raincounter/pkg/server/postgresql"
 
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -32,7 +32,7 @@ func bashCommand(executable string, args []string) {
 	}
 }
 
-// launch the database
+// launch the postgresql
 func launchDatabase(container string, database string) {
 	args := []string{
 		"run",
@@ -51,7 +51,7 @@ func launchDatabase(container string, database string) {
 	bashCommand(docker, args)
 }
 
-// kill the database
+// kill the postgresql
 func killDatabase(name string) {
 	args := []string{"kill", name}
 	bashCommand(docker, args)

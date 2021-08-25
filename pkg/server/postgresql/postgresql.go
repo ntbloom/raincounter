@@ -1,5 +1,5 @@
-// database runs the database code
-package database
+// postgresql runs the postgresql code
+package postgresql
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 )
 
 type PgConnector struct {
-	dbName string // name of the database
+	dbName string // name of the postgresql
 	url    string // how to connect
 
 }

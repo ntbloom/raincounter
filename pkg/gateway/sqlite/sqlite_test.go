@@ -1,4 +1,4 @@
-package database_test
+package sqlite_test
 
 import (
 	"os"
@@ -6,15 +6,14 @@ import (
 	"testing"
 	"testing/quick"
 
-	"github.com/ntbloom/raincounter/pkg/gateway/sqlite"
-
 	"github.com/ntbloom/raincounter/pkg/common/database"
 
-	config2 "github.com/ntbloom/raincounter/pkg/config"
-	configkey2 "github.com/ntbloom/raincounter/pkg/config/configkey"
+	"github.com/ntbloom/raincounter/pkg/config"
+	"github.com/ntbloom/raincounter/pkg/config/configkey"
 
 	"github.com/sirupsen/logrus"
 
+	"github.com/ntbloom/raincounter/pkg/gateway/sqlite"
 	"github.com/spf13/viper"
 )
 
@@ -22,13 +21,13 @@ import (
 
 // reusable configs
 func getConfig() {
-	config2.Configure()
+	config.Configure()
 }
 
 // sqliteConnectionFixture makes a reusable Sqlite object
 func sqliteConnectionFixture() *sqlite.Sqlite {
 	getConfig()
-	sqliteFile := viper.GetString(configkey2.DatabaseLocalDevFile)
+	sqliteFile := viper.GetString(configkey.DatabaseLocalDevFile)
 	db, _ := sqlite.NewSqlite(sqliteFile, true)
 	return db
 }
@@ -63,7 +62,7 @@ func testRainEntry(db *sqlite.Sqlite, t *testing.T) {
 	}
 }
 
-// Tests all the various entries work (except temperature). Also tests concurrent use of database
+// Tests all the various entries work (except temperature). Also tests concurrent use of postgresql
 func testStaticSQLEntries(db *sqlite.Sqlite, t *testing.T) {
 	count := 5
 
@@ -119,10 +118,10 @@ func testTemperatureEntries(db *sqlite.Sqlite, t *testing.T) {
 
 /* Starting with Sqlite, make sure the schema and file manipulation are enforced properly */
 
-// create and destroy sqlite file 5 times, get DBCOnnector struct
+// create and destroy sqlite file 5 times, get Sqlite Sqlite struct
 func TestSqliteDataPrep(t *testing.T) {
 	getConfig()
-	sqliteFile := viper.GetString(configkey2.DatabaseLocalDevFile)
+	sqliteFile := viper.GetString(configkey.DatabaseLocalDevFile)
 
 	// clean up when finished
 	defer func() { _ = os.Remove(sqliteFile) }()
@@ -131,7 +130,7 @@ func TestSqliteDataPrep(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		db, err := sqlite.NewSqlite(sqliteFile, true)
 		if err != nil || db == nil {
-			logrus.Error("database not created")
+			logrus.Error("problem instantiating NewSqlite struct")
 			t.Error(err)
 		}
 		_, err = os.Stat(sqliteFile)

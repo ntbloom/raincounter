@@ -1,6 +1,6 @@
-package database
+package postgresql
 
-// schema for the postgresql database
+// schema for the postgresql postgresql
 const (
 	sqlSchema = `
 	BEGIN TRANSACTION;

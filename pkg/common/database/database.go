@@ -1,6 +1,6 @@
 package database
 
-// Prep a database.  This is essentially a test fixture but also to be called at the start of a new deployment
+// Prep a postgresql.  This is essentially a test fixture but also to be called at the start of a new deployment
 import (
 	"database/sql"
 
@@ -10,18 +10,18 @@ import (
 )
 
 // DBWrapper abstracts the underlying SQL engine to let us use the same
-// code for sqlite, postgresql, or other database
+// code for sqlite, postgresql, or other postgresql
 type DBWrapper interface {
 	// MakeSchema initializes a schema
 	MakeSchema() (sql.Result, error)
 
-	// EnterData enters data into the database without returning any rows
+	// EnterData enters data into the postgresql without returning any rows
 	EnterData(cmd string) (sql.Result, error)
 
-	// AddRecord makes a single integer entry into the database for a given tag
+	// AddRecord makes a single integer entry into the postgresql for a given tag
 	AddRecord(tag, value int) (sql.Result, error)
 
-	// Tally runs sql command to count database entries for a given topic
+	// Tally runs sql command to count postgresql entries for a given topic
 	Tally(tag int) int
 
 	// GetLastRecord gets the last record for a given tag

@@ -31,7 +31,7 @@ func connectToMQTT() paho.Client {
 	return client
 }
 
-// connect to the sqlite database
+// connect to the sqlite postgresql
 func connectToDatabase() *sqlite.Sqlite {
 	db, err := sqlite.NewSqlite(viper.GetString(configkey2.DatabaseLocalDevFile), true)
 	if err != nil {
