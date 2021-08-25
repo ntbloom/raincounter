@@ -1,4 +1,4 @@
-package sqlite_test
+package database_test
 
 import (
 	"os"
@@ -13,7 +13,6 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/ntbloom/raincounter/pkg/gateway/sqlite"
 	"github.com/spf13/viper"
 )
 
@@ -25,15 +24,15 @@ func getConfig() {
 }
 
 // sqliteConnectionFixture makes a reusable Sqlite object
-func sqliteConnectionFixture() *sqlite.Sqlite {
+func sqliteConnectionFixture() *database.Sqlite {
 	getConfig()
 	sqliteFile := viper.GetString(configkey.DatabaseLocalDevFile)
-	db, _ := sqlite.NewSqlite(sqliteFile, true)
+	db, _ := database.NewSqlite(sqliteFile, true)
 	return db
 }
 
 // Property-based test for creating a bunch of rows and making sure the data get put in
-func testRainEntry(db *sqlite.Sqlite, t *testing.T) {
+func testRainEntry(db *database.Sqlite, t *testing.T) {
 	maxCount := 5
 	if testing.Short() {
 		logrus.Info("skipping property tests")
@@ -63,7 +62,7 @@ func testRainEntry(db *sqlite.Sqlite, t *testing.T) {
 }
 
 // Tests all the various entries work (except temperature). Also tests concurrent use of postgresql
-func testStaticSQLEntries(db *sqlite.Sqlite, t *testing.T) {
+func testStaticSQLEntries(db *database.Sqlite, t *testing.T) {
 	count := 5
 
 	// asynchronously make an entry for each type
@@ -103,7 +102,7 @@ func testStaticSQLEntries(db *sqlite.Sqlite, t *testing.T) {
 }
 
 // tests that we can enter temperature
-func testTemperatureEntries(db *sqlite.Sqlite, t *testing.T) {
+func testTemperatureEntries(db *database.Sqlite, t *testing.T) {
 	vals := []int{-100, -25, -15, -1, 0, 1, 2, 20, 24, 100}
 	for _, expected := range vals {
 		database.MakeTemperatureEntry(db, expected)
@@ -128,7 +127,7 @@ func TestSqliteDataPrep(t *testing.T) {
 
 	// create and destroy 5 times
 	for i := 0; i < 5; i++ {
-		db, err := sqlite.NewSqlite(sqliteFile, true)
+		db, err := database.NewSqlite(sqliteFile, true)
 		if err != nil || db == nil {
 			logrus.Error("problem instantiating NewSqlite struct")
 			t.Error(err)

@@ -1,4 +1,4 @@
-package sqlite
+package database
 
 // Schema for logging data in rainbase, should work for both postgresql and sqlite
 
