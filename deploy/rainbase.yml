@@ -34,6 +34,11 @@ database:
       file: /etc/rainbase/rainbase-gateway-prod.db
     dev:
       file: /tmp/rainbase.db
+  remote:
+    prod:
+      file: /etc/raincloud/raincloud-gateway-prod.db
+    dev:
+      file: /tmp/raincloud.db
 
 messenger:
   status:

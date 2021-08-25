@@ -2,12 +2,25 @@ package main
 
 import (
 	_ "github.com/ntbloom/raincounter/pkg/common/mqtt"
-	database2 "github.com/ntbloom/raincounter/pkg/server/postgresql"
-	web2 "github.com/ntbloom/raincounter/pkg/server/web"
 )
 
+//// connect to mqtt
+//func connectToMQTT() paho.Client {
+//	client, err := mqtt.NewConnection(mqtt.NewBrokerConfig())
+//	if err != nil {
+//		panic(err)
+//	}
+//	return client
+//}
+//
+//// connect to the sqlite postgresql
+//func connectToDatabase() *database.Sqlite {
+//	db, err := database.NewSqlite(viper.GetString(configkey.DatabaseRemoteDevFile), true)
+//	if err != nil {
+//		panic(err)
+//	}
+//	return db
+//}
+
 func main() {
-	database2.NewDatabase("raincloud", "not-a-real-url")
-	//mqtt.Start()
-	web2.Serve()
 }

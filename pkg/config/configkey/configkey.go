@@ -24,6 +24,9 @@ const (
 	DatabaseLocalProdFile = "database.local.prod.file"
 	DatabaseLocalDevFile  = "database.local.dev.file"
 
+	DatabaseRemoteProdFile = "database.remote.prod.file"
+	DatabaseRemoteDevFile  = "database.remote.dev.file"
+
 	MessengerStatusInterval      = "messenger.status.interval"
 	MessengerTemperatureInterval = "messenger.temperature.interval"
 
