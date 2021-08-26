@@ -24,7 +24,7 @@ type DockerContainer struct {
 	hostPort      int
 	containerPort int
 	ctx           context.Context
-	cli           *client.Client
+	client        *client.Client
 	id            string
 }
 
@@ -46,6 +46,7 @@ func (d *DockerContainer) Run() error {
 		return err
 	}
 	if err := d.start(); err != nil {
+		_ = d.forceRemove()
 		return err
 	}
 	return nil
@@ -53,12 +54,12 @@ func (d *DockerContainer) Run() error {
 
 // Kill removes the container
 func (d *DockerContainer) Kill() error {
-	return nil
+	return d.forceRemove()
 }
 
 // pull the latest image
 func (d *DockerContainer) pull() error {
-	out, err := d.cli.ImagePull(d.ctx, d.image, types.ImagePullOptions{})
+	out, err := d.client.ImagePull(d.ctx, d.image, types.ImagePullOptions{})
 	if err != nil {
 		logrus.Error(err)
 		return err
@@ -93,7 +94,7 @@ func (d *DockerContainer) create() error {
 			},
 		},
 	}
-	resp, err := d.cli.ContainerCreate(
+	resp, err := d.client.ContainerCreate(
 		d.ctx,
 		containerCfg,
 		hostCfg,
@@ -116,8 +117,24 @@ func (d *DockerContainer) start() error {
 	}
 
 	options := types.ContainerStartOptions{}
-	err := d.cli.ContainerStart(d.ctx, d.id, options)
-	if err != nil {
+	if err := d.client.ContainerStart(d.ctx, d.id, options); err != nil {
+		logrus.Error(err)
+		return err
+	}
+	return nil
+}
+
+// forceRemove the container
+func (d *DockerContainer) forceRemove() error {
+	if d.id == "" {
+		panic("container ID not set, did you pull and create the container first?")
+	}
+	options := types.ContainerRemoveOptions{
+		RemoveVolumes: false,
+		RemoveLinks:   false,
+		Force:         true,
+	}
+	if err := d.client.ContainerRemove(d.ctx, d.id, options); err != nil {
 		logrus.Error(err)
 		return err
 	}
