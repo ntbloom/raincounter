@@ -16,7 +16,8 @@ import (
 	_ "github.com/docker/docker/client"
 )
 
-// DockerContainer wraps the docker api to launch containers for testing purposes only
+// DockerContainer wraps the docker api to launch containers for testing purposes only.
+// Uses the docker SDK to run the equivalent of `docker run --rm -d -p 8080:8080 --name my_container nginx`.
 type DockerContainer struct {
 	image         string
 	name          string
@@ -42,6 +43,9 @@ func (d *DockerContainer) Run() error {
 		return err
 	}
 	if err := d.create(); err != nil {
+		return err
+	}
+	if err := d.start(); err != nil {
 		return err
 	}
 	return nil
@@ -102,5 +106,20 @@ func (d *DockerContainer) create() error {
 		return err
 	}
 	d.id = resp.ID
+	return nil
+}
+
+// start the container
+func (d *DockerContainer) start() error {
+	if d.id == "" {
+		panic("container ID not set, did you pull and create the container first?")
+	}
+
+	options := types.ContainerStartOptions{}
+	err := d.cli.ContainerStart(d.ctx, d.id, options)
+	if err != nil {
+		logrus.Error(err)
+		return err
+	}
 	return nil
 }
