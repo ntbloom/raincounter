@@ -34,7 +34,7 @@ func (suite *ReceiverTest) SetupSuite() {
 	config.Configure()
 
 	// launch the docker container
-	container, err := docker.NewDockerContainer("eclipse-mosquitto", "receiver-test", 1883, 1883)
+	container, err := docker.NewDockerContainer("eclipse-mosquitto", "receiver-test", 1883)
 	if err != nil {
 		panic(err)
 	}
@@ -46,7 +46,7 @@ func (suite *ReceiverTest) SetupSuite() {
 	// prep the Receiver struct
 	suite.testFile = viper.GetString(configkey.DatabaseRemoteDevFile)
 	mqttConfig := mqtt.NewBrokerConfig()
-	mqttConfig.SetBroker("localhost", 1883)
+	mqttConfig.SetDevBroker("127.0.0.1", 1883)
 	r, err := receiver.NewReceiver(mqttConfig, suite.testFile, true)
 	if err != nil {
 		panic(err)

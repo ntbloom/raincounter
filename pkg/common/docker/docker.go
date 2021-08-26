@@ -13,28 +13,25 @@ import (
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
-	_ "github.com/docker/docker/client"
 )
 
 // DockerContainer wraps the docker api to launch containers for testing purposes only.
-// Uses the docker SDK to run the equivalent of `docker run --rm -d -p 8080:8080 --name my_container nginx`.
 type DockerContainer struct {
-	image         string
-	name          string
-	hostPort      int
-	containerPort int
-	ctx           context.Context
-	client        *client.Client
-	id            string
+	image  string
+	name   string
+	port   int
+	ctx    context.Context
+	client *client.Client
+	id     string
 }
 
-func NewDockerContainer(image, name string, hostPort, containerPort int) (*DockerContainer, error) {
+func NewDockerContainer(image, name string, port int) (*DockerContainer, error) {
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		logrus.Error(err)
 		return nil, err
 	}
-	return &DockerContainer{image, name, hostPort, containerPort, context.Background(), cli, ""}, nil
+	return &DockerContainer{image, name, port, context.Background(), cli, ""}, nil
 }
 
 // Run launches an ephemeral container
@@ -73,7 +70,7 @@ func (d *DockerContainer) pull() error {
 
 // create the container
 func (d *DockerContainer) create() error {
-	port, err := nat.NewPort("tcp", strconv.Itoa(d.containerPort))
+	port, err := nat.NewPort("tcp", strconv.Itoa(d.port))
 	if err != nil {
 		logrus.Error(nil)
 		return err
@@ -85,14 +82,8 @@ func (d *DockerContainer) create() error {
 		},
 	}
 	hostCfg := &container.HostConfig{
-		PortBindings: nat.PortMap{
-			"5432/tcp": []nat.PortBinding{
-				{
-					HostIP:   "0.0.0.0",
-					HostPort: strconv.Itoa(d.hostPort),
-				},
-			},
-		},
+		AutoRemove:  true,
+		NetworkMode: "host",
 	}
 	resp, err := d.client.ContainerCreate(
 		d.ctx,

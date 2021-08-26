@@ -39,12 +39,6 @@ func NewBrokerConfig() *BrokerConfig {
 	}
 }
 
-// SetBroker overrides broker from config, assumes no auth
-func (b *BrokerConfig) SetBroker(broker string, port int) {
-	b.broker = broker
-	b.port = port
-}
-
 // NewConnection creates a new MQTT connection or error
 func NewConnection(config *BrokerConfig) (paho.Client, error) {
 	options := paho.NewClientOptions()
@@ -67,4 +61,10 @@ func NewConnection(config *BrokerConfig) (paho.Client, error) {
 	client := paho.NewClient(options)
 	return client,
 		nil
+}
+
+// SetDevBroker overrides broker from config, assumes no auth
+func (b *BrokerConfig) SetDevBroker(broker string, port int) {
+	b.broker = broker
+	b.port = port
 }
