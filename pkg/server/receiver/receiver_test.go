@@ -3,6 +3,9 @@ package receiver_test
 import (
 	"testing"
 
+	"github.com/ntbloom/raincounter/pkg/config/configkey"
+	"github.com/spf13/viper"
+
 	"github.com/ntbloom/raincounter/pkg/common/docker"
 
 	"github.com/ntbloom/raincounter/pkg/common/mqtt"
@@ -10,9 +13,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/ntbloom/raincounter/pkg/config"
-	"github.com/ntbloom/raincounter/pkg/config/configkey"
-	"github.com/spf13/viper"
-
 	"github.com/ntbloom/raincounter/pkg/server/receiver"
 
 	"github.com/stretchr/testify/suite"
@@ -43,11 +43,14 @@ func (suite *ReceiverTest) SetupSuite() {
 		panic(err)
 	}
 
-	// prep the Receiver struct
+	// connect to the docker container without auth
+	client, err := mqtt.LocalDevConnection("localhost", 1883)
+	if err != nil {
+		panic(err)
+	}
+
 	suite.testFile = viper.GetString(configkey.DatabaseRemoteDevFile)
-	mqttConfig := mqtt.NewBrokerConfig()
-	mqttConfig.SetDevBroker("127.0.0.1", 1883)
-	r, err := receiver.NewReceiver(mqttConfig, suite.testFile, true)
+	r, err := receiver.NewReceiver(client, suite.testFile, true)
 	if err != nil {
 		panic(err)
 	}

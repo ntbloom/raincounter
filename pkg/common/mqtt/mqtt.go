@@ -63,8 +63,7 @@ func NewConnection(config *BrokerConfig) (paho.Client, error) {
 		nil
 }
 
-// SetDevBroker overrides broker from config, assumes no auth
-func (b *BrokerConfig) SetDevBroker(broker string, port int) {
-	b.broker = broker
-	b.port = port
+// LocalDevConnection gets you attached to a local docker container without auth
+func LocalDevConnection(hostname string, port int) (paho.Client, error) {
+	return nil, nil
 }

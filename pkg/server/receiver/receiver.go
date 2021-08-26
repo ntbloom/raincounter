@@ -3,7 +3,6 @@ package receiver
 import (
 	paho "github.com/eclipse/paho.mqtt.golang"
 	"github.com/ntbloom/raincounter/pkg/common/database"
-	"github.com/ntbloom/raincounter/pkg/common/mqtt"
 	"github.com/sirupsen/logrus"
 )
 
@@ -14,23 +13,15 @@ type Receiver struct {
 
 // NewReceiver creates a new Receiver struct
 // mqtt connection is created automatically
-func NewReceiver(mqttConfig *mqtt.BrokerConfig, databasePath string, clobber bool) (*Receiver, error) {
+func NewReceiver(client paho.Client, databasePath string, clobber bool) (*Receiver, error) {
 	s, err := database.NewSqlite(databasePath, clobber)
 	if err != nil {
 		logrus.Error(err)
 		return nil, err
 	}
 
-	m, err := mqtt.NewConnection(mqttConfig)
-	if token := m.Connect(); token.Wait() && token.Error() != nil {
-		logrus.Errorf("unable to connect to MQTT: %s", token.Error())
-	}
-	if err != nil {
-		logrus.Error(err)
-		return nil, err
-	}
 	return &Receiver{
-		mqttConnection:  m,
+		mqttConnection:  client,
 		sqliteConection: s,
 	}, nil
 }
