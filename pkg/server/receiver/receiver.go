@@ -20,6 +20,10 @@ func NewReceiver(client paho.Client, databasePath string, clobber bool) (*Receiv
 		return nil, err
 	}
 
+	if token := client.Connect(); token.Wait() && token.Error() != nil {
+		logrus.Errorf("unable to connect to MQTT: %s", token.Error())
+	}
+
 	return &Receiver{
 		mqttConnection:  client,
 		sqliteConection: s,

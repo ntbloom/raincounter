@@ -18,6 +18,8 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+const localhost = "127.0.0.1"
+
 type ReceiverTest struct {
 	suite.Suite
 	testFile  string
@@ -44,13 +46,13 @@ func (suite *ReceiverTest) SetupSuite() {
 	}
 
 	// connect to the docker container without auth
-	client, err := mqtt.LocalDevConnection("localhost", 1883)
-	if err != nil {
-		panic(err)
-	}
+	client := mqtt.LocalDevConnection(localhost, 1883)
 
-	suite.testFile = viper.GetString(configkey.DatabaseRemoteDevFile)
-	r, err := receiver.NewReceiver(client, suite.testFile, true)
+	// prep the sqlite file
+	testFile := viper.GetString(configkey.DatabaseRemoteDevFile)
+	suite.testFile = testFile
+
+	r, err := receiver.NewReceiver(client, testFile, true)
 	if err != nil {
 		panic(err)
 	}

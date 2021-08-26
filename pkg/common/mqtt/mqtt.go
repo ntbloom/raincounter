@@ -64,6 +64,11 @@ func NewConnection(config *BrokerConfig) (paho.Client, error) {
 }
 
 // LocalDevConnection gets you attached to a local docker container without auth
-func LocalDevConnection(hostname string, port int) (paho.Client, error) {
-	return nil, nil
+func LocalDevConnection(hostname string, port int) paho.Client {
+	options := paho.NewClientOptions()
+	server := fmt.Sprintf("mqtt://%s:%d", hostname, port)
+	options.AddBroker(server)
+
+	client := paho.NewClient(options)
+	return client
 }
