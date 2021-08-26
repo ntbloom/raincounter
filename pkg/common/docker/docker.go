@@ -15,8 +15,8 @@ import (
 	"github.com/docker/docker/client"
 )
 
-// DockerContainer wraps the docker api to launch containers for testing purposes only.
-type DockerContainer struct {
+// Container wraps the docker api to launch containers for testing purposes only.
+type Container struct {
 	image  string
 	name   string
 	port   int
@@ -25,17 +25,17 @@ type DockerContainer struct {
 	id     string
 }
 
-func NewDockerContainer(image, name string, port int) (*DockerContainer, error) {
+func NewContainer(image, name string, port int) (*Container, error) {
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		logrus.Error(err)
 		return nil, err
 	}
-	return &DockerContainer{image, name, port, context.Background(), cli, ""}, nil
+	return &Container{image, name, port, context.Background(), cli, ""}, nil
 }
 
 // Run launches an ephemeral container
-func (d *DockerContainer) Run() error {
+func (d *Container) Run() error {
 	if err := d.pull(); err != nil {
 		return err
 	}
@@ -50,12 +50,12 @@ func (d *DockerContainer) Run() error {
 }
 
 // Kill removes the container
-func (d *DockerContainer) Kill() error {
+func (d *Container) Kill() error {
 	return d.forceRemove()
 }
 
 // pull the latest image
-func (d *DockerContainer) pull() error {
+func (d *Container) pull() error {
 	out, err := d.client.ImagePull(d.ctx, d.image, types.ImagePullOptions{})
 	if err != nil {
 		logrus.Error(err)
@@ -69,7 +69,7 @@ func (d *DockerContainer) pull() error {
 }
 
 // create the container
-func (d *DockerContainer) create() error {
+func (d *Container) create() error {
 	port, err := nat.NewPort("tcp", strconv.Itoa(d.port))
 	if err != nil {
 		logrus.Error(nil)
@@ -102,7 +102,7 @@ func (d *DockerContainer) create() error {
 }
 
 // start the container
-func (d *DockerContainer) start() error {
+func (d *Container) start() error {
 	if d.id == "" {
 		panic("container ID not set, did you pull and create the container first?")
 	}
@@ -116,7 +116,7 @@ func (d *DockerContainer) start() error {
 }
 
 // forceRemove the container
-func (d *DockerContainer) forceRemove() error {
+func (d *Container) forceRemove() error {
 	if d.id == "" {
 		panic("container ID not set, did you pull and create the container first?")
 	}

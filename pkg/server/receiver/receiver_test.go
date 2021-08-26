@@ -24,7 +24,7 @@ type ReceiverTest struct {
 	suite.Suite
 	testFile  string
 	receiver  *receiver.Receiver
-	mosquitto *docker.DockerContainer
+	mosquitto *docker.Container
 }
 
 func TestReceiver(t *testing.T) {
@@ -36,7 +36,7 @@ func (suite *ReceiverTest) SetupSuite() {
 	config.Configure()
 
 	// launch the docker container
-	container, err := docker.NewDockerContainer("eclipse-mosquitto", "receiver-test", 1883)
+	container, err := docker.NewContainer("eclipse-mosquitto", "receiver-test", 1883)
 	if err != nil {
 		panic(err)
 	}
@@ -59,15 +59,14 @@ func (suite *ReceiverTest) SetupSuite() {
 	suite.receiver = r
 }
 
-func (suite *ReceiverTest) SetupTest() {}
-func (suite *ReceiverTest) TearDownTest() {
-
-}
 func (suite *ReceiverTest) TearDownSuite() {
 	if err := suite.mosquitto.Kill(); err != nil {
 		panic(err)
 	}
 }
+
+func (suite *ReceiverTest) SetupTest()    {}
+func (suite *ReceiverTest) TearDownTest() {}
 
 func (suite *ReceiverTest) TestBasicConnection() {
 	assert.True(suite.T(), suite.receiver.IsConnected())
