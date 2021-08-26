@@ -35,28 +35,28 @@ func NewContainer(image, name string, port int) (*Container, error) {
 }
 
 // Run launches an ephemeral container
-func (d *Container) Run() error {
-	if err := d.pull(); err != nil {
+func (c *Container) Run() error {
+	if err := c.pull(); err != nil {
 		return err
 	}
-	if err := d.create(); err != nil {
+	if err := c.create(); err != nil {
 		return err
 	}
-	if err := d.start(); err != nil {
-		_ = d.forceRemove()
+	if err := c.start(); err != nil {
+		_ = c.forceRemove()
 		return err
 	}
 	return nil
 }
 
 // Kill removes the container
-func (d *Container) Kill() error {
-	return d.forceRemove()
+func (c *Container) Kill() error {
+	return c.forceRemove()
 }
 
 // pull the latest image
-func (d *Container) pull() error {
-	out, err := d.client.ImagePull(d.ctx, d.image, types.ImagePullOptions{})
+func (c *Container) pull() error {
+	out, err := c.client.ImagePull(c.ctx, c.image, types.ImagePullOptions{})
 	if err != nil {
 		logrus.Error(err)
 		return err
@@ -69,14 +69,14 @@ func (d *Container) pull() error {
 }
 
 // create the container
-func (d *Container) create() error {
-	port, err := nat.NewPort("tcp", strconv.Itoa(d.port))
+func (c *Container) create() error {
+	port, err := nat.NewPort("tcp", strconv.Itoa(c.port))
 	if err != nil {
 		logrus.Error(nil)
 		return err
 	}
 	containerCfg := &container.Config{
-		Image: d.image,
+		Image: c.image,
 		ExposedPorts: nat.PortSet{
 			port: struct{}{},
 		},
@@ -85,30 +85,30 @@ func (d *Container) create() error {
 		AutoRemove:  true,
 		NetworkMode: "host",
 	}
-	resp, err := d.client.ContainerCreate(
-		d.ctx,
+	resp, err := c.client.ContainerCreate(
+		c.ctx,
 		containerCfg,
 		hostCfg,
 		nil,
 		nil,
-		d.name,
+		c.name,
 	)
 	if err != nil {
 		logrus.Error(err)
 		return err
 	}
-	d.id = resp.ID
+	c.id = resp.ID
 	return nil
 }
 
 // start the container
-func (d *Container) start() error {
-	if d.id == "" {
+func (c *Container) start() error {
+	if c.id == "" {
 		panic("container ID not set, did you pull and create the container first?")
 	}
 
 	options := types.ContainerStartOptions{}
-	if err := d.client.ContainerStart(d.ctx, d.id, options); err != nil {
+	if err := c.client.ContainerStart(c.ctx, c.id, options); err != nil {
 		logrus.Error(err)
 		return err
 	}
@@ -116,8 +116,8 @@ func (d *Container) start() error {
 }
 
 // forceRemove the container
-func (d *Container) forceRemove() error {
-	if d.id == "" {
+func (c *Container) forceRemove() error {
+	if c.id == "" {
 		panic("container ID not set, did you pull and create the container first?")
 	}
 	options := types.ContainerRemoveOptions{
@@ -125,7 +125,7 @@ func (d *Container) forceRemove() error {
 		RemoveLinks:   false,
 		Force:         true,
 	}
-	if err := d.client.ContainerRemove(d.ctx, d.id, options); err != nil {
+	if err := c.client.ContainerRemove(c.ctx, c.id, options); err != nil {
 		logrus.Error(err)
 		return err
 	}
