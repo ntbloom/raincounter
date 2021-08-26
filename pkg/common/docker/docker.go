@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"os"
+	"strconv"
 
 	"github.com/docker/go-connections/nat"
 	"github.com/sirupsen/logrus"
@@ -35,29 +36,47 @@ func NewDockerContainer(image, name string, hostPort, containerPort int) (*Docke
 	return &DockerContainer{image, name, hostPort, containerPort, context.Background(), cli, ""}, nil
 }
 
-// Pull fetches the latest image, maybe not necessary?
-func (d *DockerContainer) Pull() error {
+// Run launches an ephemeral container
+func (d *DockerContainer) Run() error {
+	if err := d.pull(); err != nil {
+		return err
+	}
+	if err := d.create(); err != nil {
+		return err
+	}
+	return nil
+}
+
+// Kill removes the container
+func (d *DockerContainer) Kill() error {
+	return nil
+}
+
+// pull the latest image
+func (d *DockerContainer) pull() error {
 	out, err := d.cli.ImagePull(d.ctx, d.image, types.ImagePullOptions{})
 	if err != nil {
 		logrus.Error(err)
 		return err
 	}
-	if _, err := io.Copy(os.Stdout, out); err != nil {
+	if _, err := io.Copy(os.Stderr, out); err != nil {
 		logrus.Error(err)
 		return err
 	}
 	return nil
 }
 
-// Run launches an ephemeral container
-func (d *DockerContainer) Run() error {
-	if err := d.Pull(); err != nil {
+// create the container
+func (d *DockerContainer) create() error {
+	port, err := nat.NewPort("tcp", strconv.Itoa(d.containerPort))
+	if err != nil {
+		logrus.Error(nil)
 		return err
 	}
 	containerCfg := &container.Config{
 		Image: d.image,
 		ExposedPorts: nat.PortSet{
-			"5432:tcp": struct{}{},
+			port: struct{}{},
 		},
 	}
 	hostCfg := &container.HostConfig{
@@ -65,7 +84,7 @@ func (d *DockerContainer) Run() error {
 			"5432/tcp": []nat.PortBinding{
 				{
 					HostIP:   "0.0.0.0",
-					HostPort: "5432",
+					HostPort: strconv.Itoa(d.hostPort),
 				},
 			},
 		},
@@ -83,10 +102,5 @@ func (d *DockerContainer) Run() error {
 		return err
 	}
 	d.id = resp.ID
-	return nil
-}
-
-// Kill removes the container
-func (d *DockerContainer) Kill() error {
 	return nil
 }
