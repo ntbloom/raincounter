@@ -14,14 +14,17 @@ type Receiver struct {
 
 // NewReceiver creates a new Receiver struct
 // mqtt connection is created automatically
-func NewReceiver(databasePath string, clobber bool) (*Receiver, error) {
+func NewReceiver(mqttConfig *mqtt.BrokerConfig, databasePath string, clobber bool) (*Receiver, error) {
 	s, err := database.NewSqlite(databasePath, clobber)
 	if err != nil {
 		logrus.Error(err)
 		return nil, err
 	}
 
-	m, err := mqtt.NewConnection(mqtt.NewBrokerConfig())
+	m, err := mqtt.NewConnection(mqttConfig)
+	if token := m.Connect(); token.Wait() && token.Error() != nil {
+		logrus.Errorf("unable to connect to MQTT: %s", token.Error())
+	}
 	if err != nil {
 		logrus.Error(err)
 		return nil, err

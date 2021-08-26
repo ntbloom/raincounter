@@ -3,6 +3,10 @@ package receiver_test
 import (
 	"testing"
 
+	"github.com/ntbloom/raincounter/pkg/common/docker"
+
+	"github.com/ntbloom/raincounter/pkg/common/mqtt"
+
 	"github.com/stretchr/testify/assert"
 
 	"github.com/ntbloom/raincounter/pkg/config"
@@ -16,8 +20,9 @@ import (
 
 type ReceiverTest struct {
 	suite.Suite
-	testFile string
-	receiver *receiver.Receiver
+	testFile  string
+	receiver  *receiver.Receiver
+	mosquitto *docker.DockerContainer
 }
 
 func TestReceiver(t *testing.T) {
@@ -27,16 +32,26 @@ func TestReceiver(t *testing.T) {
 
 func (suite *ReceiverTest) SetupSuite() {
 	config.Configure()
+
+	// launch the docker container
+	suite.mosquitto = docker.NewDockerContainer("eclipse-mosquitto", "receiver-test", 1883)
+	suite.mosquitto.Run()
+
+	// prep the Receiver struct
 	suite.testFile = viper.GetString(configkey.DatabaseRemoteDevFile)
-	r, err := receiver.NewReceiver(suite.testFile, true)
+	mqttConfig := mqtt.NewBrokerConfig()
+	mqttConfig.SetBroker("localhost", 1883)
+	r, err := receiver.NewReceiver(mqttConfig, suite.testFile, true)
 	if err != nil {
 		panic(err)
 	}
 	suite.receiver = r
 }
 
-func (suite *ReceiverTest) SetupTest()     {}
-func (suite *ReceiverTest) TearDownTest()  {}
+func (suite *ReceiverTest) SetupTest() {}
+func (suite *ReceiverTest) TearDownTest() {
+	suite.mosquitto.Kill()
+}
 func (suite *ReceiverTest) TearDownSuite() {}
 
 func (suite *ReceiverTest) TestBasicConnection() {
