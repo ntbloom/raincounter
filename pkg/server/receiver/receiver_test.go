@@ -34,8 +34,14 @@ func (suite *ReceiverTest) SetupSuite() {
 	config.Configure()
 
 	// launch the docker container
-	suite.mosquitto = docker.NewDockerContainer("eclipse-mosquitto", "receiver-test", 1883)
-	suite.mosquitto.Run()
+	container, err := docker.NewDockerContainer("eclipse-mosquitto", "receiver-test", 1883, 1883)
+	if err != nil {
+		panic(err)
+	}
+	suite.mosquitto = container
+	if err = suite.mosquitto.Run(); err != nil {
+		panic(err)
+	}
 
 	// prep the Receiver struct
 	suite.testFile = viper.GetString(configkey.DatabaseRemoteDevFile)
@@ -50,9 +56,13 @@ func (suite *ReceiverTest) SetupSuite() {
 
 func (suite *ReceiverTest) SetupTest() {}
 func (suite *ReceiverTest) TearDownTest() {
-	suite.mosquitto.Kill()
+
 }
-func (suite *ReceiverTest) TearDownSuite() {}
+func (suite *ReceiverTest) TearDownSuite() {
+	if err := suite.mosquitto.Kill(); err != nil {
+		panic(err)
+	}
+}
 
 func (suite *ReceiverTest) TestBasicConnection() {
 	assert.True(suite.T(), suite.receiver.IsConnected())
