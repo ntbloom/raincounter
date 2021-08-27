@@ -16,7 +16,7 @@ const (
 
 // Configure process config files and set log level
 func Configure() {
-	for k, v := range DefaultConfig {
+	for k, v := range defaultConfig {
 		viper.SetDefault(k, v)
 	}
 	viper.SetConfigName(mainConfig)

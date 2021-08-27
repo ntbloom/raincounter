@@ -2,7 +2,7 @@
 package configkey
 
 const (
-	Loglevel = "logger.level"
+	Loglevel = "log.level"
 
 	USBPacketLengthMax   = "usb.packet.length.max"
 	USBConnectionPort    = "usb.connection.port"

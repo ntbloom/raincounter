@@ -1,3 +1,7 @@
-logger.level: debug
+log.level: debug
 usb.connection.port: /dev/ttyACM99
 main.loop.duration: -10s
+
+database:
+  local.file: /tmp/rainbase.db
+  remote.file: /tmp/raincloud.db
