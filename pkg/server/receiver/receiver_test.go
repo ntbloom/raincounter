@@ -46,7 +46,10 @@ func (suite *ReceiverTest) SetupSuite() {
 	}
 
 	// connect to the docker container without auth
-	client := mqtt.LocalDevConnection(localhost, 1883)
+	client, err := mqtt.NewConnection(mqtt.NewBrokerConfigNoAuth(localhost, 1883))
+	if err != nil {
+		panic(err)
+	}
 
 	// prep the sqlite file
 	testFile := viper.GetString(configkey.DatabaseRemoteFile)

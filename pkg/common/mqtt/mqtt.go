@@ -27,7 +27,6 @@ type BrokerConfig struct {
 
 // NewBrokerConfig get mqtt configuration details from viper directly
 func NewBrokerConfig(withAuth bool) *BrokerConfig {
-	// look for certs locally first
 	return &BrokerConfig{
 		broker:            viper.GetString(configkey.MQTTBrokerIP),
 		port:              viper.GetInt(configkey.MQTTBrokerPort),
@@ -36,6 +35,19 @@ func NewBrokerConfig(withAuth bool) *BrokerConfig {
 		clientKey:         viper.GetString(configkey.MQTTClientKey),
 		connectionTimeout: viper.GetDuration(configkey.MQTTConnectionTimeout),
 		auth:              withAuth,
+	}
+}
+
+// NewBrokerConfigNoAuth broker config with no auth, for testing only
+func NewBrokerConfigNoAuth(host string, port int) *BrokerConfig {
+	return &BrokerConfig{
+		broker:            host,
+		port:              port,
+		caCert:            "/dev/null",
+		clientCert:        "/dev/null",
+		clientKey:         "/dev/null",
+		connectionTimeout: viper.GetDuration(configkey.MQTTConnectionTimeout),
+		auth:              false,
 	}
 }
 
@@ -68,14 +80,4 @@ func NewConnection(config *BrokerConfig) (paho.Client, error) {
 	client := paho.NewClient(options)
 	return client,
 		nil
-}
-
-// LocalDevConnection gets you attached to a local docker container without auth
-func LocalDevConnection(hostname string, port int) paho.Client {
-	options := paho.NewClientOptions()
-	server := fmt.Sprintf("mqtt://%s:%d", hostname, port)
-	options.AddBroker(server)
-
-	client := paho.NewClient(options)
-	return client
 }
