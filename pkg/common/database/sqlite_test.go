@@ -26,7 +26,7 @@ func getConfig() {
 // sqliteConnectionFixture makes a reusable Sqlite object
 func sqliteConnectionFixture() *database.Sqlite {
 	getConfig()
-	sqliteFile := viper.GetString(configkey.DatabaseLocalDevFile)
+	sqliteFile := viper.GetString(configkey.DatabaseLocalFile)
 	db, _ := database.NewSqlite(sqliteFile, true)
 	return db
 }
@@ -120,7 +120,7 @@ func testTemperatureEntries(db *database.Sqlite, t *testing.T) {
 // create and destroy sqlite file 5 times, get Sqlite Sqlite struct
 func TestSqliteDataPrep(t *testing.T) {
 	getConfig()
-	sqliteFile := viper.GetString(configkey.DatabaseLocalDevFile)
+	sqliteFile := viper.GetString(configkey.DatabaseLocalFile)
 
 	// clean up when finished
 	defer func() { _ = os.Remove(sqliteFile) }()

@@ -49,7 +49,7 @@ func (suite *ReceiverTest) SetupSuite() {
 	client := mqtt.LocalDevConnection(localhost, 1883)
 
 	// prep the sqlite file
-	testFile := viper.GetString(configkey.DatabaseRemoteDevFile)
+	testFile := viper.GetString(configkey.DatabaseRemoteFile)
 	suite.testFile = testFile
 
 	r, err := receiver.NewReceiver(client, testFile, true)

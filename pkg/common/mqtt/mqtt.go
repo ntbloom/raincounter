@@ -23,6 +23,7 @@ type BrokerConfig struct {
 	clientCert        string
 	clientKey         string
 	connectionTimeout time.Duration
+	unencrypted       bool
 }
 
 // NewBrokerConfig get mqtt configuration details from viper directly

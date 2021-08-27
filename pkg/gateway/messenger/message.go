@@ -121,7 +121,7 @@ func (m *Messenger) NewMessage(packet *tlv.TLV) (*Message, error) {
 		topic = mqtt.RainTopic
 		event = &RainEvent{
 			topic,
-			viper.GetString(configkey.SensorRainMetric),
+			viper.GetString(configkey.SensorRainMm),
 			now,
 		}
 		go database.MakeRainEntry(m.db)

@@ -18,17 +18,12 @@ const (
 	MQTTQuiescence        = "mqtt.connection.quiescence"
 	MQTTQos               = "mqtt.qos"
 
-	SensorRainCustomary = "sensor.rain.measurement.inches"
-	SensorRainMetric    = "sensor.rain.measurement.mm"
+	SensorRainMm = "sensor.mm"
 
-	DatabaseLocalProdFile = "database.local.prod.file"
-	DatabaseLocalDevFile  = "database.local.dev.file"
+	DatabaseLocalFile  = "database.local.file"
+	DatabaseRemoteFile = "database.remote.file"
 
-	DatabaseRemoteProdFile = "database.remote.prod.file"
-	DatabaseRemoteDevFile  = "database.remote.dev.file"
-
-	MessengerStatusInterval      = "messenger.status.interval"
-	MessengerTemperatureInterval = "messenger.temperature.interval"
+	MessengerStatusInterval = "messenger.status.interval"
 
 	MainLoopDuration = "main.loop.duration"
 )
