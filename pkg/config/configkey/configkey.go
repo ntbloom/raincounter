@@ -8,7 +8,6 @@ const (
 	USBConnectionPort    = "usb.connection.port"
 	USBConnectionTimeout = "usb.connection.timeout"
 
-	MQTTScheme            = "mqtt.scheme"
 	MQTTBrokerIP          = "mqtt.broker.ip"
 	MQTTBrokerPort        = "mqtt.broker.port"
 	MQTTCaCert            = "mqtt.certs.ca"
