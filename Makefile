@@ -21,6 +21,8 @@ test-common:
 test-common-race:
 	@go test -race $(COMMON)/...
 
+test-all: clean test-common test-server
+
 # gateway
 
 test-gateway: test-common
@@ -51,7 +53,7 @@ run-gateway-race: build-race
 
 clean-test:
 	go clean -testcache
-	rm /tmp/rainbase.db
+	- rm /tmp/rainbase.db
 
 clean-files:
 	- rm raincounter raincounter-race
