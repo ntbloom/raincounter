@@ -71,6 +71,7 @@ func (suite *ReceiverTest) TearDownSuite() {
 func (suite *ReceiverTest) SetupTest()    {}
 func (suite *ReceiverTest) TearDownTest() {}
 
+// can we actually connect to the mqtt container?
 func (suite *ReceiverTest) TestBasicConnection() {
 	assert.True(suite.T(), suite.receiver.IsConnected())
 }

@@ -2,19 +2,19 @@ package receiver
 
 import (
 	paho "github.com/eclipse/paho.mqtt.golang"
-	"github.com/ntbloom/raincounter/pkg/common/database"
+	"github.com/ntbloom/raincounter/pkg/gateway/sqlite"
 	"github.com/sirupsen/logrus"
 )
 
 type Receiver struct {
 	mqttConnection  paho.Client
-	sqliteConection *database.Sqlite
+	sqliteConection *sqlite.Sqlite
 }
 
 // NewReceiver creates a new Receiver struct
 // mqtt connection is created automatically
 func NewReceiver(client paho.Client, databasePath string, clobber bool) (*Receiver, error) {
-	s, err := database.NewSqlite(databasePath, clobber)
+	s, err := sqlite.NewSqlite(databasePath, clobber)
 	if err != nil {
 		logrus.Error(err)
 		return nil, err
@@ -34,6 +34,22 @@ func (r *Receiver) IsConnected() bool {
 	return r.mqttConnection.IsConnected()
 }
 
-func (r *Receiver) receiveGatewayStatusMessage() {
+func (r *Receiver) handleGatewayStatusMessage() {
+	logrus.Error("not implemented!")
+}
+
+func (r *Receiver) handleSensorStatusMessage() {
+	logrus.Error("not implemented!")
+}
+
+func (r *Receiver) handleTemperatureMessage() {
+	logrus.Error("not implemented!")
+}
+
+func (r *Receiver) handleRainTopic() {
+	logrus.Error("not implemented!")
+}
+
+func (r *Receiver) handleSensorEvent() {
 	logrus.Error("not implemented!")
 }

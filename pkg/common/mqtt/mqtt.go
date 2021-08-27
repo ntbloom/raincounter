@@ -26,7 +26,7 @@ type BrokerConfig struct {
 }
 
 // NewBrokerConfig get mqtt configuration details from viper directly
-func NewBrokerConfig(withAuth bool) *BrokerConfig {
+func NewBrokerConfig() *BrokerConfig {
 	return &BrokerConfig{
 		broker:            viper.GetString(configkey.MQTTBrokerIP),
 		port:              viper.GetInt(configkey.MQTTBrokerPort),
@@ -34,7 +34,7 @@ func NewBrokerConfig(withAuth bool) *BrokerConfig {
 		clientCert:        viper.GetString(configkey.MQTTClientCert),
 		clientKey:         viper.GetString(configkey.MQTTClientKey),
 		connectionTimeout: viper.GetDuration(configkey.MQTTConnectionTimeout),
-		auth:              withAuth,
+		auth:              true,
 	}
 }
 

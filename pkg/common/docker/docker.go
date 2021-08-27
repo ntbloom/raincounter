@@ -2,9 +2,11 @@ package docker
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/docker/go-connections/nat"
 	"github.com/sirupsen/logrus"
@@ -111,6 +113,26 @@ func (c *Container) start() error {
 	if err := c.client.ContainerStart(c.ctx, c.id, options); err != nil {
 		logrus.Error(err)
 		return err
+	}
+	// block until container is up
+	isRunning := func() bool {
+		up := false
+		containers, _ := c.client.ContainerList(c.ctx, types.ContainerListOptions{})
+		for _, v := range containers {
+			if v.State == "running" {
+				up = true
+			}
+		}
+		return up
+	}
+	for i := 0; i < 5; i++ {
+		if isRunning() {
+			break
+		}
+		time.Sleep(time.Millisecond * 200) //nolint:gomnd
+	}
+	if !isRunning() {
+		return fmt.Errorf("container not started")
 	}
 	return nil
 }
