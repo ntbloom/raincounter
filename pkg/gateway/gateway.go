@@ -32,7 +32,7 @@ func connectToMQTT() paho.Client {
 }
 
 // connect to the localdb postgresql
-func connectToDatabase() *localdb.Sqlite {
+func connectToDatabase() *localdb.LocalDB {
 	db, err := localdb.NewSqlite(viper.GetString(configkey.DatabaseLocalFile), true)
 	if err != nil {
 		panic(err)

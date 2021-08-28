@@ -25,8 +25,8 @@ func getConfig() {
 	config.Configure()
 }
 
-// sqliteConnectionFixture makes a reusable Sqlite object
-func sqliteConnectionFixture() *localdb.Sqlite {
+// sqliteConnectionFixture makes a reusable LocalDB object
+func sqliteConnectionFixture() *localdb.LocalDB {
 	getConfig()
 	sqliteFile := viper.GetString(configkey.DatabaseLocalFile)
 	db, _ := localdb.NewSqlite(sqliteFile, true)
@@ -117,9 +117,9 @@ func testTemperatureEntries(db database.DBWrapper, t *testing.T) {
 
 /* TESTS */
 
-/* Starting with Sqlite, make sure the schema and file manipulation are enforced properly */
+/* Starting with LocalDB, make sure the schema and file manipulation are enforced properly */
 
-// create and destroy localdb file 5 times, get Sqlite Sqlite struct
+// create and destroy localdb file 5 times, get LocalDB LocalDB struct
 func TestSqliteDataPrep(t *testing.T) {
 	getConfig()
 	sqliteFile := viper.GetString(configkey.DatabaseLocalFile)

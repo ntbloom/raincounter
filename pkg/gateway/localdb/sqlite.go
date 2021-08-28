@@ -25,16 +25,19 @@ type connection struct {
 	conn     *sql.Conn
 }
 
-type Sqlite struct {
+// LocalDB stores data on the gateway, mostly for logging and backup
+type LocalDB struct {
 	file     *os.File        // pointer to actual file
 	fullPath string          // full POSIX path of sqlite file
 	driver   string          // change the type of postgresql connection
 	ctx      context.Context // background context
 }
 
+//type LocalDB database.Sqlite
+
 // NewSqlite makes a new connector struct for localdb
-func NewSqlite(fullPath string, clobber bool) (*Sqlite, error) {
-	logrus.Debug("making new Sqlite")
+func NewSqlite(fullPath string, clobber bool) (*LocalDB, error) {
+	logrus.Debug("making new LocalDB")
 	if clobber {
 		_ = os.Remove(fullPath)
 	}
@@ -45,8 +48,8 @@ func NewSqlite(fullPath string, clobber bool) (*Sqlite, error) {
 		return nil, err
 	}
 
-	// make a Sqlite object and make the schema if necessary
-	db := Sqlite{
+	// make a LocalDB object and make the schema if necessary
+	db := LocalDB{
 		file:     file,
 		fullPath: fullPath,
 		driver:   sqlite,
@@ -61,7 +64,7 @@ func NewSqlite(fullPath string, clobber bool) (*Sqlite, error) {
 	return &db, nil
 }
 
-func (db *Sqlite) newConnection() (*connection, error) {
+func (db *LocalDB) newConnection() (*connection, error) {
 	// get variables ready
 	var (
 		database *sql.DB
@@ -98,11 +101,11 @@ func (c *connection) disconnect() {
 	}
 }
 
-func (db *Sqlite) MakeSchema() (sql.Result, error) {
+func (db *LocalDB) MakeSchema() (sql.Result, error) {
 	return db.EnterData(localDbSchema)
 }
 
-func (db *Sqlite) EnterData(cmd string) (sql.Result, error) {
+func (db *LocalDB) EnterData(cmd string) (sql.Result, error) {
 	var c *connection
 	var err error
 
@@ -116,23 +119,23 @@ func (db *Sqlite) EnterData(cmd string) (sql.Result, error) {
 	return c.conn.ExecContext(db.ctx, safeCmd)
 }
 
-func (db *Sqlite) AddRecord(tag, value int) (sql.Result, error) {
+func (db *LocalDB) AddRecord(tag, value int) (sql.Result, error) {
 	timestamp := time.Now().Format(time.RFC3339)
 	cmd := fmt.Sprintf("INSERT INTO log (tag, value, timestamp) VALUES (%d, %d, \"%s\");", tag, value, timestamp)
 	return db.EnterData(cmd)
 }
 
-func (db *Sqlite) Tally(tag int) int {
+func (db *LocalDB) Tally(tag int) int {
 	query := fmt.Sprintf("SELECT COUNT(*) FROM log WHERE tag = %d;", tag)
 	return db.GetSingleInt(query)
 }
 
-func (db *Sqlite) GetLastRecord(tag int) int {
+func (db *LocalDB) GetLastRecord(tag int) int {
 	cmd := fmt.Sprintf(`SELECT value FROM log WHERE tag = %d ORDER BY id DESC LIMIT 1;`, tag)
 	return db.GetSingleInt(cmd)
 }
 
-func (db *Sqlite) GetSingleInt(query string) int {
+func (db *LocalDB) GetSingleInt(query string) int {
 	var rows *sql.Rows
 	var err error
 
@@ -162,7 +165,7 @@ func (db *Sqlite) GetSingleInt(query string) int {
 }
 
 // ForeignKeysAreImplemented tests function to ensure foreign key implementation
-func (db *Sqlite) ForeignKeysAreImplemented() bool {
+func (db *LocalDB) ForeignKeysAreImplemented() bool {
 	illegal := `INSERT INTO log (tag, value, timestamp) VALUES (99999,1,"timestamp");`
 	res, err := db.EnterData(illegal)
 	return res == nil && err != nil

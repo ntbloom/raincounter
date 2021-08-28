@@ -8,7 +8,7 @@ import (
 
 type Receiver struct {
 	mqttConnection  paho.Client
-	sqliteConection *localdb.Sqlite
+	sqliteConection *localdb.LocalDB
 }
 
 // NewReceiver creates a new Receiver struct
