@@ -14,7 +14,7 @@ type Receiver struct {
 // NewReceiver creates a new Receiver struct
 // mqtt connection is created automatically
 func NewReceiver(client paho.Client, databasePath string, clobber bool) (*Receiver, error) {
-	s, err := localdb.NewSqlite(databasePath, clobber)
+	s, err := localdb.NewLocalDB(databasePath, clobber)
 	if err != nil {
 		logrus.Error(err)
 		return nil, err

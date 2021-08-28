@@ -1,129 +1,41 @@
 package localdb
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
-	"os"
-	"strings"
 	"time"
 
 	"github.com/ntbloom/raincounter/pkg/common/database"
+
 	"github.com/sirupsen/logrus"
 	_ "modernc.org/sqlite" // Driver for localdb
 )
 
-/* Wrap queries in methods so we don't expose the actual databse to the rest of the application */
-
-const (
-	foreignKey = `PRAGMA foreign_keys = ON;`
-	sqlite     = "sqlite"
-)
-
-// connection gets a DB and Conn struct for a sqlite File
-type connection struct {
-	database *sql.DB
-	conn     *sql.Conn
+type LocalDB struct {
+	lite *database.Sqlite
 }
 
-//// LocalDB stores data on the gateway, mostly for logging and backup
-//type LocalDB struct {
-//	File     *os.File        // pointer to actual File
-//	FullPath string          // full POSIX path of sqlite File
-//	Driver   string          // change the type of postgresql connection
-//	Ctx      context.Context // background context
-//}
-
-type LocalDB database.Sqlite
-
-// NewSqlite makes a new connector struct for localdb
-func NewSqlite(fullPath string, clobber bool) (*LocalDB, error) {
-	logrus.Debug("making new LocalDB")
-	if clobber {
-		_ = os.Remove(fullPath)
-	}
-
-	// connect to the File and open it
-	file, err := os.Create(fullPath)
+func NewLocalDB(fulPath string, clobber bool) (*LocalDB, error) {
+	lite, err := database.NewSqlite(fulPath, clobber, localDbSchema)
 	if err != nil {
+		logrus.Error(err)
 		return nil, err
 	}
-
-	// make a LocalDB object and make the schema if necessary
-	db := LocalDB{
-		File:     file,
-		FullPath: fullPath,
-		Driver:   sqlite,
-		Ctx:      context.Background(),
-	}
-	if clobber {
-		_, err = db.MakeSchema()
-		if err != nil {
-			return nil, err
-		}
-	}
-	return &db, nil
-}
-
-func (db *LocalDB) newConnection() (*connection, error) {
-	// get variables ready
-	var (
-		dbPtr *sql.DB
-		conn  *sql.Conn
-		err   error
-	)
-
-	switch db.Driver {
-	case sqlite:
-		dbPtr, err = sql.Open("sqlite", db.FullPath)
-		if err != nil {
-			logrus.Error(err)
-			return nil, err
-		}
-
-		// make a Conn
-		conn, err = dbPtr.Conn(db.Ctx)
-		if err != nil {
-			logrus.Error("unable to get a connection struct")
-			return nil, err
-		}
-	default:
-		panic("unsupported")
-	}
-	return &connection{dbPtr, conn}, nil
-}
-
-func (c *connection) disconnect() {
-	if err := c.conn.Close(); err != nil {
-		logrus.Error(err)
-	}
-	if err := c.database.Close(); err != nil {
-		logrus.Error(err)
-	}
+	return &LocalDB{lite}, nil
 }
 
 func (db *LocalDB) MakeSchema() (sql.Result, error) {
-	return db.EnterData(localDbSchema)
+	return db.lite.MakeSchema(localDbSchema)
 }
 
 func (db *LocalDB) EnterData(cmd string) (sql.Result, error) {
-	var c *connection
-	var err error
-
-	// enforce foreign keys
-	safeCmd := strings.Join([]string{foreignKey, cmd}, " ")
-	if c, err = db.newConnection(); err != nil {
-		return nil, err
-	}
-	defer c.disconnect()
-
-	return c.conn.ExecContext(db.Ctx, safeCmd)
+	return db.lite.EnterData(cmd)
 }
 
 func (db *LocalDB) AddRecord(tag, value int) (sql.Result, error) {
 	timestamp := time.Now().Format(time.RFC3339)
 	cmd := fmt.Sprintf("INSERT INTO log (tag, value, timestamp) VALUES (%d, %d, \"%s\");", tag, value, timestamp)
-	return db.EnterData(cmd)
+	return db.lite.EnterData(cmd)
 }
 
 func (db *LocalDB) Tally(tag int) int {
@@ -140,10 +52,10 @@ func (db *LocalDB) GetSingleInt(query string) int {
 	var rows *sql.Rows
 	var err error
 
-	c, _ := db.newConnection() // don't handle the error, just return -1
-	defer c.disconnect()
+	c, _ := db.lite.Connect() // don't handle the error, just return -1
+	defer c.Disconnect()
 
-	if rows, err = c.conn.QueryContext(db.Ctx, query); err != nil {
+	if rows, err = c.Conn.QueryContext(db.lite.Ctx, query); err != nil {
 		return -1
 	}
 	closed := func() {
@@ -168,6 +80,6 @@ func (db *LocalDB) GetSingleInt(query string) int {
 // ForeignKeysAreImplemented tests function to ensure foreign key implementation
 func (db *LocalDB) ForeignKeysAreImplemented() bool {
 	illegal := `INSERT INTO log (tag, value, timestamp) VALUES (99999,1,"timestamp");`
-	res, err := db.EnterData(illegal)
+	res, err := db.lite.EnterData(illegal)
 	return res == nil && err != nil
 }

@@ -6,7 +6,7 @@ import (
 
 //// connect to mqtt
 //func connectToMQTT() paho.Client {
-//	client, err := mqtt.NewConnection(mqtt.NewBrokerConfig())
+//	client, err := mqtt.Connect(mqtt.NewBrokerConfig())
 //	if err != nil {
 //		panic(err)
 //	}

@@ -29,7 +29,7 @@ func getConfig() {
 func sqliteConnectionFixture() *localdb.LocalDB {
 	getConfig()
 	sqliteFile := viper.GetString(configkey.DatabaseLocalFile)
-	db, _ := localdb.NewSqlite(sqliteFile, true)
+	db, _ := localdb.NewLocalDB(sqliteFile, true)
 	return db
 }
 
@@ -129,9 +129,9 @@ func TestSqliteDataPrep(t *testing.T) {
 
 	// create and destroy 5 times
 	for i := 0; i < 5; i++ {
-		db, err := localdb.NewSqlite(sqliteFile, true)
+		db, err := localdb.NewLocalDB(sqliteFile, true)
 		if err != nil || db == nil {
-			logrus.Error("problem instantiating NewSqlite struct")
+			logrus.Error("problem instantiating NewLocalDB struct")
 			t.Error(err)
 		}
 		_, err = os.Stat(sqliteFile)
