@@ -2,7 +2,7 @@ package webdb
 
 const (
 	//nolint
-	webDbSchema = `
+	webDBSchema = `
 BEGIN TRANSACTION;
 
 /* rain is its own table */
