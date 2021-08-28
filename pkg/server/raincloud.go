@@ -13,7 +13,7 @@ import (
 //	return client
 //}
 //
-//// connect to the sqlite postgresql
+//// connect to the localdb postgresql
 //func connectToDatabase() *database.Sqlite {
 //	db, err := database.NewSqlite(viper.GetString(configkey.DatabaseRemoteDevFile), true)
 //	if err != nil {

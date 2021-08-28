@@ -2,19 +2,19 @@ package receiver
 
 import (
 	paho "github.com/eclipse/paho.mqtt.golang"
-	"github.com/ntbloom/raincounter/pkg/gateway/sqlite"
+	"github.com/ntbloom/raincounter/pkg/gateway/localdb"
 	"github.com/sirupsen/logrus"
 )
 
 type Receiver struct {
 	mqttConnection  paho.Client
-	sqliteConection *sqlite.Sqlite
+	sqliteConection *localdb.Sqlite
 }
 
 // NewReceiver creates a new Receiver struct
 // mqtt connection is created automatically
 func NewReceiver(client paho.Client, databasePath string, clobber bool) (*Receiver, error) {
-	s, err := sqlite.NewSqlite(databasePath, clobber)
+	s, err := localdb.NewSqlite(databasePath, clobber)
 	if err != nil {
 		logrus.Error(err)
 		return nil, err

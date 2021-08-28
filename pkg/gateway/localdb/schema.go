@@ -1,10 +1,10 @@
-package sqlite
+package localdb
 
-// Schema for logging data in rainbase, should work for both postgresql and sqlite
+// Schema for logging data in rainbase, should work for both postgresql and localdb
 
 const (
 	//nolint
-	sqliteSchema = `
+	localDbSchema = `
 BEGIN TRANSACTION;
 DROP TABLE IF EXISTS mappings;
 CREATE TABLE mappings (

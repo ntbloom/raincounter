@@ -51,7 +51,7 @@ func (suite *ReceiverTest) SetupSuite() {
 		panic(err)
 	}
 
-	// prep the sqlite file
+	// prep the localdb file
 	testFile := viper.GetString(configkey.DatabaseRemoteFile)
 	suite.testFile = testFile
 

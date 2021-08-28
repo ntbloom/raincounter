@@ -125,7 +125,7 @@ func (c *Container) start() error {
 		}
 		return up
 	}
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 10; i++ {
 		if isRunning() {
 			break
 		}

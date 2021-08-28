@@ -10,7 +10,7 @@ import (
 )
 
 // DBWrapper abstracts the underlying SQL engine to let us use the same
-// code for sqlite, postgresql, or other postgresql
+// code for localdb, postgresql, or other postgresql
 type DBWrapper interface {
 	// MakeSchema initializes a schema
 	MakeSchema() (sql.Result, error)

@@ -1,4 +1,4 @@
-package sqlite
+package localdb
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
-	_ "modernc.org/sqlite" // driver for sqlite
+	_ "modernc.org/sqlite" // driver for localdb
 )
 
 /* Wrap queries in methods so we don't expose the actual databse to the rest of the application */
@@ -32,7 +32,7 @@ type Sqlite struct {
 	ctx      context.Context // background context
 }
 
-// NewSqlite makes a new connector struct for sqlite
+// NewSqlite makes a new connector struct for localdb
 func NewSqlite(fullPath string, clobber bool) (*Sqlite, error) {
 	logrus.Debug("making new Sqlite")
 	if clobber {
@@ -73,7 +73,7 @@ func (db *Sqlite) newConnection() (*connection, error) {
 	case sqlite:
 		database, err = sql.Open("sqlite", db.fullPath)
 		if err != nil {
-			logrus.Error("unable to open postgresql")
+			logrus.Error(err)
 			return nil, err
 		}
 
@@ -99,7 +99,7 @@ func (c *connection) disconnect() {
 }
 
 func (db *Sqlite) MakeSchema() (sql.Result, error) {
-	return db.EnterData(sqliteSchema)
+	return db.EnterData(localDbSchema)
 }
 
 func (db *Sqlite) EnterData(cmd string) (sql.Result, error) {

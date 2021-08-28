@@ -1,4 +1,4 @@
-package sqlite_test
+package localdb_test
 
 import (
 	"os"
@@ -6,7 +6,7 @@ import (
 	"testing"
 	"testing/quick"
 
-	"github.com/ntbloom/raincounter/pkg/gateway/sqlite"
+	"github.com/ntbloom/raincounter/pkg/gateway/localdb"
 
 	"github.com/ntbloom/raincounter/pkg/common/database"
 
@@ -26,15 +26,15 @@ func getConfig() {
 }
 
 // sqliteConnectionFixture makes a reusable Sqlite object
-func sqliteConnectionFixture() *sqlite.Sqlite {
+func sqliteConnectionFixture() *localdb.Sqlite {
 	getConfig()
 	sqliteFile := viper.GetString(configkey.DatabaseLocalFile)
-	db, _ := sqlite.NewSqlite(sqliteFile, true)
+	db, _ := localdb.NewSqlite(sqliteFile, true)
 	return db
 }
 
 // Property-based test for creating a bunch of rows and making sure the data get put in
-func testRainEntry(db *sqlite.Sqlite, t *testing.T) {
+func testRainEntry(db *localdb.Sqlite, t *testing.T) {
 	maxCount := 5
 	if testing.Short() {
 		logrus.Info("skipping property tests")
@@ -64,7 +64,7 @@ func testRainEntry(db *sqlite.Sqlite, t *testing.T) {
 }
 
 // Tests all the various entries work (except temperature). Also tests concurrent use of postgresql
-func testStaticSQLEntries(db *sqlite.Sqlite, t *testing.T) {
+func testStaticSQLEntries(db *localdb.Sqlite, t *testing.T) {
 	count := 5
 
 	// asynchronously make an entry for each type
@@ -104,7 +104,7 @@ func testStaticSQLEntries(db *sqlite.Sqlite, t *testing.T) {
 }
 
 // tests that we can enter temperature
-func testTemperatureEntries(db *sqlite.Sqlite, t *testing.T) {
+func testTemperatureEntries(db *localdb.Sqlite, t *testing.T) {
 	vals := []int{-100, -25, -15, -1, 0, 1, 2, 20, 24, 100}
 	for _, expected := range vals {
 		database.MakeTemperatureEntry(db, expected)
@@ -119,7 +119,7 @@ func testTemperatureEntries(db *sqlite.Sqlite, t *testing.T) {
 
 /* Starting with Sqlite, make sure the schema and file manipulation are enforced properly */
 
-// create and destroy sqlite file 5 times, get Sqlite Sqlite struct
+// create and destroy localdb file 5 times, get Sqlite Sqlite struct
 func TestSqliteDataPrep(t *testing.T) {
 	getConfig()
 	sqliteFile := viper.GetString(configkey.DatabaseLocalFile)
@@ -129,14 +129,14 @@ func TestSqliteDataPrep(t *testing.T) {
 
 	// create and destroy 5 times
 	for i := 0; i < 5; i++ {
-		db, err := sqlite.NewSqlite(sqliteFile, true)
+		db, err := localdb.NewSqlite(sqliteFile, true)
 		if err != nil || db == nil {
 			logrus.Error("problem instantiating NewSqlite struct")
 			t.Error(err)
 		}
 		_, err = os.Stat(sqliteFile)
 		if err != nil {
-			logrus.Error("sqlite file doesn't exist")
+			logrus.Error("localdb file doesn't exist")
 			t.Error(err)
 		}
 	}
@@ -145,7 +145,7 @@ func TestSqliteDataPrep(t *testing.T) {
 func TestSqliteForeignKeysAreImplemented(t *testing.T) {
 	db := sqliteConnectionFixture()
 	if foreignKeys := db.ForeignKeysAreImplemented(); !foreignKeys {
-		logrus.Error("sqlite is not enforcing foreign_key constraints")
+		logrus.Error("localdb is not enforcing foreign_key constraints")
 		t.Fail()
 	}
 }
