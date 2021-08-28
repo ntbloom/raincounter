@@ -32,10 +32,14 @@ func (db *LocalDB) EnterData(cmd string) (sql.Result, error) {
 	return db.lite.EnterData(cmd)
 }
 
-func (db *LocalDB) AddRecord(tag, value int) (sql.Result, error) {
+func (db *LocalDB) AddIntRecord(tag, value int) (sql.Result, error) {
 	timestamp := time.Now().Format(time.RFC3339)
 	cmd := fmt.Sprintf("INSERT INTO log (tag, value, timestamp) VALUES (%d, %d, \"%s\");", tag, value, timestamp)
 	return db.lite.EnterData(cmd)
+}
+
+func (db *LocalDB) AddFloatRecord(tag int, value float32) (sql.Result, error) {
+	panic("float not implemented the gateway")
 }
 
 func (db *LocalDB) Tally(tag int) int {

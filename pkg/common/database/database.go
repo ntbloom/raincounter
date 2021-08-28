@@ -9,19 +9,21 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// DBWrapper abstracts the underlying SQL engine to let us use the same
-// code for localdb, postgresql, or other postgresql
+// DBWrapper abstracts the underlying SQL engine/implementations
 type DBWrapper interface {
 	// MakeSchema initializes a schema
 	MakeSchema() (sql.Result, error)
 
-	// EnterData enters data into the postgresql without returning any rows
+	// EnterData enters data into the database without returning any rows
 	EnterData(cmd string) (sql.Result, error)
 
-	// AddRecord makes a single integer entry into the postgresql for a given tag
-	AddRecord(tag, value int) (sql.Result, error)
+	// AddIntRecord makes a single integer entry into the database for a given tag
+	AddIntRecord(tag, value int) (sql.Result, error)
 
-	// Tally runs sql command to count postgresql entries for a given topic
+	// AddFloatRecord makes a single float entry into the database for a given tag
+	AddFloatRecord(tag int, value float32) (sql.Result, error)
+
+	// Tally runs sql command to count database entries for a given topic
 	Tally(tag int) int
 
 	// GetLastRecord gets the last record for a given tag
@@ -32,49 +34,57 @@ type DBWrapper interface {
 	GetSingleInt(query string) int
 }
 
-// MakeRainEntry AddRecord a rain event
-func MakeRainEntry(db DBWrapper) {
-	_, err := db.AddRecord(tlv.Rain, tlv.RainValue)
+// MakeRainTallyEntry AddIntRecord a rain event
+func MakeRainTallyEntry(db DBWrapper) {
+	_, err := db.AddIntRecord(tlv.Rain, tlv.RainValue)
 	if err != nil {
 		logrus.Error(err)
 	}
 }
 
-// MakeSoftResetEntry AddRecord a soft reset event
+// MakeRainValueEntry AddFloatRecord for a rain event
+func MakeRainValueEntry(db DBWrapper, value float32) {
+	_, err := db.AddFloatRecord(tlv.RainValue, value)
+	if err != nil {
+		logrus.Error(err)
+	}
+}
+
+// MakeSoftResetEntry AddIntRecord a soft reset event
 func MakeSoftResetEntry(db DBWrapper) {
-	_, err := db.AddRecord(tlv.SoftReset, tlv.SoftResetValue)
+	_, err := db.AddIntRecord(tlv.SoftReset, tlv.SoftResetValue)
 	if err != nil {
 		logrus.Error(err)
 	}
 }
 
-// MakeHardResetEntry AddRecord a hard reset event
+// MakeHardResetEntry AddIntRecord a hard reset event
 func MakeHardResetEntry(db DBWrapper) {
-	_, err := db.AddRecord(tlv.HardReset, tlv.HardResetValue)
+	_, err := db.AddIntRecord(tlv.HardReset, tlv.HardResetValue)
 	if err != nil {
 		logrus.Error(err)
 	}
 }
 
-// MakePauseEntry AddRecord a pause event
+// MakePauseEntry AddIntRecord a pause event
 func MakePauseEntry(db DBWrapper) {
-	_, err := db.AddRecord(tlv.Pause, tlv.Unpause)
+	_, err := db.AddIntRecord(tlv.Pause, tlv.Unpause)
 	if err != nil {
 		logrus.Error(err)
 	}
 }
 
-// MakeUnpauseEntry AddRecord an unpause event
+// MakeUnpauseEntry AddIntRecord an unpause event
 func MakeUnpauseEntry(db DBWrapper) {
-	_, err := db.AddRecord(tlv.Unpause, tlv.UnpauseValue)
+	_, err := db.AddIntRecord(tlv.Unpause, tlv.UnpauseValue)
 	if err != nil {
 		logrus.Error(err)
 	}
 }
 
-// MakeTemperatureEntry AddRecord a temperature measurement
+// MakeTemperatureEntry AddIntRecord a temperature measurement
 func MakeTemperatureEntry(db DBWrapper, tempC int) {
-	_, err := db.AddRecord(tlv.Temperature, tempC)
+	_, err := db.AddIntRecord(tlv.Temperature, tempC)
 	if err != nil {
 		logrus.Error(err)
 	}

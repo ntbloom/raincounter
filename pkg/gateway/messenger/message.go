@@ -124,7 +124,7 @@ func (m *Messenger) NewMessage(packet *tlv.TLV) (*Message, error) {
 			viper.GetString(configkey.SensorRainMm),
 			now,
 		}
-		go database.MakeRainEntry(m.db)
+		go database.MakeRainTallyEntry(m.db)
 	case tlv.Temperature:
 		topic = mqtt.TemperatureTopic
 		tempC := packet.Value

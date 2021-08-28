@@ -45,7 +45,7 @@ func testRainEntry(db database.DBWrapper, t *testing.T) {
 	test := func(reps uint8) bool {
 		count := int(reps)
 		for i := 0; i < count; i++ {
-			database.MakeRainEntry(db)
+			database.MakeRainTallyEntry(db)
 		}
 		var val int
 		if val = database.GetRainEntries(db); val == -1 {
@@ -76,7 +76,7 @@ func testStaticSQLEntries(db database.DBWrapper, t *testing.T) {
 		callable(arg)
 	}
 	for i := 0; i < count; i++ {
-		go checkAdd(database.MakeRainEntry, db)
+		go checkAdd(database.MakeRainTallyEntry, db)
 		go checkAdd(database.MakeSoftResetEntry, db)
 		go checkAdd(database.MakeHardResetEntry, db)
 		go checkAdd(database.MakePauseEntry, db)
