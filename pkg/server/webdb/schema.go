@@ -7,7 +7,8 @@ BEGIN TRANSACTION;
 DROP TABLE IF EXISTS rain;
 CREATE TABLE rain (
 	id INTEGER PRIMARY KEY,
-	timestamp TEXT,
+	gw_timestamp TEXT,
+	server_timestamp TEXT,
 	amount REAL
 );
 

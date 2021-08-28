@@ -5,8 +5,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/ntbloom/raincounter/pkg/common/database"
-
 	"github.com/ntbloom/raincounter/pkg/config/configkey"
 	"github.com/ntbloom/raincounter/pkg/server/webdb"
 	"github.com/spf13/viper"
@@ -43,7 +41,10 @@ func (suite *WebDBTest) TearDownTest()  {}
 func (suite *WebDBTest) TestBasicSchema() {
 	qty := 10
 	for i := 0; i < qty; i++ {
-		database.MakeRainValueEntry(suite.db, suite.rainAmt)
+		_, err := suite.db.AddRainEvent(suite.rainAmt, "timestamp")
+		if err != nil {
+			panic(err)
+		}
 	}
 	assert.InDelta(suite.T(), suite.db.TallyRain(), float32(qty)*suite.rainAmt, 0.0001)
 }

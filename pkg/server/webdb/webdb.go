@@ -2,6 +2,8 @@ package webdb
 
 import (
 	"database/sql"
+	"fmt"
+	"time"
 
 	"github.com/ntbloom/raincounter/pkg/gateway/tlv"
 	"github.com/sirupsen/logrus"
@@ -54,22 +56,50 @@ func (w *WebDB) AddIntRecord(tag, value int) (sql.Result, error) {
 	return nil, nil
 }
 
-func (w *WebDB) AddFloatRecord(tag int, value float32) (sql.Result, error) {
-	panic("implement me")
-}
-
-func (w *WebDB) Tally(tag int) int {
-	panic("implement me")
+func (w *WebDB) AddRainEvent(value float32, gw_timestamp string) (sql.Result, error) {
+	timestamp := time.Now().Format(time.RFC3339)
+	cmd := fmt.Sprintf(
+		"INSERT INTO rain (gw_timestamp, server_timestamp, amount) VALUES (\"%s\",\"%s\",%f);",
+		gw_timestamp,
+		timestamp,
+		value,
+	)
+	res, err := w.lite.EnterData(cmd)
+	if err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
+	return res, nil
 }
 
 func (w *WebDB) TallyRain() float32 {
-	return -1.0
+	return w.tallyFloat("rain")
 }
 
-func (w *WebDB) GetLastRecord(tag int) int {
-	panic("implement me")
-}
+func (w *WebDB) tallyFloat(table string) float32 {
+	var rows *sql.Rows
+	var err error
+	c, _ := w.lite.Connect()
+	defer c.Disconnect()
 
-func (w *WebDB) GetSingleInt(query string) int {
-	panic("implement me")
+	query := fmt.Sprintf("SELECT SUM(amount) FROM \"%s\"", table)
+	if rows, err = c.Conn.QueryContext(w.lite.Ctx, query); err != nil {
+		logrus.Error(err)
+	}
+	defer func() {
+		if err = rows.Close(); err != nil {
+			logrus.Error(err)
+		}
+	}()
+	results := make([]float32, 0)
+	for rows.Next() {
+		var val float32
+		if err = rows.Scan(&val); err != nil {
+			logrus.Error(err)
+			return -1.0
+		}
+		results = append(results, val)
+	}
+
+	return results[0]
 }

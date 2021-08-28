@@ -21,11 +21,11 @@ test-common:
 test-common-race:
 	@go test -race $(COMMON)/...
 
-test-all: clean test-common test-server
+test-all: clean test-common test-gateway test-server
 
 # gateway
 
-test-gateway: test-common
+test-gateway:
 	@go test $(GW)/...
 
 test-gateway-race: clean-test test-common-race
@@ -33,10 +33,10 @@ test-gateway-race: clean-test test-common-race
 	@go test -race $(GW)/...
 
 # server
-test-server: test-common
+test-server:
 	@go test $(SERVER)/...
 
-test-server0race: clean-test test-common-race
+test-server-race: clean-test test-common-race
 	@go clean -testcache
 	@go test -race $(SERVER)/...
 
