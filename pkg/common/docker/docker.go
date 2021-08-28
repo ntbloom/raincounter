@@ -129,7 +129,7 @@ func (c *Container) start() error {
 		if isRunning() {
 			break
 		}
-		time.Sleep(time.Millisecond * 200) //nolint:gomnd
+		time.Sleep(time.Millisecond * 300) //nolint:gomnd
 	}
 	if !isRunning() {
 		return fmt.Errorf("container not started")

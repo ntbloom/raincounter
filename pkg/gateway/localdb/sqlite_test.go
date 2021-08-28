@@ -34,7 +34,7 @@ func sqliteConnectionFixture() *localdb.Sqlite {
 }
 
 // Property-based test for creating a bunch of rows and making sure the data get put in
-func testRainEntry(db *localdb.Sqlite, t *testing.T) {
+func testRainEntry(db database.DBWrapper, t *testing.T) {
 	maxCount := 5
 	if testing.Short() {
 		logrus.Info("skipping property tests")
@@ -64,7 +64,7 @@ func testRainEntry(db *localdb.Sqlite, t *testing.T) {
 }
 
 // Tests all the various entries work (except temperature). Also tests concurrent use of postgresql
-func testStaticSQLEntries(db *localdb.Sqlite, t *testing.T) {
+func testStaticSQLEntries(db database.DBWrapper, t *testing.T) {
 	count := 5
 
 	// asynchronously make an entry for each type
@@ -104,7 +104,7 @@ func testStaticSQLEntries(db *localdb.Sqlite, t *testing.T) {
 }
 
 // tests that we can enter temperature
-func testTemperatureEntries(db *localdb.Sqlite, t *testing.T) {
+func testTemperatureEntries(db database.DBWrapper, t *testing.T) {
 	vals := []int{-100, -25, -15, -1, 0, 1, 2, 20, 24, 100}
 	for _, expected := range vals {
 		database.MakeTemperatureEntry(db, expected)
