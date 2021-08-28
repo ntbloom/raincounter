@@ -4,16 +4,13 @@ const (
 	//nolint
 	webDBSchema = `
 BEGIN TRANSACTION;
-
-/* rain is its own table */
 DROP TABLE IF EXISTS rain;
 CREATE TABLE rain (
 	id INTEGER PRIMARY KEY,
-	timestamp TEXT
+	timestamp TEXT,
 	amount REAL
 );
 
-/* temperature gets its own table */
 DROP TABLE IF EXISTS temperature;
 CREATE TABLE temperature (
 	if INTEGER PRIMARY KEY,
@@ -21,13 +18,13 @@ CREATE TABLE temperature (
 	value INTEGER NOT NULL
 );
 
-/* map the logs and dump them in a file */
 DROP TABLE IF EXISTS mappings;
 CREATE TABLE mappings (
 	id INTEGER PRIMARY KEY,
 	longname TEXT
 );
-INSERT INTO mappings (id, longname) 
+
+INSERT INTO mappings (id, longname)
 VALUES
 	(2, "soft reset event"),
 	(3, "hard reset event"),
@@ -36,8 +33,9 @@ VALUES
 	(6, NULL),
 	(7, NULL)
 ;
-CREATE TABLE IF EXISTS log;
-CREATE TABLE log;
+
+DROP TABLE IF EXISTS log;
+CREATE TABLE log (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	tag INTEGER NOT NULL,
 	value INTEGER NOT NULL,

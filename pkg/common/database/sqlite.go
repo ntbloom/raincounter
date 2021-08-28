@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/sirupsen/logrus"
+	_ "modernc.org/sqlite" // Driver for localdb
 )
 
 const (

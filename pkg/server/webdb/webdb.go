@@ -62,6 +62,10 @@ func (w *WebDB) Tally(tag int) int {
 	panic("implement me")
 }
 
+func (w *WebDB) TallyRain() float32 {
+	return -1.0
+}
+
 func (w *WebDB) GetLastRecord(tag int) int {
 	panic("implement me")
 }
