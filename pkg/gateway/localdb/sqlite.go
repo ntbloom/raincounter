@@ -8,8 +8,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ntbloom/raincounter/pkg/common/database"
 	"github.com/sirupsen/logrus"
-	_ "modernc.org/sqlite" // driver for localdb
+	_ "modernc.org/sqlite" // Driver for localdb
 )
 
 /* Wrap queries in methods so we don't expose the actual databse to the rest of the application */
@@ -19,21 +20,21 @@ const (
 	sqlite     = "sqlite"
 )
 
-// connection gets a DB and Conn struct for a sqlite file
+// connection gets a DB and Conn struct for a sqlite File
 type connection struct {
 	database *sql.DB
 	conn     *sql.Conn
 }
 
-// LocalDB stores data on the gateway, mostly for logging and backup
-type LocalDB struct {
-	file     *os.File        // pointer to actual file
-	fullPath string          // full POSIX path of sqlite file
-	driver   string          // change the type of postgresql connection
-	ctx      context.Context // background context
-}
+//// LocalDB stores data on the gateway, mostly for logging and backup
+//type LocalDB struct {
+//	File     *os.File        // pointer to actual File
+//	FullPath string          // full POSIX path of sqlite File
+//	Driver   string          // change the type of postgresql connection
+//	Ctx      context.Context // background context
+//}
 
-//type LocalDB database.Sqlite
+type LocalDB database.Sqlite
 
 // NewSqlite makes a new connector struct for localdb
 func NewSqlite(fullPath string, clobber bool) (*LocalDB, error) {
@@ -42,7 +43,7 @@ func NewSqlite(fullPath string, clobber bool) (*LocalDB, error) {
 		_ = os.Remove(fullPath)
 	}
 
-	// connect to the file and open it
+	// connect to the File and open it
 	file, err := os.Create(fullPath)
 	if err != nil {
 		return nil, err
@@ -50,10 +51,10 @@ func NewSqlite(fullPath string, clobber bool) (*LocalDB, error) {
 
 	// make a LocalDB object and make the schema if necessary
 	db := LocalDB{
-		file:     file,
-		fullPath: fullPath,
-		driver:   sqlite,
-		ctx:      context.Background(),
+		File:     file,
+		FullPath: fullPath,
+		Driver:   sqlite,
+		Ctx:      context.Background(),
 	}
 	if clobber {
 		_, err = db.MakeSchema()
@@ -67,21 +68,21 @@ func NewSqlite(fullPath string, clobber bool) (*LocalDB, error) {
 func (db *LocalDB) newConnection() (*connection, error) {
 	// get variables ready
 	var (
-		database *sql.DB
-		conn     *sql.Conn
-		err      error
+		dbPtr *sql.DB
+		conn  *sql.Conn
+		err   error
 	)
 
-	switch db.driver {
+	switch db.Driver {
 	case sqlite:
-		database, err = sql.Open("sqlite", db.fullPath)
+		dbPtr, err = sql.Open("sqlite", db.FullPath)
 		if err != nil {
 			logrus.Error(err)
 			return nil, err
 		}
 
 		// make a Conn
-		conn, err = database.Conn(db.ctx)
+		conn, err = dbPtr.Conn(db.Ctx)
 		if err != nil {
 			logrus.Error("unable to get a connection struct")
 			return nil, err
@@ -89,7 +90,7 @@ func (db *LocalDB) newConnection() (*connection, error) {
 	default:
 		panic("unsupported")
 	}
-	return &connection{database, conn}, nil
+	return &connection{dbPtr, conn}, nil
 }
 
 func (c *connection) disconnect() {
@@ -116,7 +117,7 @@ func (db *LocalDB) EnterData(cmd string) (sql.Result, error) {
 	}
 	defer c.disconnect()
 
-	return c.conn.ExecContext(db.ctx, safeCmd)
+	return c.conn.ExecContext(db.Ctx, safeCmd)
 }
 
 func (db *LocalDB) AddRecord(tag, value int) (sql.Result, error) {
@@ -142,7 +143,7 @@ func (db *LocalDB) GetSingleInt(query string) int {
 	c, _ := db.newConnection() // don't handle the error, just return -1
 	defer c.disconnect()
 
-	if rows, err = c.conn.QueryContext(db.ctx, query); err != nil {
+	if rows, err = c.conn.QueryContext(db.Ctx, query); err != nil {
 		return -1
 	}
 	closed := func() {

@@ -117,9 +117,9 @@ func testTemperatureEntries(db database.DBWrapper, t *testing.T) {
 
 /* TESTS */
 
-/* Starting with LocalDB, make sure the schema and file manipulation are enforced properly */
+/* Starting with LocalDB, make sure the schema and File manipulation are enforced properly */
 
-// create and destroy localdb file 5 times, get LocalDB LocalDB struct
+// create and destroy localdb File 5 times, get LocalDB LocalDB struct
 func TestSqliteDataPrep(t *testing.T) {
 	getConfig()
 	sqliteFile := viper.GetString(configkey.DatabaseLocalFile)
@@ -136,7 +136,7 @@ func TestSqliteDataPrep(t *testing.T) {
 		}
 		_, err = os.Stat(sqliteFile)
 		if err != nil {
-			logrus.Error("localdb file doesn't exist")
+			logrus.Error("localdb File doesn't exist")
 			t.Error(err)
 		}
 	}
