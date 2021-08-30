@@ -28,10 +28,6 @@ func NewWebSqlite(fullPath string, clobber bool) (*WebSqlite, error) {
 	return &WebSqlite{lite}, nil
 }
 
-func (w *WebSqlite) MakeSchema() (sql.Result, error) {
-	return w.lite.MakeSchema(webDBSchema)
-}
-
 func (w *WebSqlite) EnterData(cmd string) (sql.Result, error) {
 	return w.lite.EnterData(cmd)
 }
@@ -72,8 +68,17 @@ func (w *WebSqlite) AddRainEvent(value float32, gwTimestamp string) (sql.Result,
 	return res, nil
 }
 
-func (w *WebSqlite) TallyRain() float32 {
+func (w *WebSqlite) TallyRainSince(since time.Time) float32 {
+	panic("implement me!")
 	return w.tallyFloat("rain")
+}
+
+func (w *WebSqlite) TallyRainFrom(start, finish time.Time) float32 {
+	panic("implement me")
+}
+
+func (w *WebSqlite) GetLastRain() time.Time {
+	panic("implement me!")
 }
 
 func (w *WebSqlite) tallyFloat(table string) float32 {

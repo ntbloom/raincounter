@@ -4,6 +4,8 @@ SERVER = $(HOMEDIR)pkg/server
 COMMON = $(HOMEDIR)pkg/common
 EXE = ./raincounter
 
+#TESTFLAGS  = -v
+
 ### BUILD ###
 
 build:
@@ -16,29 +18,29 @@ build-race: clean
 
 # common
 test-common:
-	@go test  $(COMMON)/...
+	@go test $(TESTFLAGS) $(COMMON)/...
 
 test-common-race:
-	@go test -race $(COMMON)/...
+	@go test $(TESTFLAGS) -race $(COMMON)/...
 
 test-all: clean test-common test-gateway test-server
 
 # gateway
 
 test-gateway:
-	@go test $(GW)/...
+	@go test $(TESTFLAGS) $(GW)/...
 
 test-gateway-race: clean-test test-common-race
 	@go clean -testcache
-	@go test -race $(GW)/...
+	@go test $(TESTFLAGS) -race $(GW)/...
 
 # server
 test-server:
-	@go test $(SERVER)/...
+	@go test $(TESTFLAGS) $(SERVER)/...
 
 test-server-race: clean-test test-common-race
 	@go clean -testcache
-	@go test -race $(SERVER)/...
+	@go test $(TESTFLAGS) -race $(SERVER)/...
 
 ### RUN ###
 

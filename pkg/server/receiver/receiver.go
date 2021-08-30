@@ -10,7 +10,7 @@ import (
 type Receiver struct {
 	mqttConnection  paho.Client
 	sqliteConection *localdb.LocalDB
-	db              webdb.WebDB
+	db              webdb.DBEntry
 }
 
 // NewReceiver creates a new Receiver struct
@@ -26,7 +26,7 @@ func NewReceiver(client paho.Client, databasePath string, clobber bool) (*Receiv
 		logrus.Errorf("unable to connect to MQTT: %s", token.Error())
 	}
 
-	var db webdb.WebDB
+	var db webdb.DBEntry
 	db, err = webdb.NewWebSqlite(databasePath, true)
 	if err != nil {
 		logrus.Error(err)
