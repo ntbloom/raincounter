@@ -38,7 +38,7 @@ func (suite *WebDBTest) TearDownSuite() {}
 func (suite *WebDBTest) SetupTest()     {}
 func (suite *WebDBTest) TearDownTest()  {}
 
-func (suite *WebDBTest) TestBasicSchema() {
+func (suite *WebDBTest) TestEnterRainEvent() {
 	qty := 10
 	for i := 0; i < qty; i++ {
 		_, err := suite.db.AddRainEvent(suite.rainAmt, "timestamp")

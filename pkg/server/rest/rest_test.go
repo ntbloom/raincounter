@@ -1,4 +1,4 @@
-package web_test
+package rest_test
 
 import (
 	"testing"
@@ -7,5 +7,5 @@ import (
 )
 
 func TestWeb(t *testing.T) {
-	logrus.Info("here's a blank test for the web API")
+	logrus.Info("here's a blank test for the rest API")
 }

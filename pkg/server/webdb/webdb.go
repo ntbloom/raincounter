@@ -56,11 +56,11 @@ func (w *WebDB) AddIntRecord(tag, value int) (sql.Result, error) {
 	return nil, nil
 }
 
-func (w *WebDB) AddRainEvent(value float32, gw_timestamp string) (sql.Result, error) {
+func (w *WebDB) AddRainEvent(value float32, gwTimestamp string) (sql.Result, error) {
 	timestamp := time.Now().Format(time.RFC3339)
 	cmd := fmt.Sprintf(
 		"INSERT INTO rain (gw_timestamp, server_timestamp, amount) VALUES (\"%s\",\"%s\",%f);",
-		gw_timestamp,
+		gwTimestamp,
 		timestamp,
 		value,
 	)
@@ -74,6 +74,11 @@ func (w *WebDB) AddRainEvent(value float32, gw_timestamp string) (sql.Result, er
 
 func (w *WebDB) TallyRain() float32 {
 	return w.tallyFloat("rain")
+}
+
+// EnterEvent puts a tagged event in the events table
+func (w *WebDB) EnterEvent(tag int) (sql.Result, error) {
+	panic("implement me")
 }
 
 func (w *WebDB) tallyFloat(table string) float32 {
