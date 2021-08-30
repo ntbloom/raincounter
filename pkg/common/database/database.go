@@ -34,7 +34,7 @@ type DBWrapper interface {
 	GetSingleInt(query string) int
 }
 
-// MakeRainTallyEntry AddIntRecord a rain event
+// MakeRainTallyEntry AddTag a rain event
 func MakeRainTallyEntry(db DBWrapper) {
 	_, err := db.AddIntRecord(tlv.Rain, tlv.RainValue)
 	if err != nil {
@@ -50,7 +50,7 @@ func MakeRainValueEntry(db DBWrapper, value float32) {
 	}
 }
 
-// MakeSoftResetEntry AddIntRecord a soft reset event
+// MakeSoftResetEntry AddTag a soft reset event
 func MakeSoftResetEntry(db DBWrapper) {
 	_, err := db.AddIntRecord(tlv.SoftReset, tlv.SoftResetValue)
 	if err != nil {
@@ -58,7 +58,7 @@ func MakeSoftResetEntry(db DBWrapper) {
 	}
 }
 
-// MakeHardResetEntry AddIntRecord a hard reset event
+// MakeHardResetEntry AddTag a hard reset event
 func MakeHardResetEntry(db DBWrapper) {
 	_, err := db.AddIntRecord(tlv.HardReset, tlv.HardResetValue)
 	if err != nil {
@@ -66,7 +66,7 @@ func MakeHardResetEntry(db DBWrapper) {
 	}
 }
 
-// MakePauseEntry AddIntRecord a pause event
+// MakePauseEntry AddTag a pause event
 func MakePauseEntry(db DBWrapper) {
 	_, err := db.AddIntRecord(tlv.Pause, tlv.Unpause)
 	if err != nil {
@@ -74,7 +74,7 @@ func MakePauseEntry(db DBWrapper) {
 	}
 }
 
-// MakeUnpauseEntry AddIntRecord an unpause event
+// MakeUnpauseEntry AddTag an unpause event
 func MakeUnpauseEntry(db DBWrapper) {
 	_, err := db.AddIntRecord(tlv.Unpause, tlv.UnpauseValue)
 	if err != nil {
@@ -82,7 +82,7 @@ func MakeUnpauseEntry(db DBWrapper) {
 	}
 }
 
-// MakeTemperatureEntry AddIntRecord a temperature measurement
+// MakeTemperatureEntry AddTag a temperature measurement
 func MakeTemperatureEntry(db DBWrapper, tempC int) {
 	_, err := db.AddIntRecord(tlv.Temperature, tempC)
 	if err != nil {

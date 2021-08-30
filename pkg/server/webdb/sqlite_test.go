@@ -15,7 +15,7 @@ import (
 
 type WebDBTest struct {
 	suite.Suite
-	db      *webdb.WebDB
+	db      *webdb.WebSqlite
 	rainAmt float32
 }
 
@@ -27,7 +27,7 @@ func TestReceiver(t *testing.T) {
 func (suite *WebDBTest) SetupSuite() {
 	config.Configure()
 	sqliteFile := viper.GetString(configkey.DatabaseRemoteFile)
-	db, err := webdb.NewWebDB(sqliteFile, true)
+	db, err := webdb.NewWebSqlite(sqliteFile, true)
 	if err != nil {
 		panic(err)
 	}

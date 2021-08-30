@@ -3,12 +3,14 @@ package receiver
 import (
 	paho "github.com/eclipse/paho.mqtt.golang"
 	"github.com/ntbloom/raincounter/pkg/gateway/localdb"
+	"github.com/ntbloom/raincounter/pkg/server/webdb"
 	"github.com/sirupsen/logrus"
 )
 
 type Receiver struct {
 	mqttConnection  paho.Client
 	sqliteConection *localdb.LocalDB
+	db              webdb.WebDB
 }
 
 // NewReceiver creates a new Receiver struct
@@ -24,9 +26,17 @@ func NewReceiver(client paho.Client, databasePath string, clobber bool) (*Receiv
 		logrus.Errorf("unable to connect to MQTT: %s", token.Error())
 	}
 
+	var db webdb.WebDB
+	db, err = webdb.NewWebSqlite(databasePath, true)
+	if err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
+
 	return &Receiver{
 		mqttConnection:  client,
 		sqliteConection: s,
+		db:              db,
 	}, nil
 }
 
