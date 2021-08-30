@@ -63,9 +63,7 @@ func (suite *ReceiverTest) SetupSuite() {
 }
 
 func (suite *ReceiverTest) TearDownSuite() {
-	if err := suite.mosquitto.Kill(); err != nil {
-		panic(err)
-	}
+	suite.mosquitto.Kill()
 }
 
 func (suite *ReceiverTest) SetupTest()    {}

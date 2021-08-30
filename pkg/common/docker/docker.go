@@ -45,15 +45,26 @@ func (c *Container) Run() error {
 		return err
 	}
 	if err := c.start(); err != nil {
-		_ = c.forceRemove()
+		c.forceRemove()
 		return err
 	}
 	return nil
 }
 
+// Status gets the state of the container (running, etc.)
+func (c *Container) Status() string {
+	containers, _ := c.client.ContainerList(c.ctx, types.ContainerListOptions{})
+	for _, v := range containers {
+		if v.ID == c.id {
+			return v.State
+		}
+	}
+	return "not created yet"
+}
+
 // Kill removes the container
-func (c *Container) Kill() error {
-	return c.forceRemove()
+func (c *Container) Kill() {
+	c.forceRemove()
 }
 
 // pull the latest image
@@ -115,16 +126,7 @@ func (c *Container) start() error {
 		return err
 	}
 	// block until container is up
-	isRunning := func() bool {
-		up := false
-		containers, _ := c.client.ContainerList(c.ctx, types.ContainerListOptions{})
-		for _, v := range containers {
-			if v.State == "running" {
-				up = true
-			}
-		}
-		return up
-	}
+	isRunning := func() bool { return c.Status() == "running" }
 	for i := 0; i < 10; i++ {
 		if isRunning() {
 			break
@@ -138,7 +140,7 @@ func (c *Container) start() error {
 }
 
 // forceRemove the container
-func (c *Container) forceRemove() error {
+func (c *Container) forceRemove() {
 	if c.id == "" {
 		panic("container ID not set, did you pull and create the container first?")
 	}
@@ -149,7 +151,6 @@ func (c *Container) forceRemove() error {
 	}
 	if err := c.client.ContainerRemove(c.ctx, c.id, options); err != nil {
 		logrus.Error(err)
-		return err
+		logrus.Warningf("container %s may not have shut down properly", c.name)
 	}
-	return nil
 }

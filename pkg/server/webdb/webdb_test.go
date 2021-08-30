@@ -51,9 +51,10 @@ func (suite *WebDBTest) TearDownTest()  {}
 func (suite *WebDBTest) TestEnterRainEvent() {
 	start := time.Now()
 	time.Sleep(time.Second)
+	timestamp := time.Now().String()
 	qty := 10
 	for i := 0; i < qty; i++ {
-		_, err := suite.entry.AddRainEvent(suite.rainAmt, "timestamp")
+		_, err := suite.entry.AddRainEvent(suite.rainAmt, timestamp)
 		if err != nil {
 			panic(err)
 		}
