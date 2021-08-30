@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/docker/docker/pkg/stdcopy"
+
 	"github.com/docker/go-connections/nat"
 	"github.com/sirupsen/logrus"
 
@@ -28,6 +30,7 @@ type Container struct {
 }
 
 func NewContainer(image, name string, port int) (*Container, error) {
+	_ = os.Setenv("POSTGRESQL_PASSWORD", "password")
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		logrus.Error(err)
@@ -83,6 +86,7 @@ func (c *Container) pull() error {
 
 // create the container
 func (c *Container) create() error {
+	logrus.Debugf("creating %s container", c.image)
 	port, err := nat.NewPort("tcp", strconv.Itoa(c.port))
 	if err != nil {
 		logrus.Error(nil)
@@ -110,14 +114,31 @@ func (c *Container) create() error {
 		logrus.Error(err)
 		return err
 	}
+	if len(resp.Warnings) != 0 {
+		for warn := range resp.Warnings {
+			logrus.Warn(warn)
+		}
+	}
 	c.id = resp.ID
 	return nil
 }
 
 // start the container
 func (c *Container) start() error {
+	logrus.Debugf("starting %s container id=%s", c.image, c.id)
 	if c.id == "" {
 		panic("container ID not set, did you pull and create the container first?")
+	}
+
+	out, err := c.client.ContainerLogs(c.ctx, c.id, types.ContainerLogsOptions{
+		ShowStdout: true,
+		Follow:     true,
+	})
+	if err != nil {
+		logrus.Error(err)
+	}
+	if _, err = stdcopy.StdCopy(os.Stdout, os.Stderr, out); err != nil {
+		logrus.Error(err)
 	}
 
 	options := types.ContainerStartOptions{}
@@ -141,6 +162,7 @@ func (c *Container) start() error {
 
 // forceRemove the container
 func (c *Container) forceRemove() {
+	logrus.Debugf("removing %s container", c.image)
 	if c.id == "" {
 		panic("container ID not set, did you pull and create the container first?")
 	}
@@ -150,7 +172,7 @@ func (c *Container) forceRemove() {
 		Force:         true,
 	}
 	if err := c.client.ContainerRemove(c.ctx, c.id, options); err != nil {
-		logrus.Error(err)
 		logrus.Warningf("container %s may not have shut down properly", c.name)
+		logrus.Error(err)
 	}
 }

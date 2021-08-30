@@ -1,7 +1,11 @@
 package docker_test
 
 import (
+	"os"
+	"sort"
 	"time"
+
+	"github.com/ntbloom/raincounter/pkg/config"
 
 	"github.com/sirupsen/logrus"
 
@@ -28,7 +32,9 @@ func TestPostgresql(t *testing.T) {
 	suite.Run(t, test)
 }
 
-func (suite *DockerTest) SetupSuite()    {}
+func (suite *DockerTest) SetupSuite() {
+	config.Configure()
+}
 func (suite *DockerTest) TearDownSuite() {}
 func (suite *DockerTest) SetupTest()     {}
 func (suite *DockerTest) TearDownTest()  {}
@@ -40,6 +46,13 @@ func (suite *DockerTest) TestPostgresql() {
 		suite.Fail("container struct not instantiated")
 	}
 	defer container.Kill()
+	if err = os.Setenv("POSTGRES_PASSWORD", "password"); err != nil {
+		logrus.Error("problem setting ENV variables")
+		suite.Fail("not propagating environment variables")
+	}
+	env := os.Environ()
+	sort.Strings(env)
+	logrus.Trace(env)
 	if err = container.Run(); err != nil {
 		logrus.Error(err)
 		suite.Fail("container not running")
