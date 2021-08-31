@@ -7,8 +7,8 @@ import (
 
 // DBEntry enters data into the database
 type DBEntry interface {
-	// EnterData runs arbitary sql commands
-	EnterData(string) (sql.Result, error)
+	// RunCmd runs arbitary sql commands
+	RunCmd(string) (sql.Result, error)
 
 	// AddTagValue puts a single tag and value in the database
 	AddTagValue(int, int) (sql.Result, error)
@@ -19,12 +19,18 @@ type DBEntry interface {
 
 // DBQuery queries data from the database
 type DBQuery interface {
+	// RunCmd runs arbitary sql commands
+	RunCmd(string) (sql.Result, error)
+
+	// Unwrap converts a query with one row result into the correct value
+	Unwrap(sql.Result) interface{}
+
 	// TallyRainSince gets total rain from a time in the past to present
 	TallyRainSince(time.Time) float32
 
 	// TallyRainFrom gets total rain between two timestamps
 	TallyRainFrom(time.Time, time.Time) float32
 
-	// GetLastRain tallies the date since the last rain
-	GetLastRain() time.Time
+	// GetLastRainTime shows the date of the last rain
+	GetLastRainTime() time.Time
 }

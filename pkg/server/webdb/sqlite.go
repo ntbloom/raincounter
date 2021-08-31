@@ -2,42 +2,40 @@ package webdb
 
 import (
 	"database/sql"
-	"fmt"
 	"time"
 
 	"github.com/ntbloom/raincounter/pkg/gateway/tlv"
 	"github.com/sirupsen/logrus"
-
-	"github.com/ntbloom/raincounter/pkg/common/database"
 )
 
-// WebSqlite implements the database wrapper used on the cloud server.
+// PGConnector implements the database wrapper used on the cloud server.
 // We still use the same tag structure, but put the data into different
 // tables because we don't really care about events, just the rain and
 // temperature data.
-type WebSqlite struct {
-	lite *database.Sqlite
+
+type PGConnector struct {
 }
 
-func NewWebSqlite(fullPath string, clobber bool) (*WebSqlite, error) {
-	lite, err := database.NewSqlite(fullPath, clobber, webDBSchema)
-	if err != nil {
-		logrus.Error(err)
-		return nil, err
-	}
-	return &WebSqlite{lite}, nil
+func NewPGConnector(database string) (*PGConnector, error) {
+	return nil, nil
 }
 
-func (w *WebSqlite) EnterData(cmd string) (sql.Result, error) {
-	return w.lite.EnterData(cmd)
+func (pg *PGConnector) RunCmd(cmd string) (sql.Result, error) {
+	panic("implement me!")
 }
 
-func (w *WebSqlite) AddTagValue(tag, value int) (sql.Result, error) {
+func (pg *PGConnector) Unwrap(sql.Result) interface{} {
+	panic("implement me!")
+}
+
+func (pg *PGConnector) AddTagValue(tag, value int) (sql.Result, error) {
 	switch tag {
+	// don't use these methods
 	case tlv.Rain:
 		panic("rain events not supported in this method")
 	case tlv.Temperature:
-		logrus.Debug("adding temp record to web database")
+		panic("temperature events not supported in this method")
+
 	case tlv.SoftReset:
 		logrus.Debug("adding soft reset to web database")
 	case tlv.HardReset:
@@ -52,59 +50,22 @@ func (w *WebSqlite) AddTagValue(tag, value int) (sql.Result, error) {
 	return nil, nil
 }
 
-func (w *WebSqlite) AddRainEvent(value float32, gwTimestamp string) (sql.Result, error) {
-	timestamp := time.Now().Format(time.RFC3339)
-	cmd := fmt.Sprintf(
-		"INSERT INTO rain (gw_timestamp, server_timestamp, amount) VALUES (\"%s\",\"%s\",%f);",
-		gwTimestamp,
-		timestamp,
-		value,
-	)
-	res, err := w.lite.EnterData(cmd)
-	if err != nil {
-		logrus.Error(err)
-		return nil, err
-	}
-	return res, nil
-}
-
-func (w *WebSqlite) TallyRainSince(since time.Time) float32 {
-	panic("implement me!")
-	return w.tallyFloat("rain")
-}
-
-func (w *WebSqlite) TallyRainFrom(start, finish time.Time) float32 {
-	panic("implement me")
-}
-
-func (w *WebSqlite) GetLastRain() time.Time {
+func (pg *PGConnector) AddRainEvent(value float32, gwTimestamp string) (sql.Result, error) {
 	panic("implement me!")
 }
 
-func (w *WebSqlite) tallyFloat(table string) float32 {
-	var rows *sql.Rows
-	var err error
-	c, _ := w.lite.Connect()
-	defer c.Disconnect()
+func (pg *PGConnector) TallyRainSince(since time.Time) float32 {
+	panic("implement me!")
+}
 
-	query := fmt.Sprintf("SELECT SUM(amount) FROM \"%s\"", table)
-	if rows, err = c.Conn.QueryContext(w.lite.Ctx, query); err != nil {
-		logrus.Error(err)
-	}
-	defer func() {
-		if err = rows.Close(); err != nil {
-			logrus.Error(err)
-		}
-	}()
-	results := make([]float32, 0)
-	for rows.Next() {
-		var val float32
-		if err = rows.Scan(&val); err != nil {
-			logrus.Error(err)
-			return -1.0
-		}
-		results = append(results, val)
-	}
+func (pg *PGConnector) TallyRainFrom(start, finish time.Time) float32 {
+	panic("implement me!")
+}
 
-	return results[0]
+func (pg *PGConnector) GetLastRainTime() time.Time {
+	panic("implement me!")
+}
+
+func (pg *PGConnector) tallyFloat(table string) float32 {
+	panic("implement me!")
 }

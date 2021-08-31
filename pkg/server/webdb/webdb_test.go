@@ -2,7 +2,6 @@ package webdb_test
 
 import (
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 
@@ -21,20 +20,17 @@ type WebDBTest struct {
 	rainAmt float32
 }
 
-func TestReceiver(t *testing.T) {
+func TestWebDB(t *testing.T) {
 	test := new(WebDBTest)
 	suite.Run(t, test)
 }
 
 func (suite *WebDBTest) SetupSuite() {
 	config.Configure()
-	sqliteFile := viper.GetString(configkey.DatabaseRemoteFile)
 
-	// use the same object as entry and query
-	// in production you would have two separate objects
 	var entry webdb.DBEntry
 	var query webdb.DBQuery
-	db, err := webdb.NewWebSqlite(sqliteFile, true)
+	db, err := webdb.NewPGConnector("raincounter")
 	if err != nil {
 		panic(err)
 	}
@@ -48,16 +44,25 @@ func (suite *WebDBTest) TearDownSuite() {}
 func (suite *WebDBTest) SetupTest()     {}
 func (suite *WebDBTest) TearDownTest()  {}
 
-func (suite *WebDBTest) TestEnterRainEvent() {
-	start := time.Now()
-	time.Sleep(time.Second)
-	timestamp := time.Now().String()
-	qty := 10
-	for i := 0; i < qty; i++ {
-		_, err := suite.entry.AddRainEvent(suite.rainAmt, timestamp)
-		if err != nil {
-			panic(err)
-		}
+func (suite *WebDBTest) TestPosgresqlConnection() {
+	res, err := suite.query.RunCmd("SELECT 2+2;")
+	if err != nil {
+		suite.Fail("problem running query", err)
 	}
-	assert.InDelta(suite.T(), suite.query.TallyRainSince(start), float32(qty)*suite.rainAmt, 0.0001)
+	assert.Equal(suite.T(), 4, suite.query.Unwrap(res), "2+2 != 4")
+
 }
+
+//func (suite *WebDBTest) TestEnterRainEvent() {
+//	start := time.Now()
+//	time.Sleep(time.Second)
+//	timestamp := time.Now().String()
+//	qty := 10
+//	for i := 0; i < qty; i++ {
+//		_, err := suite.entry.AddRainEvent(suite.rainAmt, timestamp)
+//		if err != nil {
+//			panic(err)
+//		}
+//	}
+//	assert.InDelta(suite.T(), suite.query.TallyRainSince(start), float32(qty)*suite.rainAmt, 0.0001)
+//}

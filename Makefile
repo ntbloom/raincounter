@@ -4,6 +4,12 @@ SERVER = $(HOMEDIR)pkg/server
 COMMON = $(HOMEDIR)pkg/common
 EXE = ./raincounter
 
+# docker-compose, for testing
+COMPOSEFILE = $(HOMEDIR)pkg/test/docker-compose.yaml
+COMPOSE = docker-compose -f $(COMPOSEFILE)
+COMPOSEFLAGS  = --remove-orphans
+COMPOSEFLAGS += -d
+
 #TESTFLAGS  = -v
 
 ### BUILD ###
@@ -36,7 +42,11 @@ test-gateway-race: clean-test test-common-race
 
 # server
 test-server:
-	@go test $(TESTFLAGS) $(SERVER)/...
+	@$(COMPOSE) up $(COMPOSEFLAGS)
+	@sleep 2
+	@- go test $(TESTFLAGS) $(SERVER)/...
+	@$(COMPOSE) down
+
 
 test-server-race: clean-test test-common-race
 	@go clean -testcache
@@ -61,4 +71,5 @@ clean-files:
 	- rm raincounter raincounter-race
 
 clean: clean-test clean-files
+	- $(COMPOSE) down
 
