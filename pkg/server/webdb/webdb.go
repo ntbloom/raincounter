@@ -17,7 +17,7 @@ type DBEntry interface {
 	AddRainEvent(float32, string) (sql.Result, error)
 }
 
-// DBQuery queries data from the database
+// DBQuery retreives data from the database
 type DBQuery interface {
 	// RunCmd runs arbitary sql commands
 	RunCmd(string) (sql.Result, error)

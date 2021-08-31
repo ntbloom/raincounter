@@ -1,9 +1,15 @@
 package webdb
 
 import (
+	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
+	"github.com/ntbloom/raincounter/pkg/config/configkey"
+	"github.com/spf13/viper"
+
+	"github.com/jackc/pgx/v4"
 	"github.com/ntbloom/raincounter/pkg/gateway/tlv"
 	"github.com/sirupsen/logrus"
 )
@@ -14,14 +20,33 @@ import (
 // temperature data.
 
 type PGConnector struct {
+	ctx context.Context
+	url string
 }
 
-func NewPGConnector(database string) (*PGConnector, error) {
-	return nil, nil
+func NewPGConnector() *PGConnector {
+	ctx := context.Background()
+	dbName := viper.GetString(configkey.DatabaseRemoteName)
+	password := viper.GetString(configkey.DatabasePostgresqlPassword)
+	url := fmt.Sprintf("postgresql://postgres:%s@127.0.0.1:5432/%s", password, dbName)
+	logrus.Error(url)
+
+	return &PGConnector{ctx, url}
 }
 
 func (pg *PGConnector) RunCmd(cmd string) (sql.Result, error) {
-	panic("implement me!")
+	conn, err := pg.connect()
+	if err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
+	defer func() {
+		err := conn.Close(pg.ctx)
+		if err != nil {
+			logrus.Warningf("connection not closed properly: %s", err)
+		}
+	}()
+	return nil, nil
 }
 
 func (pg *PGConnector) Unwrap(sql.Result) interface{} {
@@ -64,6 +89,10 @@ func (pg *PGConnector) TallyRainFrom(start, finish time.Time) float32 {
 
 func (pg *PGConnector) GetLastRainTime() time.Time {
 	panic("implement me!")
+}
+
+func (pg *PGConnector) connect() (*pgx.Conn, error) {
+	return pgx.Connect(pg.ctx, pg.url)
 }
 
 func (pg *PGConnector) tallyFloat(table string) float32 {

@@ -13,17 +13,12 @@ type Receiver struct {
 
 // NewReceiver creates a new Receiver struct
 // mqtt connection is created automatically
-func NewReceiver(client paho.Client, databasePath string) (*Receiver, error) {
+func NewReceiver(client paho.Client) (*Receiver, error) {
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
 		logrus.Errorf("unable to connect to MQTT: %s", token.Error())
 	}
 
-	var db webdb.DBEntry
-	db, err := webdb.NewPGConnector(databasePath)
-	if err != nil {
-		logrus.Error(err)
-		return nil, err
-	}
+	db := webdb.NewPGConnector()
 
 	return &Receiver{
 		mqttConnection: client,

@@ -30,10 +30,7 @@ func (suite *WebDBTest) SetupSuite() {
 
 	var entry webdb.DBEntry
 	var query webdb.DBQuery
-	db, err := webdb.NewPGConnector("raincounter")
-	if err != nil {
-		panic(err)
-	}
+	db := webdb.NewPGConnector()
 	entry = db
 	query = db
 	suite.entry = entry
@@ -50,10 +47,9 @@ func (suite *WebDBTest) TestPosgresqlConnection() {
 		suite.Fail("problem running query", err)
 	}
 	assert.Equal(suite.T(), 4, suite.query.Unwrap(res), "2+2 != 4")
-
 }
 
-//func (suite *WebDBTest) TestEnterRainEvent() {
+// func (suite *WebDBTest) TestEnterRainEvent() {
 //	start := time.Now()
 //	time.Sleep(time.Second)
 //	timestamp := time.Now().String()

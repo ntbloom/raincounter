@@ -70,6 +70,9 @@ clean-test:
 clean-files:
 	- rm raincounter raincounter-race
 
-clean: clean-test clean-files
+clean-docker:
 	- $(COMPOSE) down
+	- docker volume prune -f | tail -1
+
+clean: clean-test clean-files clean-docker
 

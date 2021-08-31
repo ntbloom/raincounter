@@ -37,8 +37,7 @@ func (suite *ReceiverTest) SetupSuite() {
 
 	testFile := "deadbeef"
 	suite.testDatabase = testFile
-
-	r, err := receiver.NewReceiver(client, testFile)
+	r, err := receiver.NewReceiver(client)
 	if err != nil {
 		panic(err)
 	}

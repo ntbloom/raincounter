@@ -19,8 +19,9 @@ const (
 
 	SensorRainMm = "sensor.mm"
 
-	DatabaseLocalFile  = "database.local.file"
-	DatabaseRemoteFile = "database.remote.file"
+	DatabaseLocalFile          = "database.local.file"
+	DatabaseRemoteName         = "database.remote.name"
+	DatabasePostgresqlPassword = "database.remote.password"
 
 	MessengerStatusInterval = "messenger.status.interval"
 

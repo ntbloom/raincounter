@@ -4,4 +4,4 @@ main.loop.duration: -10s
 
 database:
   local.file: /tmp/rainbase.db
-  remote.file: /tmp/raincloud.db
+  remote.name: raincounter
