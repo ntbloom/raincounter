@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/stretchr/testify/assert"
 
 	"github.com/jackc/pgx/v4"
@@ -40,11 +42,20 @@ func (suite *WebDBTest) SetupSuite() {
 	suite.query = query
 	suite.rainAmt = float32(viper.GetFloat64(configkey.SensorRainMm))
 }
-func (suite *WebDBTest) TearDownSuite() {}
-func (suite *WebDBTest) SetupTest()     {}
-func (suite *WebDBTest) TearDownTest()  {}
+func (suite *WebDBTest) TearDownSuite() {
+	// close the connections
+	logrus.Debug("closing the test suite's entry pool...")
+	suite.entry.Close()
+	logrus.Debug("closing the test suite's query pool...")
+	suite.query.Close()
+}
 
-// Simple test to make sure we can connect to the database, insert data and query the results
+func (suite *WebDBTest) SetupTest()    {}
+func (suite *WebDBTest) TearDownTest() {}
+
+// Simple test to make sure we can connect to the database, insert data and
+// query the results. This is a good general health test to make sure, among
+// other things, we can connect to the database.
 func (suite *WebDBTest) TestInsertSelect() {
 	// enter a dumb test table using `Insert`
 	err := suite.entry.Insert("CREATE TABLE test (id INTEGER);")

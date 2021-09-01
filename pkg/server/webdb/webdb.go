@@ -15,6 +15,11 @@ type DBEntry interface {
 
 	// AddRainEvent puts a rain event with a timestamp from the sensor
 	AddRainEvent(float32, string) (sql.Result, error)
+
+	// Close closes the connection with the database. This may or may not need
+	// to be called, depending on the implementation. In the case of a pooled
+	// connection struct, this is always necessary.
+	Close()
 }
 
 // DBQuery retreives data from the database
@@ -30,4 +35,9 @@ type DBQuery interface {
 
 	// GetLastRainTime shows the date of the last rain
 	GetLastRainTime() time.Time
+
+	// Close closes the connection with the database. This may or may not need
+	// to be called, depending on the implementation. In the case of a pooled
+	// connection struct, this is always necessary.
+	Close()
 }

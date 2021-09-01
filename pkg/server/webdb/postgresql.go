@@ -62,7 +62,8 @@ func (pg *PGConnector) Close() {
 }
 
 func (pg *PGConnector) Insert(cmd string) error {
-	_, err := pg.genericQuery(cmd)
+	res, err := pg.genericQuery(cmd)
+	res.Close()
 	return err
 }
 
