@@ -49,10 +49,7 @@ dcd:
 
 # server
 test-server:
-	@$(COMPOSE) up $(COMPOSEFLAGS)
-	@sleep $(COMPOSEWAIT)
 	@- go test $(TESTFLAGS) $(SERVER)/...
-	@$(COMPOSE) down
 
 
 test-server-race: clean-test test-common-race
@@ -81,5 +78,5 @@ clean-docker:
 	- $(COMPOSE) down
 	- docker volume prune -f | tail -1
 
-clean: clean-test clean-files clean-docker
+clean: clean-test clean-files
 

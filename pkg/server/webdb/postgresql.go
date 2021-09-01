@@ -26,7 +26,6 @@ import (
 
 type PGConnector struct {
 	ctx  context.Context
-	url  string
 	pool *pgxpool.Pool
 }
 
@@ -52,7 +51,7 @@ func NewPGConnector() *PGConnector {
 		logrus.Fatal(err)
 		os.Exit(exitcodes.PostgresqlConnnectionError)
 	}
-	return &PGConnector{ctx, url, pgpool}
+	return &PGConnector{ctx, pgpool}
 }
 
 func (pg *PGConnector) Close() {
