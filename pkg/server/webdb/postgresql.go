@@ -2,7 +2,6 @@ package webdb
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"os"
 	"time"
@@ -61,22 +60,15 @@ func (pg *PGConnector) Close() {
 	pg.pool.Close()
 }
 
+/* INSERTING DATA */
+
 func (pg *PGConnector) Insert(cmd string) error {
 	res, err := pg.genericQuery(cmd)
 	res.Close()
 	return err
 }
 
-func (pg *PGConnector) Select(cmd string) (interface{}, error) {
-	return pg.genericQuery(cmd)
-}
-
-func (pg *PGConnector) genericQuery(cmd string) (pgx.Rows, error) {
-	logrus.Debugf("pgsql: %s", cmd)
-	return pg.pool.Query(pg.ctx, cmd)
-}
-
-func (pg *PGConnector) AddTagValue(tag, value int) (sql.Result, error) {
+func (pg *PGConnector) AddTagValue(tag int, value int, t time.Time) error {
 	switch tag {
 	// don't use these methods
 	case tlv.Rain:
@@ -95,18 +87,36 @@ func (pg *PGConnector) AddTagValue(tag, value int) (sql.Result, error) {
 	default:
 		panic("unsupported tag")
 	}
-	return nil, nil
+	return nil
 }
 
-func (pg *PGConnector) AddRainEvent(value float32, gwTimestamp string) (sql.Result, error) {
+func (pg *PGConnector) AddTempCValue(tempC int, gwTimestamp time.Time) error {
 	panic("implement me!")
 }
 
-func (pg *PGConnector) TallyRainSince(since time.Time) float32 {
+func (pg *PGConnector) AddRainMMEvent(value float32, gwTimestamp time.Time) error {
 	panic("implement me!")
 }
 
-func (pg *PGConnector) TallyRainFrom(start, finish time.Time) float32 {
+/* QUERYING DATA */
+
+func (pg *PGConnector) Select(cmd string) (interface{}, error) {
+	return pg.genericQuery(cmd)
+}
+
+func (pg *PGConnector) TotalRainMMSince(since time.Time) float32 {
+	panic("implement me!")
+}
+
+func (pg *PGConnector) TotalRainMMFrom(from, to time.Time) float32 {
+	panic("implement me!")
+}
+
+func (pg *PGConnector) GetRainMMSince(timestamp time.Time) RainMMMap {
+	panic("implement me!")
+}
+
+func (pg *PGConnector) GetRainMMFrom(from, to time.Time) RainMMMap {
 	panic("implement me!")
 }
 
@@ -114,6 +124,10 @@ func (pg *PGConnector) GetLastRainTime() time.Time {
 	panic("implement me!")
 }
 
-func (pg *PGConnector) tallyFloat(table string) float32 {
-	panic("implement me!")
+/* RANDOM HELPER FUNCTIONS */
+
+// executes arbitrary sql. we need to close the connection after each value, either for
+func (pg *PGConnector) genericQuery(cmd string) (pgx.Rows, error) {
+	logrus.Debugf("pgsql: %s", cmd)
+	return pg.pool.Query(pg.ctx, cmd)
 }
