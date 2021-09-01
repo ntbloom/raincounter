@@ -2,7 +2,9 @@ package webdb_test
 
 import (
 	"fmt"
+	"math/rand"
 	"testing"
+	"time"
 
 	"github.com/sirupsen/logrus"
 
@@ -87,4 +89,35 @@ func (suite *WebDBTest) TestInsertSelect() {
 
 	// verify they're equal
 	assert.Equal(suite.T(), expected, actual, "failed simple SQL math")
+}
+
+// Insert a bunch of temperature data, get it retreived again
+func (suite *WebDBTest) TestInsertSelectTemperatureData() {
+	// make a random TempCMap
+	size := 100
+	temps := generateRandomTempCMap(size)
+	logrus.Debug(temps)
+}
+
+// make a randomly generated TempCMap
+func generateRandomTempCMap(n int) webdb.TempCMap {
+	stamps := generateOrderedTimestamps(n)
+	temps := make(webdb.TempCMap, n)
+	for _, v := range stamps {
+		var tempC int
+		base := rand.Intn(40)    //nolint:gosec
+		neg := rand.Int()%2 == 0 //nolint:gosec
+		if neg {
+			tempC = base * -1
+		} else {
+			tempC = base
+		}
+		temps[v] = tempC
+	}
+	return temps
+}
+
+// get a bunch of ordered timestamps where idx 0 is the oldest and idx -1 is the newest
+func generateOrderedTimestamps(num int) []time.Time {
+	panic("not implemented, start at generateOrderedTimestamps!")
 }

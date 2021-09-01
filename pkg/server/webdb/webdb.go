@@ -50,4 +50,4 @@ type DBQuery interface {
 type RainMMMap map[time.Time]float32
 
 // TempCMap is a simple map of Celsius temperatures over time
-type TempCMap map[time.Time]int32
+type TempCMap map[time.Time]int
