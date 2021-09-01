@@ -5,6 +5,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"github.com/jackc/pgx/v4"
+
 	"github.com/ntbloom/raincounter/pkg/config/configkey"
 	"github.com/ntbloom/raincounter/pkg/server/webdb"
 	"github.com/spf13/viper"
@@ -42,11 +44,19 @@ func (suite *WebDBTest) SetupTest()     {}
 func (suite *WebDBTest) TearDownTest()  {}
 
 func (suite *WebDBTest) TestPosgresqlConnection() {
-	res, err := suite.query.RunCmd("SELECT 2+2;")
-	if err != nil {
+	res, err := suite.query.Select("SELECT 2+2;")
+	if err != nil || res == nil {
 		suite.Fail("problem running query", err)
 	}
-	assert.Equal(suite.T(), 4, suite.query.Unwrap(res), "2+2 != 4")
+	var sum int
+	val := res.(pgx.Rows)
+	defer val.Close()
+	val.Next()
+	err = val.Scan(&sum)
+	if err != nil {
+		suite.Fail("bad reflection", err)
+	}
+	assert.Equal(suite.T(), 4, sum, "failed simple SQL math")
 }
 
 // func (suite *WebDBTest) TestEnterRainEvent() {

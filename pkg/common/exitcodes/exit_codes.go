@@ -2,6 +2,7 @@
 package exitcodes
 
 const (
-	SerialPortNotFound = 1
-	TLSError           = 2
+	SerialPortNotFound         = 1
+	TLSError                   = 2
+	PostgresqlConnnectionError = 3
 )

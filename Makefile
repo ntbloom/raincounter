@@ -7,6 +7,7 @@ EXE = ./raincounter
 # docker-compose, for testing
 COMPOSEFILE = $(HOMEDIR)pkg/test/docker-compose.yaml
 COMPOSE = docker-compose -f $(COMPOSEFILE)
+COMPOSEWAIT = 10
 COMPOSEFLAGS  = --remove-orphans
 COMPOSEFLAGS += -d
 
@@ -40,10 +41,16 @@ test-gateway-race: clean-test test-common-race
 	@go clean -testcache
 	@go test $(TESTFLAGS) -race $(GW)/...
 
+dcu:
+	@$(COMPOSE) up $(COMPOSEFLAGS)
+
+dcd:
+	@$(COMPOSE) down
+
 # server
 test-server:
 	@$(COMPOSE) up $(COMPOSEFLAGS)
-	@sleep 2
+	@sleep $(COMPOSEWAIT)
 	@- go test $(TESTFLAGS) $(SERVER)/...
 	@$(COMPOSE) down
 

@@ -4,12 +4,16 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"os"
 	"time"
+
+	"github.com/ntbloom/raincounter/pkg/common/exitcodes"
+
+	"github.com/jackc/pgx/v4/pgxpool"
 
 	"github.com/ntbloom/raincounter/pkg/config/configkey"
 	"github.com/spf13/viper"
 
-	"github.com/jackc/pgx/v4"
 	"github.com/ntbloom/raincounter/pkg/gateway/tlv"
 	"github.com/sirupsen/logrus"
 )
@@ -20,8 +24,9 @@ import (
 // temperature data.
 
 type PGConnector struct {
-	ctx context.Context
-	url string
+	ctx  context.Context
+	url  string
+	pool *pgxpool.Pool
 }
 
 func NewPGConnector() *PGConnector {
@@ -29,28 +34,37 @@ func NewPGConnector() *PGConnector {
 	dbName := viper.GetString(configkey.DatabaseRemoteName)
 	password := viper.GetString(configkey.DatabasePostgresqlPassword)
 	url := fmt.Sprintf("postgresql://postgres:%s@127.0.0.1:5432/%s", password, dbName)
-	logrus.Error(url)
+	logrus.Debugf("connecting to postgres: %s", url)
 
-	return &PGConnector{ctx, url}
-}
-
-func (pg *PGConnector) RunCmd(cmd string) (sql.Result, error) {
-	conn, err := pg.connect()
-	if err != nil {
-		logrus.Error(err)
-		return nil, err
-	}
-	defer func() {
-		err := conn.Close(pg.ctx)
-		if err != nil {
-			logrus.Warningf("connection not closed properly: %s", err)
+	duration := time.Millisecond * 200
+	waits := int((time.Second * 10) / duration)
+	var pgpool *pgxpool.Pool
+	var err error
+	for i := 0; i < waits; i++ {
+		pgpool, err = pgxpool.Connect(ctx, url)
+		if err == nil {
+			break
 		}
-	}()
-	return nil, nil
+		time.Sleep(duration)
+	}
+	if err != nil {
+		logrus.Fatal(err)
+		os.Exit(exitcodes.PostgresqlConnnectionError)
+	}
+	return &PGConnector{ctx, url, pgpool}
 }
 
-func (pg *PGConnector) Unwrap(sql.Result) interface{} {
+func (pg *PGConnector) Close() {
+	logrus.Info("closing connection pool to postgresql")
+	pg.pool.Close()
+}
+
+func (pg *PGConnector) Insert(cmd string) error {
 	panic("implement me!")
+}
+
+func (pg *PGConnector) Select(cmd string) (interface{}, error) {
+	return pg.pool.Query(pg.ctx, cmd)
 }
 
 func (pg *PGConnector) AddTagValue(tag, value int) (sql.Result, error) {
@@ -89,10 +103,6 @@ func (pg *PGConnector) TallyRainFrom(start, finish time.Time) float32 {
 
 func (pg *PGConnector) GetLastRainTime() time.Time {
 	panic("implement me!")
-}
-
-func (pg *PGConnector) connect() (*pgx.Conn, error) {
-	return pgx.Connect(pg.ctx, pg.url)
 }
 
 func (pg *PGConnector) tallyFloat(table string) float32 {

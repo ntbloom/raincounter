@@ -7,8 +7,8 @@ import (
 
 // DBEntry enters data into the database
 type DBEntry interface {
-	// RunCmd runs arbitary sql commands
-	RunCmd(string) (sql.Result, error)
+	// Insert runs arbitrary sql INSERT commands
+	Insert(string) error
 
 	// AddTagValue puts a single tag and value in the database
 	AddTagValue(int, int) (sql.Result, error)
@@ -19,11 +19,8 @@ type DBEntry interface {
 
 // DBQuery retreives data from the database
 type DBQuery interface {
-	// RunCmd runs arbitary sql commands
-	RunCmd(string) (sql.Result, error)
-
-	// Unwrap converts a query with one row result into the correct value
-	Unwrap(sql.Result) interface{}
+	// Select runs arbitary sql SELECT commands
+	Select(string) (interface{}, error)
 
 	// TallyRainSince gets total rain from a time in the past to present
 	TallyRainSince(time.Time) float32
