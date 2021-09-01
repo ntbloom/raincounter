@@ -7,6 +7,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/jackc/pgx/v4"
+
 	"github.com/ntbloom/raincounter/pkg/common/exitcodes"
 
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -60,10 +62,16 @@ func (pg *PGConnector) Close() {
 }
 
 func (pg *PGConnector) Insert(cmd string) error {
-	panic("implement me!")
+	_, err := pg.genericQuery(cmd)
+	return err
 }
 
 func (pg *PGConnector) Select(cmd string) (interface{}, error) {
+	return pg.genericQuery(cmd)
+}
+
+func (pg *PGConnector) genericQuery(cmd string) (pgx.Rows, error) {
+	logrus.Debugf("pgsql: %s", cmd)
 	return pg.pool.Query(pg.ctx, cmd)
 }
 

@@ -1,6 +1,7 @@
 package webdb_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -43,32 +44,36 @@ func (suite *WebDBTest) TearDownSuite() {}
 func (suite *WebDBTest) SetupTest()     {}
 func (suite *WebDBTest) TearDownTest()  {}
 
-func (suite *WebDBTest) TestPosgresqlConnection() {
-	res, err := suite.query.Select("SELECT 2+2;")
-	if err != nil || res == nil {
-		suite.Fail("problem running query", err)
+// Simple test to make sure we can connect to the database, insert data and query the results
+func (suite *WebDBTest) TestInsertSelect() {
+	// enter a dumb test table using `Insert`
+	err := suite.entry.Insert("CREATE TABLE test (id INTEGER);")
+	defer func() {
+		_ = suite.entry.Insert("DROP TABLE test;")
+	}()
+	if err != nil {
+		suite.Fail("unable to create table", err)
 	}
-	var sum int
+	expected := 42
+	err = suite.entry.Insert(fmt.Sprintf("INSERT INTO test (id) VALUES (%d);", expected))
+	if err != nil {
+		suite.Fail("unable to insert into test table", err)
+	}
+
+	// get the value using `Select`
+	res, err := suite.query.Select("SELECT id FROM test;")
+	if err != nil {
+		suite.Fail("problem querying test table", err)
+	}
+	var actual int
 	val := res.(pgx.Rows)
 	defer val.Close()
 	val.Next()
-	err = val.Scan(&sum)
+	err = val.Scan(&actual)
 	if err != nil {
 		suite.Fail("bad reflection", err)
 	}
-	assert.Equal(suite.T(), 4, sum, "failed simple SQL math")
-}
 
-// func (suite *WebDBTest) TestEnterRainEvent() {
-//	start := time.Now()
-//	time.Sleep(time.Second)
-//	timestamp := time.Now().String()
-//	qty := 10
-//	for i := 0; i < qty; i++ {
-//		_, err := suite.entry.AddRainEvent(suite.rainAmt, timestamp)
-//		if err != nil {
-//			panic(err)
-//		}
-//	}
-//	assert.InDelta(suite.T(), suite.query.TallyRainSince(start), float32(qty)*suite.rainAmt, 0.0001)
-//}
+	// verify they're equal
+	assert.Equal(suite.T(), expected, actual, "failed simple SQL math")
+}
