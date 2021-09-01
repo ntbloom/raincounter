@@ -19,9 +19,12 @@ const (
 
 	SensorRainMm = "sensor.mm"
 
-	DatabaseLocalFile          = "database.local.file"
-	DatabaseRemoteName         = "database.remote.name"
-	DatabasePostgresqlPassword = "database.remote.password"
+	DatabaseLocalFile = "database.local.file"
+
+	PGDatabaseName        = "database.remote.name"
+	PGPassword            = "database.remote.password"
+	PGConnectionTimeout   = "database.remote.connection.timeout"
+	PGConnectionRetryWait = "database.remote.connection.retry.wait"
 
 	MessengerStatusInterval = "messenger.status.interval"
 

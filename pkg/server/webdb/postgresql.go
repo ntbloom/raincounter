@@ -31,16 +31,16 @@ type PGConnector struct {
 
 func NewPGConnector() *PGConnector {
 	ctx := context.Background()
-	dbName := viper.GetString(configkey.DatabaseRemoteName)
-	password := viper.GetString(configkey.DatabasePostgresqlPassword)
+	dbName := viper.GetString(configkey.PGDatabaseName)
+	password := viper.GetString(configkey.PGPassword)
 	url := fmt.Sprintf("postgresql://postgres:%s@127.0.0.1:5432/%s", password, dbName)
 	logrus.Debugf("connecting to postgres: %s", url)
 
-	duration := time.Millisecond * 200
-	waits := int((time.Second * 10) / duration)
+	duration := viper.GetDuration(configkey.PGConnectionRetryWait)
+	totalWait := int((viper.GetDuration(configkey.PGConnectionTimeout)) / duration)
 	var pgpool *pgxpool.Pool
 	var err error
-	for i := 0; i < waits; i++ {
+	for i := 0; i < totalWait; i++ {
 		pgpool, err = pgxpool.Connect(ctx, url)
 		if err == nil {
 			break
