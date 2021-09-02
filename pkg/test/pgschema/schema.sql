@@ -3,8 +3,8 @@ DROP TABLE IF EXISTS rain;
 CREATE TABLE rain
 (
     id               SERIAL PRIMARY KEY,
-    gw_timestamp     TIMESTAMP NOT NULL,
-    server_timestamp TIMESTAMP NOT NULL,
+    gw_timestamp     TIMESTAMPTZ NOT NULL,
+    server_timestamp TIMESTAMPTZ NOT NULL,
     amount           FLOAT     NOT NULL
 );
 
@@ -12,8 +12,8 @@ DROP TABLE IF EXISTS temperature;
 CREATE TABLE temperature
 (
     id               SERIAL PRIMARY KEY,
-    gw_timestamp     TIMESTAMP NOT NULL,
-    server_timestamp TIMESTAMP NOT NULL,
+    gw_timestamp     TIMESTAMPTZ NOT NULL,
+    server_timestamp TIMESTAMPTZ NOT NULL,
     value            INTEGER   NOT NULL
 );
 
@@ -39,7 +39,7 @@ CREATE TABLE event_log
     id        INTEGER PRIMARY KEY,
     tag       INTEGER   NOT NULL,
     value     INTEGER   NOT NULL,
-    timestamp TIMESTAMP NOT NULL,
+    timestamp TIMESTAMPTZ NOT NULL,
     FOREIGN KEY (tag) REFERENCES mappings (id)
 );
 COMMIT;

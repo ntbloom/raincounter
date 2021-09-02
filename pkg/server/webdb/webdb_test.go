@@ -100,28 +100,30 @@ func (suite *WebDBTest) TestQueryRealTables() {
 		suite.Fail("failure to unwrap", err)
 	}
 	assert.Equal(suite.T(), "soft reset", actual)
-
 }
 
-//
-//// Insert a bunch of temperature data, get it retreived again
-//func (suite *WebDBTest) TestInsertSelectTemperatureData() {
-//	// make a random TempCMap
-//	size := 5
-//	expected := generateRandomTempCMap(size)
-//	for timestamp, temperature := range expected {
-//		err := suite.entry.AddTempCValue(temperature, timestamp)
-//		if err != nil {
-//			suite.Fail("error inserting temperature into database", err)
-//		}
-//	}
-//	actual := suite.query.GetTempDataCSince(time.Now())
-//	for k, _ := range actual {
-//		exp := expected[k]
-//		act := actual[k]
-//		assert.Equal(suite.T(), exp, act, "mismatch on TempCMap entry")
-//	}
-//}
+// Insert a bunch of temperature data, get it retreived again
+func (suite *WebDBTest) TestInsertSelectTemperatureData() {
+	// make a random TempCMap
+	size := 5
+	expected := generateRandomTempCMap(size)
+	for timestamp, temperature := range expected {
+		err := suite.entry.AddTempCValue(temperature, timestamp)
+		if err != nil {
+			suite.Fail("error inserting temperature into database", err)
+		}
+	}
+	actual := suite.query.GetTempDataCSince(time.Now())
+	assert.NotNil(suite.T(), actual)
+	logrus.Error(actual)
+	for k, v := range actual {
+		_, ok := expected[k]
+		if !ok {
+			suite.Fail(fmt.Sprintf("%s not in expected", k))
+		}
+		assert.Equal(suite.T(), v, expected[k], "mismatch on TempCMap entry")
+	}
+}
 
 // unwrap a single value
 func unwrap(res interface{}) (interface{}, error) {

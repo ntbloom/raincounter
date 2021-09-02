@@ -24,6 +24,8 @@ import (
 // tables because we don't really care about events, just the rain and
 // temperature data.
 
+const ISO8601 = time.RFC3339
+
 type PGConnector struct {
 	ctx  context.Context
 	pool *pgxpool.Pool
@@ -90,10 +92,9 @@ func (pg *PGConnector) AddTagValue(tag int, value int, t time.Time) error {
 }
 
 func (pg *PGConnector) AddTempCValue(tempC int, gwTimestamp time.Time) error {
-	sql := fmt.Sprintf(`
-		INSERT INTO temperature (gw_timestamp, server_timestamp, value) 
-		VALUES (%s,%s,%d);
-	`, gwTimestamp.String(), time.Now().String(), tempC)
+	sql := fmt.Sprintf(
+		`INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('%s','%s',%d);`,
+		gwTimestamp.Format(ISO8601), time.Now().Format(ISO8601), tempC)
 	return pg.Insert(sql)
 }
 
@@ -136,7 +137,8 @@ func (pg *PGConnector) GetTempDataCFrom(from time.Time, to time.Time) TempCMap {
 		SELECT server_timestamp, value
 		FROM temperature;
 	`)
-	_, err := pg.genericQuery(sql)
+	res, err := pg.genericQuery(sql)
+	defer res.Close()
 	if err != nil {
 		logrus.Errorf("bad query: `%s`", sql)
 	}
