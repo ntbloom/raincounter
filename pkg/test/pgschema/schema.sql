@@ -11,9 +11,10 @@ CREATE TABLE rain
 DROP TABLE IF EXISTS temperature;
 CREATE TABLE temperature
 (
-    id        SERIAL PRIMARY KEY,
-    timestamp TIMESTAMP NOT NULL,
-    value     INTEGER   NOT NULL
+    id               SERIAL PRIMARY KEY,
+    gw_timestamp     TIMESTAMP NOT NULL,
+    server_timestamp TIMESTAMP NOT NULL,
+    value            INTEGER   NOT NULL
 );
 
 DROP TABLE IF EXISTS mappings;
@@ -32,8 +33,8 @@ VALUES (2, 'soft reset'),
        (7, NULL)
 ;
 
-DROP TABLE IF EXISTS log;
-CREATE TABLE log
+DROP TABLE IF EXISTS event_log;
+CREATE TABLE event_log
 (
     id        INTEGER PRIMARY KEY,
     tag       INTEGER   NOT NULL,

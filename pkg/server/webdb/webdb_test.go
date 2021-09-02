@@ -3,6 +3,7 @@ package webdb_test
 import (
 	"fmt"
 	"math/rand"
+	"sort"
 	"testing"
 	"time"
 
@@ -67,7 +68,7 @@ func (suite *WebDBTest) TestInsertSelect() {
 	if err != nil {
 		suite.Fail("unable to create table", err)
 	}
-	expected := 42
+	var expected int32 = 42
 	err = suite.entry.Insert(fmt.Sprintf("INSERT INTO test (id) VALUES (%d);", expected))
 	if err != nil {
 		suite.Fail("unable to insert into test table", err)
@@ -78,11 +79,8 @@ func (suite *WebDBTest) TestInsertSelect() {
 	if err != nil {
 		suite.Fail("problem querying test table", err)
 	}
-	var actual int
-	val := res.(pgx.Rows)
-	defer val.Close()
-	val.Next()
-	err = val.Scan(&actual)
+	actual, err := unwrap(res)
+
 	if err != nil {
 		suite.Fail("bad reflection", err)
 	}
@@ -91,19 +89,58 @@ func (suite *WebDBTest) TestInsertSelect() {
 	assert.Equal(suite.T(), expected, actual, "failed simple SQL math")
 }
 
-// Insert a bunch of temperature data, get it retreived again
-func (suite *WebDBTest) TestInsertSelectTemperatureData() {
-	// make a random TempCMap
-	size := 100
-	temps := generateRandomTempCMap(size)
-	logrus.Debug(temps)
+// Are we actually creating the database from a schema?
+func (suite *WebDBTest) TestQueryRealTables() {
+	res, err := suite.query.Select("SELECT longname FROM mappings WHERE id=2;")
+	if err != nil {
+		suite.Fail("failure to SELECT longname FROM mappings", err)
+	}
+	actual, err := unwrap(res)
+	if err != nil {
+		suite.Fail("failure to unwrap", err)
+	}
+	assert.Equal(suite.T(), "soft reset", actual)
+
+}
+
+//
+//// Insert a bunch of temperature data, get it retreived again
+//func (suite *WebDBTest) TestInsertSelectTemperatureData() {
+//	// make a random TempCMap
+//	size := 5
+//	expected := generateRandomTempCMap(size)
+//	for timestamp, temperature := range expected {
+//		err := suite.entry.AddTempCValue(temperature, timestamp)
+//		if err != nil {
+//			suite.Fail("error inserting temperature into database", err)
+//		}
+//	}
+//	actual := suite.query.GetTempDataCSince(time.Now())
+//	for k, _ := range actual {
+//		exp := expected[k]
+//		act := actual[k]
+//		assert.Equal(suite.T(), exp, act, "mismatch on TempCMap entry")
+//	}
+//}
+
+// unwrap a single value
+func unwrap(res interface{}) (interface{}, error) {
+	var actual interface{}
+	val := res.(pgx.Rows)
+	defer val.Close()
+	val.Next()
+	err := val.Scan(&actual)
+	if err != nil {
+		return nil, err
+	}
+	return actual, nil
 }
 
 // make a randomly generated TempCMap
 func generateRandomTempCMap(n int) webdb.TempCMap {
 	stamps := generateOrderedTimestamps(n)
 	temps := make(webdb.TempCMap, n)
-	for _, v := range stamps {
+	for _, v := range *stamps {
 		var tempC int
 		base := rand.Intn(40)    //nolint:gosec
 		neg := rand.Int()%2 == 0 //nolint:gosec
@@ -118,6 +155,15 @@ func generateRandomTempCMap(n int) webdb.TempCMap {
 }
 
 // get a bunch of ordered timestamps where idx 0 is the oldest and idx -1 is the newest
-func generateOrderedTimestamps(num int) []time.Time {
-	panic("not implemented, start at generateOrderedTimestamps!")
+func generateOrderedTimestamps(num int) *[]time.Time {
+	times := make([]time.Time, num)
+	now := time.Now()
+	secondsInYear := 60 * 60 * 24 * 365
+	for i := 0; i < num; i++ {
+		times[i] = now.Add(time.Second * time.Duration(rand.Intn(secondsInYear)))
+	}
+	sort.Slice(times, func(i, j int) bool {
+		return times[i].Before(times[j])
+	})
+	return &times
 }

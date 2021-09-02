@@ -90,7 +90,11 @@ func (pg *PGConnector) AddTagValue(tag int, value int, t time.Time) error {
 }
 
 func (pg *PGConnector) AddTempCValue(tempC int, gwTimestamp time.Time) error {
-	panic("implement me!")
+	sql := fmt.Sprintf(`
+		INSERT INTO temperature (gw_timestamp, server_timestamp, value) 
+		VALUES (%s,%s,%d);
+	`, gwTimestamp.String(), time.Now().String(), tempC)
+	return pg.Insert(sql)
 }
 
 func (pg *PGConnector) AddRainMMEvent(value float32, gwTimestamp time.Time) error {
@@ -121,6 +125,27 @@ func (pg *PGConnector) GetRainMMFrom(from, to time.Time) RainMMMap {
 
 func (pg *PGConnector) GetLastRainTime() time.Time {
 	panic("implement me!")
+}
+
+func (pg *PGConnector) GetTempDataCSince(since time.Time) TempCMap {
+	return pg.GetTempDataCFrom(since, time.Now())
+}
+
+func (pg *PGConnector) GetTempDataCFrom(from time.Time, to time.Time) TempCMap {
+	sql := fmt.Sprintf(`
+		SELECT server_timestamp, value
+		FROM temperature;
+	`)
+	_, err := pg.genericQuery(sql)
+	if err != nil {
+		logrus.Errorf("bad query: `%s`", sql)
+	}
+	return nil
+}
+
+func (pg *PGConnector) GetLastTempC() int {
+	panic("implement me!")
+
 }
 
 /* RANDOM HELPER FUNCTIONS */

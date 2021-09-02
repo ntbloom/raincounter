@@ -42,6 +42,15 @@ type DBQuery interface {
 	// GetLastRainTime shows the date of the last rain
 	GetLastRainTime() time.Time
 
+	// GetTempDataCSince gets a TempCMap from a time in the past to the present
+	GetTempDataCSince(time.Time) TempCMap
+
+	// GetTempDataCFrom gets a TempCMap between two timestamps
+	GetTempDataCFrom(time.Time, time.Time) TempCMap
+
+	// GetLastTempC shows the most recent temperature
+	GetLastTempC() int
+
 	// Close closes the connection with the database. Necessary for pooled connections
 	Close()
 }
