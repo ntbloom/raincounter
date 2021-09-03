@@ -33,20 +33,20 @@ type DBQuery interface {
 	// TotalRainMMFrom gets total rain between two timestamps
 	TotalRainMMFrom(time.Time, time.Time) float32
 
-	// GetRainMMSince gets a RainMMMap from a time in the past to present
-	GetRainMMSince(time.Time) *RainMMMap
+	// GetRainMMSince gets a RainEntriesMm from a time in the past to present
+	GetRainMMSince(time.Time) *RainEntriesMm
 
-	// GetRainMMFrom gets a RainMMMap between two timestamps
-	GetRainMMFrom(time.Time, time.Time) *RainMMMap
+	// GetRainMMFrom gets a RainEntriesMm between two timestamps
+	GetRainMMFrom(time.Time, time.Time) *RainEntriesMm
 
 	// GetLastRainTime shows the date of the last rain
 	GetLastRainTime() time.Time
 
-	// GetTempDataCSince gets a TempCMap from a time in the past to the present
-	GetTempDataCSince(time.Time) *TempCMap
+	// GetTempDataCSince gets a TempEntriesC from a time in the past to the present
+	GetTempDataCSince(time.Time) *TempEntriesC
 
-	// GetTempDataCFrom gets a TempCMap between two timestamps
-	GetTempDataCFrom(time.Time, time.Time) *TempCMap
+	// GetTempDataCFrom gets a TempEntriesC between two timestamps
+	GetTempDataCFrom(time.Time, time.Time) *TempEntriesC
 
 	// GetLastTempC shows the most recent temperature
 	GetLastTempC() int
@@ -55,8 +55,20 @@ type DBQuery interface {
 	Close()
 }
 
-// RainMMMap is a simple map of a timestamp and millimeters of rain
-type RainMMMap map[time.Time]float32
+// RainEntriesMm is a simple array of RainEntryMm values
+type RainEntriesMm []RainEntryMm
 
-// TempCMap is a simple map of Celsius temperatures over time
-type TempCMap map[time.Time]int
+// RainEntryMm is a single timestamp/mm of rain entry
+type RainEntryMm struct {
+	Timestamp   time.Time
+	Millimeters float32
+}
+
+// TempEntriesC is an ordered slice of TempEntryC values
+type TempEntriesC []TempEntryC
+
+// TempEntryC is a single temperature/timestamp entry
+type TempEntryC struct {
+	Timestamp time.Time
+	TempC     int
+}

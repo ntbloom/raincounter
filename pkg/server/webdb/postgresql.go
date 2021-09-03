@@ -116,11 +116,11 @@ func (pg *PGConnector) TotalRainMMFrom(from, to time.Time) float32 {
 	panic("implement me!")
 }
 
-func (pg *PGConnector) GetRainMMSince(timestamp time.Time) *RainMMMap {
+func (pg *PGConnector) GetRainMMSince(timestamp time.Time) *RainEntriesMm {
 	panic("implement me!")
 }
 
-func (pg *PGConnector) GetRainMMFrom(from, to time.Time) *RainMMMap {
+func (pg *PGConnector) GetRainMMFrom(from, to time.Time) *RainEntriesMm {
 	panic("implement me!")
 }
 
@@ -128,26 +128,26 @@ func (pg *PGConnector) GetLastRainTime() time.Time {
 	panic("implement me!")
 }
 
-func (pg *PGConnector) GetTempDataCSince(since time.Time) *TempCMap {
-	now := time.Now()
-	return pg.GetTempDataCFrom(since, now)
+func (pg *PGConnector) GetTempDataCSince(since time.Time) *TempEntriesC {
+	return pg.GetTempDataCFrom(since, time.Now())
 }
 
-func (pg *PGConnector) GetTempDataCFrom(from time.Time, to time.Time) *TempCMap {
+func (pg *PGConnector) GetTempDataCFrom(from time.Time, to time.Time) *TempEntriesC {
 	sql := fmt.Sprintf(`
 		SELECT gw_timestamp, value
 		FROM temperature
 		WHERE gw_timestamp BETWEEN '%s' and '%s'
+		ORDER BY gw_timestamp
 		;
 	`, from.Format(TimestampFormat), to.Format(TimestampFormat))
 	rows, err := pg.genericQuery(sql)
-	defer rows.Close()
 	if err != nil {
 		logrus.Errorf("bad query: `%s`", sql)
+		return nil
 	}
+	defer rows.Close()
 
-	// build the data structure
-	data := make(map[time.Time]int)
+	var temps TempEntriesC
 	for rows.Next() {
 		var timestamp time.Time
 		var tempC int
@@ -156,15 +156,16 @@ func (pg *PGConnector) GetTempDataCFrom(from time.Time, to time.Time) *TempCMap 
 			logrus.Errorf("cannot retrieve timestamp/tempC row: %s", err)
 			return nil
 		}
-		data[timestamp] = tempC
+		temps = append(temps, TempEntryC{
+			timestamp,
+			tempC,
+		})
 	}
-	ptr := TempCMap(data)
-	return &ptr
+	return &temps
 }
 
 func (pg *PGConnector) GetLastTempC() int {
 	panic("implement me!")
-
 }
 
 /* RANDOM HELPER FUNCTIONS */

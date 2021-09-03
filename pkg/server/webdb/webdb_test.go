@@ -25,7 +25,7 @@ const (
 	secondsInYear = 60 * 60 * 24 * 365
 )
 
-var yearAgo = time.Now().Add(time.Second * -secondsInYear)
+var yearAgo = time.Now().Add(time.Second * -secondsInYear) //nolint:gochecknoglobals
 
 type WebDBTest struct {
 	suite.Suite
@@ -120,26 +120,24 @@ func (suite *WebDBTest) TestQueryRealTables() {
 
 // Insert a bunch of temperature data, get it retreived again
 func (suite *WebDBTest) TestInsertSelectTemperatureData() {
-	// make a random TempCMap
-	size := 10
+	// make a random TempEntriesC
+	size := 100
 	expected := generateRandomTempCMap(size)
-	for timestamp, temperature := range expected {
-		err := suite.entry.AddTempCValue(temperature, timestamp)
+	for _, entry := range expected {
+		err := suite.entry.AddTempCValue(entry.TempC, entry.Timestamp)
 		if err != nil {
 			suite.Fail("error inserting temperature into database", err)
 		}
 	}
 	since := yearAgo
 	actual := suite.query.GetTempDataCSince(since)
+	assert.True(suite.T(), len(*actual) == len(expected))
 	assert.NotNil(suite.T(), actual)
-	logrus.Errorf("actual=%v", actual)
-	logrus.Errorf("expected=%v", expected)
-	for actualTime, actualTemp := range *actual {
-		expectedTemp, ok := expected[actualTime]
-		if !ok {
-			suite.Fail(fmt.Sprintf("%s not in expected", actualTime))
-		}
-		assert.Equal(suite.T(), actualTemp, expectedTemp, "mismatch on TempCMap entry")
+	for i, v := range *actual {
+		// account for subtle rounding errors to go back and forth between postgresql and go
+		timeDiff := expected[i].Timestamp.Sub(v.Timestamp)
+		assert.True(suite.T(), timeDiff < time.Second)
+		assert.Equal(suite.T(), expected[i].TempC, v.TempC, "mismatch on TempEntriesC entry")
 	}
 }
 
@@ -156,11 +154,11 @@ func unwrap(res interface{}) (interface{}, error) {
 	return actual, nil
 }
 
-// make a randomly generated TempCMap
-func generateRandomTempCMap(n int) webdb.TempCMap {
+// make a randomly generated TempEntriesC
+func generateRandomTempCMap(n int) webdb.TempEntriesC {
+	var temps []webdb.TempEntryC //nolint:prealloc
 	stamps := generateOrderedTimestamps(n)
-	temps := make(webdb.TempCMap, n)
-	for _, v := range *stamps {
+	for _, stamp := range *stamps {
 		var tempC int
 		base := rand.Intn(40)    //nolint:gosec
 		neg := rand.Int()%2 == 0 //nolint:gosec
@@ -169,7 +167,11 @@ func generateRandomTempCMap(n int) webdb.TempCMap {
 		} else {
 			tempC = base
 		}
-		temps[v] = tempC
+		entry := webdb.TempEntryC{
+			Timestamp: stamp,
+			TempC:     tempC,
+		}
+		temps = append(temps, entry)
 	}
 	return temps
 }
