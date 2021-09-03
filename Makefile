@@ -51,7 +51,7 @@ docker-pglogs:
 	@$(COMPOSE) logs -f postgresql
 
 psql:
-	psql -U postgres -h localhost
+	psql -U postgres -h localhost raincounter
 
 # server
 test-server:

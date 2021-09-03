@@ -34,19 +34,19 @@ type DBQuery interface {
 	TotalRainMMFrom(time.Time, time.Time) float32
 
 	// GetRainMMSince gets a RainMMMap from a time in the past to present
-	GetRainMMSince(time.Time) RainMMMap
+	GetRainMMSince(time.Time) *RainMMMap
 
 	// GetRainMMFrom gets a RainMMMap between two timestamps
-	GetRainMMFrom(time.Time, time.Time) RainMMMap
+	GetRainMMFrom(time.Time, time.Time) *RainMMMap
 
 	// GetLastRainTime shows the date of the last rain
 	GetLastRainTime() time.Time
 
 	// GetTempDataCSince gets a TempCMap from a time in the past to the present
-	GetTempDataCSince(time.Time) TempCMap
+	GetTempDataCSince(time.Time) *TempCMap
 
 	// GetTempDataCFrom gets a TempCMap between two timestamps
-	GetTempDataCFrom(time.Time, time.Time) TempCMap
+	GetTempDataCFrom(time.Time, time.Time) *TempCMap
 
 	// GetLastTempC shows the most recent temperature
 	GetLastTempC() int

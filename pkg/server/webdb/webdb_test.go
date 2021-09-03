@@ -21,6 +21,12 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+const (
+	secondsInYear = 60 * 60 * 24 * 365
+)
+
+var yearAgo = time.Now().Add(time.Second * -secondsInYear)
+
 type WebDBTest struct {
 	suite.Suite
 	entry   webdb.DBEntry
@@ -53,7 +59,17 @@ func (suite *WebDBTest) TearDownSuite() {
 	suite.query.Close()
 }
 
-func (suite *WebDBTest) SetupTest()    {}
+func (suite *WebDBTest) SetupTest() {
+	// delete all database rows
+	err := suite.entry.Insert("DELETE FROM temperature;")
+	if err != nil {
+		suite.Fail("unable to delete temp tables", err)
+	}
+	err = suite.entry.Insert("DELETE FROM rain;")
+	if err != nil {
+		suite.Fail("unable to delete rain tables", err)
+	}
+}
 func (suite *WebDBTest) TearDownTest() {}
 
 // Simple test to make sure we can connect to the database, insert data and
@@ -105,7 +121,7 @@ func (suite *WebDBTest) TestQueryRealTables() {
 // Insert a bunch of temperature data, get it retreived again
 func (suite *WebDBTest) TestInsertSelectTemperatureData() {
 	// make a random TempCMap
-	size := 5
+	size := 10
 	expected := generateRandomTempCMap(size)
 	for timestamp, temperature := range expected {
 		err := suite.entry.AddTempCValue(temperature, timestamp)
@@ -113,15 +129,17 @@ func (suite *WebDBTest) TestInsertSelectTemperatureData() {
 			suite.Fail("error inserting temperature into database", err)
 		}
 	}
-	actual := suite.query.GetTempDataCSince(time.Now())
+	since := yearAgo
+	actual := suite.query.GetTempDataCSince(since)
 	assert.NotNil(suite.T(), actual)
-	logrus.Error(actual)
-	for k, v := range actual {
-		_, ok := expected[k]
+	logrus.Errorf("actual=%v", actual)
+	logrus.Errorf("expected=%v", expected)
+	for actualTime, actualTemp := range *actual {
+		expectedTemp, ok := expected[actualTime]
 		if !ok {
-			suite.Fail(fmt.Sprintf("%s not in expected", k))
+			suite.Fail(fmt.Sprintf("%s not in expected", actualTime))
 		}
-		assert.Equal(suite.T(), v, expected[k], "mismatch on TempCMap entry")
+		assert.Equal(suite.T(), actualTemp, expectedTemp, "mismatch on TempCMap entry")
 	}
 }
 
@@ -160,9 +178,8 @@ func generateRandomTempCMap(n int) webdb.TempCMap {
 func generateOrderedTimestamps(num int) *[]time.Time {
 	times := make([]time.Time, num)
 	now := time.Now()
-	secondsInYear := 60 * 60 * 24 * 365
 	for i := 0; i < num; i++ {
-		times[i] = now.Add(time.Second * time.Duration(rand.Intn(secondsInYear)))
+		times[i] = now.Add(time.Second * time.Duration(-rand.Intn(secondsInYear))) //nolint:gosec
 	}
 	sort.Slice(times, func(i, j int) bool {
 		return times[i].Before(times[j])
