@@ -41,11 +41,17 @@ test-gateway-race: clean-test test-common-race
 	@go clean -testcache
 	@go test $(TESTFLAGS) -race $(GW)/...
 
-dcu:
+docker-up:
 	@$(COMPOSE) up $(COMPOSEFLAGS)
 
-dcd:
+docker-down:
 	@$(COMPOSE) down
+
+docker-pglogs:
+	@$(COMPOSE) logs -f postgresql
+
+psql:
+	psql -U postgres -h localhost
 
 # server
 test-server:
