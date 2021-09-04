@@ -164,7 +164,22 @@ func (pg *PGConnector) GetTempDataCFrom(from time.Time, to time.Time) *TempEntri
 }
 
 func (pg *PGConnector) GetLastTempC() int {
-	panic("implement me!")
+	errVal := -999 //nolint:gomnd
+	sql := `SELECT value FROM temperature ORDER BY gw_timestamp DESC LIMIT 1;`
+	rows, err := pg.genericQuery(sql)
+	if err != nil {
+		logrus.Errorf("bad query: `%s`", sql)
+		return errVal
+	}
+	defer rows.Close()
+	var tempC int
+	rows.Next()
+	err = rows.Scan(&tempC)
+	if err != nil {
+		logrus.Errorf("failed to scan rows: %s", err)
+		return errVal
+	}
+	return tempC
 }
 
 /* RANDOM HELPER FUNCTIONS */

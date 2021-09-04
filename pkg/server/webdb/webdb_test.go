@@ -141,7 +141,7 @@ func (suite *WebDBTest) TestInsertSelectTemperatureData() {
 	}
 }
 
-// Insert data, grab it from a specific range within
+// Insert temperature data, grab it from within a specific range
 func (suite *WebDBTest) TestInsertSelectSpecificTemperatureRange() {
 	// make a large chunk of temperature data ordered sequentially by time
 	var temps, expected webdb.TempEntriesC
@@ -176,6 +176,32 @@ func (suite *WebDBTest) TestInsertSelectSpecificTemperatureRange() {
 		assert.True(suite.T(), timeDiff < time.Second)
 		assert.Equal(suite.T(), expected[i].TempC, v.TempC)
 	}
+}
+
+// Can we get the last temperature value
+func (suite *WebDBTest) TestGetLastTempC() {
+	randomData := generateRandomTempCMap(100)
+	var maxDate time.Time
+	var maxTemp int
+	for i, v := range randomData {
+		stamp := v.Timestamp
+		temp := v.TempC
+		if i == 0 {
+			maxDate = stamp
+			maxTemp = temp
+		}
+		if stamp.After(maxDate) {
+			maxDate = stamp
+			maxTemp = temp
+		}
+		err := suite.entry.AddTempCValue(temp, stamp)
+		if err != nil {
+			suite.Fail("error inserting temp data", err)
+		}
+	}
+	actual := suite.query.GetLastTempC()
+	assert.Equal(suite.T(), maxTemp, actual)
+
 }
 
 /* HELPER FUNCTIONS */
