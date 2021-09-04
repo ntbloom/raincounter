@@ -99,7 +99,7 @@ func (pg *PGConnector) AddRainMMEvent(value float32, gwTimestamp time.Time) erro
 	panic("implement me!")
 }
 
-/* QUERYING DATA */
+/* QUERYING RAIN */
 
 func (pg *PGConnector) Select(cmd string) (interface{}, error) {
 	return pg.genericQuery(cmd)
@@ -124,6 +124,8 @@ func (pg *PGConnector) GetRainMMFrom(from, to time.Time) *RainEntriesMm {
 func (pg *PGConnector) GetLastRainTime() time.Time {
 	panic("implement me!")
 }
+
+/* QUERYING TEMPERATURE */
 
 func (pg *PGConnector) GetTempDataCSince(since time.Time) *TempEntriesC {
 	return pg.GetTempDataCFrom(since, time.Now())

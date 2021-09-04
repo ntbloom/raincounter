@@ -150,7 +150,6 @@ func (suite *WebDBTest) TestInsertSelectSpecificTemperatureRange() {
 	end := 6
 	beginning := time.Date(2020, time.Month(start), 1, 0, 0, 0, 0, time.UTC)
 	finish := time.Date(2020, time.Month(end), 3, 0, 0, 0, 0, time.UTC)
-
 	for i := 1; i < 12; i++ {
 		month := time.Month(i)
 		timestamp := time.Date(2020, month, 2, 1, 1, 1, 1, time.UTC)
@@ -167,10 +166,9 @@ func (suite *WebDBTest) TestInsertSelectSpecificTemperatureRange() {
 		if int(month) >= start && int(month) <= end {
 			expected = append(expected, entry)
 		}
-
 		temp++
 	}
-
+	// verify the query
 	actual := suite.query.GetTempDataCFrom(beginning, finish)
 	assert.Equal(suite.T(), len(expected), len(*actual))
 	for i, v := range *actual {
@@ -179,6 +177,8 @@ func (suite *WebDBTest) TestInsertSelectSpecificTemperatureRange() {
 		assert.Equal(suite.T(), expected[i].TempC, v.TempC)
 	}
 }
+
+/* HELPER FUNCTIONS */
 
 // unwrap a single value
 func unwrap(res interface{}) (interface{}, error) {
