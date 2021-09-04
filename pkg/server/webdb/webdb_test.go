@@ -144,7 +144,7 @@ func (suite *WebDBTest) TestInsertSelectTemperatureData() {
 // Insert temperature data, grab it from within a specific range
 func (suite *WebDBTest) TestInsertSelectSpecificTemperatureRange() {
 	// make a large chunk of temperature data ordered sequentially by time
-	var temps, expected webdb.TempEntriesC
+	var expected webdb.TempEntriesC
 	temp := 0
 	start := 4
 	end := 6
@@ -154,7 +154,6 @@ func (suite *WebDBTest) TestInsertSelectSpecificTemperatureRange() {
 		month := time.Month(i)
 		timestamp := time.Date(2020, month, 2, 1, 1, 1, 1, time.UTC)
 		entry := webdb.TempEntryC{Timestamp: timestamp, TempC: temp}
-		temps = append(temps, entry)
 
 		// enter everything into the database
 		err := suite.entry.AddTempCValue(temp, timestamp)
@@ -201,7 +200,6 @@ func (suite *WebDBTest) TestGetLastTempC() {
 	}
 	actual := suite.query.GetLastTempC()
 	assert.Equal(suite.T(), maxTemp, actual)
-
 }
 
 /* HELPER FUNCTIONS */
