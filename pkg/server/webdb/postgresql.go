@@ -62,12 +62,15 @@ func (pg *PGConnector) Close() {
 
 func (pg *PGConnector) Insert(cmd string) error {
 	res, err := pg.genericQuery(cmd)
+	if err != nil {
+		logrus.Error(err)
+	}
 	defer res.Close()
 	return err
 }
 
 func (pg *PGConnector) AddTagValue(tag int, value int, t time.Time) error {
-	//switch tag {
+	// switch tag {
 	//// don't use these methods
 	//case tlv.Rain:
 	//	panic("rain events not supported in this method")
@@ -99,11 +102,11 @@ func (pg *PGConnector) AddRainMMEvent(value float32, gwTimestamp time.Time) erro
 	panic("implement me!")
 }
 
-/* QUERYING RAIN */
-
 func (pg *PGConnector) Select(cmd string) (interface{}, error) {
 	return pg.genericQuery(cmd)
 }
+
+/* QUERYING RAIN */
 
 func (pg *PGConnector) TotalRainMMSince(since time.Time) float32 {
 	panic("implement me!")
