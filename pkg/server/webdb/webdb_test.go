@@ -141,6 +141,45 @@ func (suite *WebDBTest) TestInsertSelectTemperatureData() {
 	}
 }
 
+// Insert data, grab it from a specific range within
+func (suite *WebDBTest) TestInsertSelectSpecificTemperatureRange() {
+	// make a large chunk of temperature data ordered sequentially by time
+	var temps, expected webdb.TempEntriesC
+	temp := 0
+	start := 4
+	end := 6
+	beginning := time.Date(2020, time.Month(start), 1, 0, 0, 0, 0, time.UTC)
+	finish := time.Date(2020, time.Month(end), 3, 0, 0, 0, 0, time.UTC)
+
+	for i := 1; i < 12; i++ {
+		month := time.Month(i)
+		timestamp := time.Date(2020, month, 2, 1, 1, 1, 1, time.UTC)
+		entry := webdb.TempEntryC{Timestamp: timestamp, TempC: temp}
+		temps = append(temps, entry)
+
+		// enter everything into the database
+		err := suite.entry.AddTempCValue(temp, timestamp)
+		if err != nil {
+			suite.Fail("unable to add temp data", err)
+		}
+
+		// save a 3-month period to query against
+		if int(month) >= start && int(month) <= end {
+			expected = append(expected, entry)
+		}
+
+		temp++
+	}
+
+	actual := suite.query.GetTempDataCFrom(beginning, finish)
+	assert.Equal(suite.T(), len(expected), len(*actual))
+	for i, v := range *actual {
+		timeDiff := v.Timestamp.Sub(expected[i].Timestamp)
+		assert.True(suite.T(), timeDiff < time.Second)
+		assert.Equal(suite.T(), expected[i].TempC, v.TempC)
+	}
+}
+
 // unwrap a single value
 func unwrap(res interface{}) (interface{}, error) {
 	var actual interface{}

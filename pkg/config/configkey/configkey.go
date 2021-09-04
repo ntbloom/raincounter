@@ -1,6 +1,8 @@
 // Package configkey maps yaml configs to a constant
 package configkey
 
+import "time"
+
 const (
 	Loglevel = "log.level"
 
@@ -37,4 +39,5 @@ const (
 	DegreesC          = string("\u00B0C")
 	Kill              = 1
 	SendStatusMessage = 2
+	TimestampFormat   = time.RFC3339
 )

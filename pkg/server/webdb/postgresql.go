@@ -15,7 +15,6 @@ import (
 	"github.com/ntbloom/raincounter/pkg/config/configkey"
 	"github.com/spf13/viper"
 
-	"github.com/ntbloom/raincounter/pkg/gateway/tlv"
 	"github.com/sirupsen/logrus"
 )
 
@@ -23,8 +22,6 @@ import (
 // We still use the same tag structure, but put the data into different
 // tables because we don't really care about events, just the rain and
 // temperature data.
-
-const TimestampFormat = time.RFC3339
 
 type PGConnector struct {
 	ctx  context.Context
@@ -65,36 +62,36 @@ func (pg *PGConnector) Close() {
 
 func (pg *PGConnector) Insert(cmd string) error {
 	res, err := pg.genericQuery(cmd)
-	res.Close()
+	defer res.Close()
 	return err
 }
 
 func (pg *PGConnector) AddTagValue(tag int, value int, t time.Time) error {
-	switch tag {
-	// don't use these methods
-	case tlv.Rain:
-		panic("rain events not supported in this method")
-	case tlv.Temperature:
-		panic("temperature events not supported in this method")
-
-	case tlv.SoftReset:
-		logrus.Debug("adding soft reset to web database")
-	case tlv.HardReset:
-		logrus.Debug("adding hard reset to web database")
-	case tlv.Pause:
-		logrus.Debug("adding pause to web database")
-	case tlv.Unpause:
-		logrus.Debug("adding unpause to web database")
-	default:
-		panic("unsupported tag")
-	}
+	//switch tag {
+	//// don't use these methods
+	//case tlv.Rain:
+	//	panic("rain events not supported in this method")
+	//case tlv.Temperature:
+	//	panic("temperature events not supported in this method")
+	//
+	//case tlv.SoftReset:
+	//	logrus.Debug("adding soft reset to web database")
+	//case tlv.HardReset:
+	//	logrus.Debug("adding hard reset to web database")
+	//case tlv.Pause:
+	//	logrus.Debug("adding pause to web database")
+	//case tlv.Unpause:
+	//	logrus.Debug("adding unpause to web database")
+	//default:
+	//	panic("unsupported tag")
+	//}
 	return nil
 }
 
 func (pg *PGConnector) AddTempCValue(tempC int, gwTimestamp time.Time) error {
 	sql := fmt.Sprintf(
 		`INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('%s','%s',%d);`,
-		gwTimestamp.Format(TimestampFormat), time.Now().Format(TimestampFormat), tempC)
+		gwTimestamp.Format(configkey.TimestampFormat), time.Now().Format(configkey.TimestampFormat), tempC)
 	return pg.Insert(sql)
 }
 
@@ -139,7 +136,7 @@ func (pg *PGConnector) GetTempDataCFrom(from time.Time, to time.Time) *TempEntri
 		WHERE gw_timestamp BETWEEN '%s' and '%s'
 		ORDER BY gw_timestamp
 		;
-	`, from.Format(TimestampFormat), to.Format(TimestampFormat))
+	`, from.Format(configkey.TimestampFormat), to.Format(configkey.TimestampFormat))
 	rows, err := pg.genericQuery(sql)
 	if err != nil {
 		logrus.Errorf("bad query: `%s`", sql)
