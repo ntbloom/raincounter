@@ -123,7 +123,22 @@ func (pg *PGConnector) TotalRainMMSince(since time.Time) float32 {
 }
 
 func (pg *PGConnector) TotalRainMMFrom(from, to time.Time) float32 {
-	return -1.0
+	sql := fmt.Sprintf(`SELECT sum(amount) FROM rain WHERE gw_timestamp BETWEEN '%s' and '%s';`,
+		from.Format(configkey.TimestampFormat), to.Format(configkey.TimestampFormat))
+	row, err := pg.genericQuery(sql)
+	if err != nil {
+		logrus.Error(err)
+		return floatErrVal
+	}
+	defer row.Close()
+	row.Next()
+	var total float32
+	err = row.Scan(&total)
+	if err != nil {
+		logrus.Error(err)
+		return floatErrVal
+	}
+	return total
 }
 
 func (pg *PGConnector) GetRainMMSince(since time.Time) *RainEntriesMm {
