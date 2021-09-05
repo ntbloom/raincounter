@@ -15,6 +15,9 @@ type DBEntry interface {
 	// AddTempCValue puts a Celsius temperature value in the database
 	AddTempCValue(int, time.Time) error
 
+	// AddStatus
+	AddStatusUpdate(int, time.Time) error
+
 	// AddRainMMEvent puts a rain event with a timestamp from the sensor
 	AddRainMMEvent(float32, time.Time) error
 

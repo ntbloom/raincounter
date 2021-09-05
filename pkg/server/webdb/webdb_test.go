@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ntbloom/raincounter/pkg/gateway/tlv"
+
 	"github.com/stretchr/testify/assert"
 
 	"github.com/sirupsen/logrus"
@@ -335,6 +337,40 @@ func generateRandomRainEntriesMM(n int) webdb.RainEntriesMm {
 		rain = append(rain, entry)
 	}
 	return rain
+}
+
+/* MAKE SURE WE DON'T ERROR ON STATUS/EVENT MESSGES */
+func (suite *WebDBTest) TestEventAndStatusMessagesDontError() {
+	for _, asset := range []int{configkey.SensorStatus, configkey.GatewayStatus} {
+		err := suite.entry.AddStatusUpdate(asset, time.Now())
+		if err != nil {
+			suite.Fail("unable to add status message", err)
+		}
+	}
+	for _, tag := range []int{tlv.SoftReset, tlv.HardReset, tlv.Pause, tlv.Unpause} {
+		err := suite.entry.AddTagValue(tag, 1, time.Now())
+		if err != nil {
+			suite.Fail("unable to add tag", err)
+		}
+	}
+	// do a few quick and dirty sql query just to make sure something made it into the database
+
+	// status page
+	statusQuery := `SELECT sum(asset) FROM status_log;` // should be 1(sensor) + 2(gateway), so 3
+	val := suite.entry.Insert(statusQuery)
+	statuses, err := unwrap(val)
+	if err != nil {
+		suite.Fail("unable to query status_log table", err)
+	}
+	assert.Equal(suite.T(), 3, statuses)
+
+	tagQuery := `SELECT sum(value) FROM event_log;` // should be 4, one for each tlv tag
+	val = suite.entry.Insert(tagQuery)
+	tags, err := unwrap(val)
+	if err != nil {
+		suite.Fail("unable to query event_log table", err)
+	}
+	assert.Equal(suite.T(), 4, tags)
 }
 
 /* HELPER FUNCTIONS */

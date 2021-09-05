@@ -40,4 +40,6 @@ const (
 	Kill              = 1
 	SendStatusMessage = 2
 	TimestampFormat   = time.RFC3339
+	SensorStatus      = 1
+	GatewayStatus     = 2
 )

@@ -98,6 +98,12 @@ func (pg *PGConnector) AddTagValue(tag int, value int, t time.Time) error {
 	return nil
 }
 
+func (pg *PGConnector) AddStatusUpdate(asset int, gwTimestamp time.Time) error {
+	//sql := fmt.Sprintf(`INSERT INTO status_log (gw_timestamp, server_timestamp, asset) VALUES ('%s','%s','%d'`,
+	//	gwTimestamp.Format(configkey.TimestampFormat), time.Now().Format(configkey.TimestampFormat), asset)
+	return nil
+}
+
 func (pg *PGConnector) AddTempCValue(tempC int, gwTimestamp time.Time) error {
 	sql := fmt.Sprintf(
 		`INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('%s','%s',%d);`,
