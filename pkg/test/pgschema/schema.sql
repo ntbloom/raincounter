@@ -59,10 +59,11 @@ VALUES (2, 'soft reset'),
 DROP TABLE IF EXISTS event_log CASCADE;
 CREATE TABLE event_log
 (
-    id        INTEGER PRIMARY KEY,
-    tag       INTEGER     NOT NULL,
-    value     INTEGER     NOT NULL,
-    timestamp TIMESTAMPTZ NOT NULL,
+    id               SERIAL PRIMARY KEY,
+    gw_timestamp     TIMESTAMPTZ NOT NULL,
+    server_timestamp TIMESTAMPTZ NOT NULL,
+    tag              INTEGER     NOT NULL,
+    value            INTEGER     NOT NULL,
     FOREIGN KEY (tag) REFERENCES mappings (id)
 );
 COMMIT;

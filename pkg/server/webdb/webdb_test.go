@@ -63,13 +63,16 @@ func (suite *WebDBTest) TearDownSuite() {
 
 func (suite *WebDBTest) SetupTest() {
 	// delete all database rows
-	err := suite.entry.Insert("DELETE FROM temperature;")
-	if err != nil {
-		suite.Fail("unable to delete temp tables", err)
-	}
-	err = suite.entry.Insert("DELETE FROM rain;")
-	if err != nil {
-		suite.Fail("unable to delete rain tables", err)
+	for _, sql := range []string{
+		"DELETE FROM temperature;",
+		"DELETE FROM rain;",
+		"DELETE FROM event_log;",
+		"DELETE FROM status_log;",
+	} {
+		err := suite.entry.Insert(sql)
+		if err != nil {
+			suite.Fail("can't delete table rows", err)
+		}
 	}
 }
 func (suite *WebDBTest) TearDownTest() {}
@@ -353,24 +356,30 @@ func (suite *WebDBTest) TestEventAndStatusMessagesDontError() {
 			suite.Fail("unable to add tag", err)
 		}
 	}
-	// do a few quick and dirty sql query just to make sure something made it into the database
+	// do a few quick and dirty sql queries just to make sure something made it into the database
 
 	// status page
 	statusQuery := `SELECT sum(asset) FROM status_log;` // should be 1(sensor) + 2(gateway), so 3
-	val := suite.entry.Insert(statusQuery)
-	statuses, err := unwrap(val)
+	val, err := suite.query.Select(statusQuery)
 	if err != nil {
 		suite.Fail("unable to query status_log table", err)
 	}
-	assert.Equal(suite.T(), 3, statuses)
+	statuses, err := unwrap(val)
+	if err != nil {
+		suite.Fail("unable to unwrap statuses", err)
+	}
+	assert.Equal(suite.T(), int64(3), statuses)
 
 	tagQuery := `SELECT sum(value) FROM event_log;` // should be 4, one for each tlv tag
-	val = suite.entry.Insert(tagQuery)
-	tags, err := unwrap(val)
+	val, err = suite.query.Select(tagQuery)
 	if err != nil {
 		suite.Fail("unable to query event_log table", err)
 	}
-	assert.Equal(suite.T(), 4, tags)
+	tags, err := unwrap(val)
+	if err != nil {
+		suite.Fail("error unwrapping event_log", err)
+	}
+	assert.Equal(suite.T(), int64(4), tags)
 }
 
 /* HELPER FUNCTIONS */

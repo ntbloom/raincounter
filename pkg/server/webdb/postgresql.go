@@ -6,6 +6,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/ntbloom/raincounter/pkg/gateway/tlv"
+
 	"github.com/jackc/pgx/v4"
 
 	"github.com/ntbloom/raincounter/pkg/common/exitcodes"
@@ -76,32 +78,26 @@ func (pg *PGConnector) Insert(cmd string) error {
 	return err
 }
 
-func (pg *PGConnector) AddTagValue(tag int, value int, t time.Time) error {
-	// switch tag {
-	//// don't use these methods
-	//case tlv.Rain:
-	//	panic("rain events not supported in this method")
-	//case tlv.Temperature:
-	//	panic("temperature events not supported in this method")
-	//
-	//case tlv.SoftReset:
-	//	logrus.Debug("adding soft reset to web database")
-	//case tlv.HardReset:
-	//	logrus.Debug("adding hard reset to web database")
-	//case tlv.Pause:
-	//	logrus.Debug("adding pause to web database")
-	//case tlv.Unpause:
-	//	logrus.Debug("adding unpause to web database")
-	//default:
-	//	panic("unsupported tag")
-	//}
-	return nil
+func (pg *PGConnector) AddTagValue(tag int, value int, gwTimestamp time.Time) error {
+	switch tag {
+	// don't use these methods
+	case tlv.Rain:
+		return fmt.Errorf("rain events not supported in AddTagValue")
+	case tlv.Temperature:
+		return fmt.Errorf("temperature events not supported in AddTagValue")
+	default:
+		sql := fmt.Sprintf(
+			`INSERT INTO event_log (gw_timestamp, server_timestamp, tag, value) VALUES ('%s','%s',%d,%d);`,
+			gwTimestamp.Format(configkey.TimestampFormat), time.Now().Format(configkey.TimestampFormat), tag, value,
+		)
+		return pg.Insert(sql)
+	}
 }
 
 func (pg *PGConnector) AddStatusUpdate(asset int, gwTimestamp time.Time) error {
-	//sql := fmt.Sprintf(`INSERT INTO status_log (gw_timestamp, server_timestamp, asset) VALUES ('%s','%s','%d'`,
-	//	gwTimestamp.Format(configkey.TimestampFormat), time.Now().Format(configkey.TimestampFormat), asset)
-	return nil
+	sql := fmt.Sprintf(`INSERT INTO status_log (gw_timestamp, server_timestamp, asset) VALUES ('%s','%s',%d);`,
+		gwTimestamp.Format(configkey.TimestampFormat), time.Now().Format(configkey.TimestampFormat), asset)
+	return pg.Insert(sql)
 }
 
 func (pg *PGConnector) AddTempCValue(tempC int, gwTimestamp time.Time) error {
@@ -118,11 +114,11 @@ func (pg *PGConnector) AddRainMMEvent(amount float32, gwTimestamp time.Time) err
 	return pg.Insert(sql)
 }
 
+/* QUERYING RAIN */
+
 func (pg *PGConnector) Select(cmd string) (interface{}, error) {
 	return pg.genericQuery(cmd)
 }
-
-/* QUERYING RAIN */
 
 func (pg *PGConnector) TotalRainMMSince(since time.Time) float32 {
 	return pg.TotalRainMMFrom(since, time.Now())
