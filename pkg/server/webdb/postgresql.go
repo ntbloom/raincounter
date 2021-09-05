@@ -119,19 +119,46 @@ func (pg *PGConnector) Select(cmd string) (interface{}, error) {
 /* QUERYING RAIN */
 
 func (pg *PGConnector) TotalRainMMSince(since time.Time) float32 {
-	panic("implement me!")
+	return pg.TotalRainMMFrom(since, time.Now())
 }
 
 func (pg *PGConnector) TotalRainMMFrom(from, to time.Time) float32 {
-	panic("implement me!")
+	return -1.0
 }
 
-func (pg *PGConnector) GetRainMMSince(timestamp time.Time) *RainEntriesMm {
-	panic("implement me!")
+func (pg *PGConnector) GetRainMMSince(since time.Time) *RainEntriesMm {
+	return pg.GetRainMMFrom(since, time.Now())
 }
 
 func (pg *PGConnector) GetRainMMFrom(from, to time.Time) *RainEntriesMm {
-	panic("implement me!")
+	sql := fmt.Sprintf(`
+		SELECT gw_timestamp, amount 
+		FROM rain 
+		WHERE gw_timestamp BETWEEN '%s' and '%s'
+		ORDER BY gw_timestamp
+		;
+	`, from.Format(configkey.TimestampFormat), to.Format(configkey.TimestampFormat))
+	rows, err := pg.genericQuery(sql)
+	if err != nil {
+		logrus.Error(err)
+		return nil
+	}
+	defer rows.Close()
+	var rain RainEntriesMm
+	for rows.Next() {
+		var amt float32
+		var stamp time.Time
+		err = rows.Scan(&stamp, &amt)
+		if err != nil {
+			logrus.Error(err)
+			return nil
+		}
+		rain = append(rain, RainEntryMm{
+			Timestamp:   stamp,
+			Millimeters: amt,
+		})
+	}
+	return &rain
 }
 
 func (pg *PGConnector) GetLastRainTime() time.Time {

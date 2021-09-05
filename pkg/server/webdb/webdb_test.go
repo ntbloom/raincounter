@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/stretchr/testify/assert"
+
+	"github.com/sirupsen/logrus"
 
 	"github.com/jackc/pgx/v4"
 
@@ -72,6 +72,8 @@ func (suite *WebDBTest) SetupTest() {
 }
 func (suite *WebDBTest) TearDownTest() {}
 
+/* GENERIC PACKAGE-LEVEL TESTS */
+
 // Simple test to make sure we can connect to the database, insert data and
 // query the results. This is a good general health test to make sure, among
 // other things, we can connect to the database.
@@ -118,11 +120,13 @@ func (suite *WebDBTest) TestQueryRealTables() {
 	assert.Equal(suite.T(), "soft reset", actual)
 }
 
+/* TEMPERATURE INSERT/QUERY TESTS */
+
 // Insert a bunch of temperature data, get it retreived again
 func (suite *WebDBTest) TestInsertSelectTemperatureData() {
 	// make a random TempEntriesC
 	size := 100
-	expected := generateRandomTempCMap(size)
+	expected := generateRandomTempEntriesC(size)
 	for _, entry := range expected {
 		err := suite.entry.AddTempCValue(entry.TempC, entry.Timestamp)
 		if err != nil {
@@ -179,7 +183,7 @@ func (suite *WebDBTest) TestInsertSelectSpecificTemperatureRange() {
 
 // Can we get the last temperature value
 func (suite *WebDBTest) TestGetLastTempC() {
-	randomData := generateRandomTempCMap(100)
+	randomData := generateRandomTempEntriesC(100)
 	var maxDate time.Time
 	var maxTemp int
 	for i, v := range randomData {
@@ -202,41 +206,8 @@ func (suite *WebDBTest) TestGetLastTempC() {
 	assert.Equal(suite.T(), maxTemp, actual)
 }
 
-// Insert some rain values, get timestamp from the last entry entered
-func (suite *WebDBTest) TestGetLastRainTime() {
-	// make 2 timestamps, enter rain event for it
-	amt := float32(viper.GetFloat64(configkey.SensorRainMm))
-	twoHoursAgo := time.Now().Add(time.Hour * -2)
-	oneHourAgo := time.Now().Add(time.Hour * -1)
-	for _, stamp := range []time.Time{twoHoursAgo, oneHourAgo} {
-		err := suite.entry.AddRainMMEvent(amt, stamp)
-		if err != nil {
-			suite.Fail("failed to enter value", err)
-		}
-	}
-	//
-	lastRainTime := suite.query.GetLastRainTime()
-	timeDiff := lastRainTime.Sub(oneHourAgo)
-	assert.True(suite.T(), timeDiff < time.Second)
-}
-
-/* HELPER FUNCTIONS */
-
-// unwrap a single value
-func unwrap(res interface{}) (interface{}, error) {
-	var actual interface{}
-	val := res.(pgx.Rows)
-	defer val.Close()
-	val.Next()
-	err := val.Scan(&actual)
-	if err != nil {
-		return nil, err
-	}
-	return actual, nil
-}
-
 // make a randomly generated TempEntriesC
-func generateRandomTempCMap(n int) webdb.TempEntriesC {
+func generateRandomTempEntriesC(n int) webdb.TempEntriesC {
 	var temps []webdb.TempEntryC //nolint:prealloc
 	stamps := generateOrderedTimestamps(n)
 	for _, stamp := range *stamps {
@@ -255,6 +226,78 @@ func generateRandomTempCMap(n int) webdb.TempEntriesC {
 		temps = append(temps, entry)
 	}
 	return temps
+}
+
+/* RAIN INSERT/QUERY TESTS */
+func (suite *WebDBTest) TestEnterAndRetrieveRain() {
+	// generate random array of data
+	data := generateRandomRainEntriesMM(100)
+	var expTotalRain float32 = 0.0
+	for _, entry := range data {
+		err := suite.entry.AddRainMMEvent(entry.Millimeters, entry.Timestamp)
+		expTotalRain += entry.Millimeters
+		if err != nil {
+			suite.Fail("failed to add rain amount", err)
+		}
+	}
+	actual := suite.query.GetRainMMSince(yearAgo)
+	assert.NotNil(suite.T(), actual)
+	var actTotalRain float32 = 0.0
+	for i, v := range *actual {
+		actTotalRain += v.Millimeters
+		timeDiff := data[i].Timestamp.Sub(v.Timestamp)
+		assert.True(suite.T(), timeDiff < time.Second)
+	}
+	assert.Equal(suite.T(), len(data), len(*actual), "length of actual and expected data are not equal")
+	assert.Equal(suite.T(), expTotalRain, actTotalRain, "actual and total rain are not equal")
+
+}
+
+// Insert some rain values, get timestamp from the last entry entered
+func (suite *WebDBTest) TestGetLastRainTime() {
+	// make 2 timestamps, enter rain event for it
+	amt := float32(viper.GetFloat64(configkey.SensorRainMm))
+	twoHoursAgo := time.Now().Add(time.Hour * -2)
+	oneHourAgo := time.Now().Add(time.Hour * -1)
+	for _, stamp := range []time.Time{twoHoursAgo, oneHourAgo} {
+		err := suite.entry.AddRainMMEvent(amt, stamp)
+		if err != nil {
+			suite.Fail("failed to enter value", err)
+		}
+	}
+	//
+	lastRainTime := suite.query.GetLastRainTime()
+	timeDiff := lastRainTime.Sub(oneHourAgo)
+	assert.True(suite.T(), timeDiff < time.Second)
+}
+
+// generate a random RainEntriesMM struct
+func generateRandomRainEntriesMM(n int) webdb.RainEntriesMm {
+	stamps := generateOrderedTimestamps(n)
+	amt := float32(viper.GetFloat64(configkey.SensorRainMm))
+	var rain webdb.RainEntriesMm
+	for _, stamp := range *stamps {
+		entry := webdb.RainEntryMm{
+			Timestamp: stamp, Millimeters: amt,
+		}
+		rain = append(rain, entry)
+	}
+	return rain
+}
+
+/* HELPER FUNCTIONS */
+
+// unwrap a single value
+func unwrap(res interface{}) (interface{}, error) {
+	var actual interface{}
+	val := res.(pgx.Rows)
+	defer val.Close()
+	val.Next()
+	err := val.Scan(&actual)
+	if err != nil {
+		return nil, err
+	}
+	return actual, nil
 }
 
 // get a bunch of ordered timestamps where idx 0 is the oldest and idx -1 is the newest
