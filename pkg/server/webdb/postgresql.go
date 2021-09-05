@@ -23,6 +23,13 @@ import (
 // tables because we don't really care about events, just the rain and
 // temperature data.
 
+const (
+	intErrVal   = -999
+	floatErrVal = -999.0
+)
+
+var errTime time.Time = time.Unix(0, 0)
+
 type PGConnector struct {
 	ctx  context.Context
 	pool *pgxpool.Pool
@@ -98,8 +105,11 @@ func (pg *PGConnector) AddTempCValue(tempC int, gwTimestamp time.Time) error {
 	return pg.Insert(sql)
 }
 
-func (pg *PGConnector) AddRainMMEvent(value float32, gwTimestamp time.Time) error {
-	panic("implement me!")
+func (pg *PGConnector) AddRainMMEvent(amount float32, gwTimestamp time.Time) error {
+	sql := fmt.Sprintf(
+		`INSERT INTO rain (gw_timestamp, server_timestamp, amount ) VALUES ('%s','%s','%f');`,
+		gwTimestamp.Format(configkey.TimestampFormat), time.Now().Format(configkey.TimestampFormat), amount)
+	return pg.Insert(sql)
 }
 
 func (pg *PGConnector) Select(cmd string) (interface{}, error) {
@@ -125,7 +135,20 @@ func (pg *PGConnector) GetRainMMFrom(from, to time.Time) *RainEntriesMm {
 }
 
 func (pg *PGConnector) GetLastRainTime() time.Time {
-	panic("implement me!")
+	sql := `SELECT amount FROM rain ORDER BY gw_timestamp DESC LIMIT 1;`
+	row, err := pg.genericQuery(sql)
+	if err != nil {
+		return errTime
+	}
+	defer row.Close()
+	var stamp time.Time
+	row.Next()
+	err = row.Scan(&stamp)
+	if err != nil {
+		logrus.Errorf("failure to scan row for last rain timestamp: %s", err)
+		return errTime
+	}
+	return stamp
 }
 
 /* QUERYING TEMPERATURE */
@@ -167,20 +190,19 @@ func (pg *PGConnector) GetTempDataCFrom(from time.Time, to time.Time) *TempEntri
 }
 
 func (pg *PGConnector) GetLastTempC() int {
-	errVal := -999 //nolint:gomnd
 	sql := `SELECT value FROM temperature ORDER BY gw_timestamp DESC LIMIT 1;`
-	rows, err := pg.genericQuery(sql)
+	row, err := pg.genericQuery(sql)
 	if err != nil {
-		logrus.Errorf("bad query: `%s`", sql)
-		return errVal
+		logrus.Error(err)
+		return intErrVal
 	}
-	defer rows.Close()
+	defer row.Close()
 	var tempC int
-	rows.Next()
-	err = rows.Scan(&tempC)
+	row.Next()
+	err = row.Scan(&tempC)
 	if err != nil {
-		logrus.Errorf("failed to scan rows: %s", err)
-		return errVal
+		logrus.Errorf("failed to scan row for tempC: %s", err)
+		return intErrVal
 	}
 	return tempC
 }

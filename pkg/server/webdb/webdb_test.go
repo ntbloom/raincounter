@@ -202,6 +202,24 @@ func (suite *WebDBTest) TestGetLastTempC() {
 	assert.Equal(suite.T(), maxTemp, actual)
 }
 
+// Insert some rain values, get timestamp from the last entry entered
+func (suite *WebDBTest) TestGetLastRainTime() {
+	// make 2 timestamps, enter rain event for it
+	amt := float32(viper.GetFloat64(configkey.SensorRainMm))
+	twoHoursAgo := time.Now().Add(time.Hour * -2)
+	oneHourAgo := time.Now().Add(time.Hour * -1)
+	for _, stamp := range []time.Time{twoHoursAgo, oneHourAgo} {
+		err := suite.entry.AddRainMMEvent(amt, stamp)
+		if err != nil {
+			suite.Fail("failed to enter value", err)
+		}
+	}
+	//
+	lastRainTime := suite.query.GetLastRainTime()
+	timeDiff := lastRainTime.Sub(oneHourAgo)
+	assert.True(suite.T(), timeDiff < time.Second)
+}
+
 /* HELPER FUNCTIONS */
 
 // unwrap a single value
