@@ -58,7 +58,7 @@ func (m *Messenger) Start() {
 			logrus.Tracef("received Message from serial port: %s", msg.payload)
 			m.publish(msg)
 		case <-statusTimer.C:
-			logrus.Debug("requesting status message")
+			logrus.Tracef("requesting status message")
 			m.sendStatus()
 		}
 	}
@@ -73,6 +73,7 @@ func (m *Messenger) Stop() {
 // publish sends a Message over MQTT
 func (m *Messenger) publish(msg *Message) {
 	logrus.Tracef("sending Message over MQTT: %s", msg.payload)
+	logrus.Debugf("publishing topic=%s, msg=%s", msg.topic, msg.payload)
 	m.client.Publish(msg.topic, msg.qos, msg.retained, msg.payload)
 }
 
@@ -97,7 +98,6 @@ func gatewayStatusMessage() (*Message, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return &Message{
 		topic:    mqtt.GatewayStatus,
 		retained: false,

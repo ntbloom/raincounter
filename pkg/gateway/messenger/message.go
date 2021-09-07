@@ -165,6 +165,6 @@ func (m *Messenger) NewMessage(packet *tlv.TLV) (*Message, error) {
 		qos:      byte(viper.GetInt(configkey.MQTTQos)),
 		payload:  payload,
 	}
-	logrus.Debugf("topic=%s, payload=%s", topic, payload)
+	logrus.Tracef("sending message, topic=%s, payload=%s", topic, payload)
 	return &msg, nil
 }
