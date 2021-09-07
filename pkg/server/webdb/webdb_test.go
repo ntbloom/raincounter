@@ -307,7 +307,6 @@ func (suite *WebDBTest) TestEnterAndRetrieveRainDataWithinRange() {
 	// also verify the tallying function
 	queriedTotal := suite.query.TotalRainMMFrom(beginning, finish)
 	assert.Equal(suite.T(), expTotal, queriedTotal, "rain tallying function is incorrect")
-
 }
 
 // Insert some rain values, get timestamp from the last entry entered
@@ -342,7 +341,7 @@ func generateRandomRainEntriesMM(n int) webdb.RainEntriesMm {
 	return rain
 }
 
-/* MAKE SURE WE DON'T ERROR ON STATUS/EVENT MESSGES */
+// make sure we don't error on event/status messages
 func (suite *WebDBTest) TestEventAndStatusMessagesDontError() {
 	for _, asset := range []int{configkey.SensorStatus, configkey.GatewayStatus} {
 		err := suite.entry.AddStatusUpdate(asset, time.Now())
@@ -380,6 +379,21 @@ func (suite *WebDBTest) TestEventAndStatusMessagesDontError() {
 		suite.Fail("error unwrapping event_log", err)
 	}
 	assert.Equal(suite.T(), int64(4), tags)
+}
+
+// make sure we handle the database rows being empty
+func (suite *WebDBTest) TestEmptyResultsDontError() {
+	// test assumes all rows are empty
+
+	rainSince := suite.query.GetRainMMSince(time.Now())
+	assert.Zero(suite.T(), len(*rainSince), "expected an empty struct")
+
+	rainBetween := suite.query.TotalRainMMFrom(time.Now(), time.Now())
+	assert.Zero(suite.T(), rainBetween, "function should return 0.0 when no matches")
+
+	tempSince := suite.query.GetTempDataCSince(time.Now())
+	assert.Zero(suite.T(), len(*tempSince), "expected an empty struct")
+
 }
 
 /* HELPER FUNCTIONS */

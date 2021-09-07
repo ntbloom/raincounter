@@ -137,8 +137,8 @@ func (pg *PGConnector) TotalRainMMFrom(from, to time.Time) float32 {
 	var total float32
 	err = row.Scan(&total)
 	if err != nil {
-		logrus.Error(err)
-		return floatErrVal
+		// means there is no value
+		return 0.0
 	}
 	return total
 }

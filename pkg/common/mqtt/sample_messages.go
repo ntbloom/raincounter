@@ -1,9 +1,5 @@
 package mqtt
 
-import (
-	"time"
-)
-
 // Examples of sample messages for use in testing, etc.
 
 type SampleMessage struct {
@@ -11,7 +7,7 @@ type SampleMessage struct {
 	msg   map[string]interface{}
 }
 
-var timestamp = time.Now()
+const timestamp = "2021-09-06T21:57:32.779567444-04:00"
 
 var SampleRain = SampleMessage{
 	topic: RainTopic,
