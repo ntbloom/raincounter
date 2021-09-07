@@ -4,12 +4,11 @@ import (
 	"testing"
 
 	"github.com/ntbloom/raincounter/pkg/common/mqtt"
-
-	"github.com/stretchr/testify/assert"
-
 	"github.com/ntbloom/raincounter/pkg/config"
 	"github.com/ntbloom/raincounter/pkg/server/receiver"
+	"github.com/ntbloom/raincounter/pkg/server/webdb"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -17,8 +16,8 @@ const localhost = "127.0.0.1"
 
 type ReceiverTest struct {
 	suite.Suite
-	testDatabase string
-	receiver     *receiver.Receiver
+	receiver *receiver.Receiver
+	query    webdb.DBQuery
 }
 
 func TestReceiver(t *testing.T) {
@@ -34,19 +33,24 @@ func (suite *ReceiverTest) SetupSuite() {
 	if err != nil {
 		panic(err)
 	}
-
-	testFile := "deadbeef"
-	suite.testDatabase = testFile
 	r, err := receiver.NewReceiver(client)
 	if err != nil {
 		panic(err)
 	}
 	suite.receiver = r
+
+	// control the database as well
+	var query webdb.DBQuery
+	db := webdb.NewPGConnector()
+	query = db
+	suite.query = query
 }
 
 func (suite *ReceiverTest) TearDownSuite() {}
 
-func (suite *ReceiverTest) SetupTest()    {}
+func (suite *ReceiverTest) SetupTest() {
+
+}
 func (suite *ReceiverTest) TearDownTest() {}
 
 // can we actually connect to the mqtt container?

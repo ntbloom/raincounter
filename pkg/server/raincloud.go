@@ -1,9 +1,5 @@
 package main
 
-import (
-	_ "github.com/ntbloom/raincounter/pkg/common/mqtt"
-)
-
 //// connect to mqtt
 //func connectToMQTT() paho.Client {
 //	client, err := mqtt.Connect(mqtt.NewBrokerConfig())
