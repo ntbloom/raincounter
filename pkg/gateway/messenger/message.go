@@ -25,8 +25,8 @@ func process(p Payload) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	val := string(payload)
-	logrus.Tracef("processing payload %s: ", val)
+	//val := string(payload)
+	//logrus.Tracef("processing payload %s: ", val)
 	return payload, nil
 }
 

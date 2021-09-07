@@ -1,9 +1,12 @@
 package receiver_test
 
 import (
+	"encoding/json"
 	"testing"
+	"time"
 
 	paho "github.com/eclipse/paho.mqtt.golang"
+	"github.com/sirupsen/logrus"
 
 	"github.com/ntbloom/raincounter/pkg/common/mqtt"
 	"github.com/ntbloom/raincounter/pkg/config"
@@ -53,9 +56,6 @@ func (suite *ReceiverTest) SetupSuite() {
 func (suite *ReceiverTest) TearDownSuite() {}
 
 func (suite *ReceiverTest) SetupTest() {
-
-}
-func (suite *ReceiverTest) TearDownTest() {
 	// delete all database rows
 	for _, sql := range []string{
 		"DELETE FROM temperature;",
@@ -70,15 +70,50 @@ func (suite *ReceiverTest) TearDownTest() {
 		}
 	}
 }
+func (suite *ReceiverTest) TearDownTest() {}
 
 // can we actually connect to the mqtt container?
 func (suite *ReceiverTest) TestBasicConnection() {
 	assert.True(suite.T(), suite.receiver.IsConnected())
 }
 
-//// publish a rain topic, make sure it gets into the database
-//func (suite *ReceiverTest) TestReceiveRainMessage() {
-//	// make sure the row is empty
-//	empty := suite.query.GetLastRainTime()
-//	suite.client.Publish()
+// publish a rain topic, make sure it gets into the database
+func (suite *ReceiverTest) TestReceiveRainMessage() {
+	suite.client.Publish(process(mqtt.SampleRain))
+	// wait for it to make it to the broker
+	time.Sleep(time.Second)
+
+	// verify the last rain matches what we put in the database
+	lastRain := suite.query.GetLastRainTime()
+	assert.Equal(suite.T(), mqtt.SampleTimestamp, lastRain)
+}
+
+// TODO: come back to this test
+//func (suite *ReceiverTest) TestAllMessages() {
+//	for _, message := range []mqtt.SampleMessage{
+//		mqtt.SampleSensorPause,
+//		mqtt.SampleSensorUnpause,
+//		mqtt.SampleSensorSoftReset,
+//		mqtt.SampleSensorHardReset,
+//		mqtt.SampleSensorStatus,
+//		mqtt.SampleGatewayStatus,
+//	} {
+//		suite.client.Publish(process(message))
+//	}
+//
+//	// wait for it to make it to the broker
+//	time.Sleep(time.Second)
+//
+//	// verify the last rain matches what we put in the database
+//	panic("implement me!")
 //}
+
+// publish a bunch of stuff to the broker
+func process(msg mqtt.SampleMessage) (string, byte, bool, []byte) {
+	payload, err := json.Marshal(msg.Msg)
+	if err != nil {
+		logrus.Error(err)
+		panic("problem marshalling json")
+	}
+	return msg.Topic, 1, false, payload
+}

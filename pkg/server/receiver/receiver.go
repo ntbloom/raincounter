@@ -1,7 +1,10 @@
 package receiver
 
 import (
+	"encoding/json"
+
 	paho "github.com/eclipse/paho.mqtt.golang"
+	"github.com/ntbloom/raincounter/pkg/common/mqtt"
 	"github.com/ntbloom/raincounter/pkg/server/webdb"
 	"github.com/sirupsen/logrus"
 )
@@ -18,10 +21,13 @@ func NewReceiver(client paho.Client) (*Receiver, error) {
 		logrus.Errorf("unable to connect to MQTT: %s", token.Error())
 	}
 	db := webdb.NewPGConnector()
-	return &Receiver{
+	recv := Receiver{
 		mqttConnection: client,
 		db:             db,
-	}, nil
+	}
+
+	client.Subscribe(mqtt.RainTopic, mqtt.Qos, recv.handleRainTopic)
+	return &recv, nil
 }
 
 func (r *Receiver) IsConnected() bool {
@@ -40,8 +46,16 @@ func (r *Receiver) handleTemperatureMessage() {
 	panic("not implemented!")
 }
 
-func (r *Receiver) handleRainTopic() {
-	panic("not implemented!")
+func (r *Receiver) handleRainTopic(client paho.Client, message paho.Message) {
+	logrus.Error(message)
+	var readable map[string]interface{}
+	err := json.Unmarshal(message.Payload(), &readable)
+	if err != nil {
+		panic(err)
+	}
+	//stamp := readable["Timestamp"]
+	//mm, err := strconv.ParseFloat(readable["Millimeters"], 32)
+
 }
 
 func (r *Receiver) handleSensorEvent() {
