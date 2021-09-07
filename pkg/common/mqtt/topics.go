@@ -2,9 +2,17 @@ package mqtt
 
 // mqtt topics for events, measurements, status
 const (
-	GatewayStatus    = "status/gateway"
-	SensorStatus     = "status/sensor"
-	TemperatureTopic = "measurement/temperature"
-	RainTopic        = "measurement/rain"
-	SensorEvent      = "sensor/event"
+	GatewayStatusTopic = "status/gateway"
+	SensorStatusTopic  = "status/sensor"
+	TemperatureTopic   = "measurement/temperature"
+	RainTopic          = "measurement/rain"
+	SensorEventTopic   = "sensor/event"
+)
+
+// mqtt event tags
+const (
+	SensorPauseEvent     = "sensorPause"
+	SensorUnpauseEvent   = "sensorUnpause"
+	SensorSoftResetEvent = "sensorSoftReset"
+	SensorHardResetEvent = "sensorHardReset"
 )

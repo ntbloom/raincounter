@@ -88,7 +88,7 @@ func (m *Messenger) sendStatus() {
 // get a status message about how the gateway is doing
 func gatewayStatusMessage() (*Message, error) {
 	gs := GatewayStatus{
-		//Topic:     mqtt.GatewayStatus,
+		//Topic:     mqtt.GatewayStatusTopic,
 		OK:        true,
 		Timestamp: time.Now(),
 	}
@@ -97,7 +97,7 @@ func gatewayStatusMessage() (*Message, error) {
 		return nil, err
 	}
 	return &Message{
-		topic:    mqtt.GatewayStatus,
+		topic:    mqtt.GatewayStatusTopic,
 		retained: false,
 		qos:      0,
 		payload:  msg,
@@ -123,7 +123,7 @@ func sensorStatusMessage() (*Message, error) {
 		return nil, err
 	}
 	return &Message{
-		topic:    mqtt.SensorStatus,
+		topic:    mqtt.SensorStatusTopic,
 		retained: false,
 		qos:      0,
 		payload:  msg,

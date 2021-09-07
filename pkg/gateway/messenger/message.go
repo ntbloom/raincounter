@@ -14,14 +14,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-// values for static status messages
-const (
-	SensorPause     = "sensorPause"
-	SensorUnpause   = "sensorUnpause"
-	SensorSoftReset = "sensorSoftReset"
-	SensorHardReset = "sensorHardReset"
-)
-
 // Payload generic type of message we'll send over MQTT
 type Payload interface {
 	Process() ([]byte, error)
@@ -123,30 +115,30 @@ func (m *Messenger) NewMessage(packet *tlv.TLV) (*Message, error) {
 		}
 		go database.MakeTemperatureEntry(m.db, tempC)
 	case tlv.SoftReset:
-		topic = mqtt.SensorEvent
+		topic = mqtt.SensorEventTopic
 		event = &SensorEvent{
-			SensorSoftReset,
+			mqtt.SensorSoftResetEvent,
 			now,
 		}
 		go database.MakeSoftResetEntry(m.db)
 	case tlv.HardReset:
-		topic = mqtt.SensorEvent
+		topic = mqtt.SensorEventTopic
 		event = &SensorEvent{
-			SensorHardReset,
+			mqtt.SensorHardResetEvent,
 			now,
 		}
 		go database.MakeHardResetEntry(m.db)
 	case tlv.Pause:
-		topic = mqtt.SensorEvent
+		topic = mqtt.SensorEventTopic
 		event = &SensorEvent{
-			SensorPause,
+			mqtt.SensorPauseEvent,
 			now,
 		}
 		go database.MakePauseEntry(m.db)
 	case tlv.Unpause:
-		topic = mqtt.SensorEvent
+		topic = mqtt.SensorEventTopic
 		event = &SensorEvent{
-			SensorUnpause,
+			mqtt.SensorUnpauseEvent,
 			now,
 		}
 		go database.MakeUnpauseEntry(m.db)
