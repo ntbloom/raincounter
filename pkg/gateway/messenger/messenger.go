@@ -5,9 +5,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/ntbloom/raincounter/pkg/gateway/localdb"
-
 	"github.com/ntbloom/raincounter/pkg/common/mqtt"
+
+	"github.com/ntbloom/raincounter/pkg/gateway/localdb"
 
 	"github.com/ntbloom/raincounter/pkg/config/configkey"
 
@@ -55,7 +55,7 @@ func (m *Messenger) Start() {
 				continue
 			}
 		case msg := <-m.Data:
-			logrus.Debugf("received Message from serial port: %s", msg.payload)
+			logrus.Tracef("received Message from serial port: %s", msg.payload)
 			m.publish(msg)
 		case <-statusTimer.C:
 			logrus.Debug("requesting status message")
@@ -89,7 +89,7 @@ func (m *Messenger) sendStatus() {
 // get a status message about how the gateway is doing
 func gatewayStatusMessage() (*Message, error) {
 	gs := GatewayStatus{
-		Topic:     mqtt.GatewayStatus,
+		//Topic:     mqtt.GatewayStatus,
 		OK:        true,
 		Timestamp: time.Now(),
 	}
@@ -99,7 +99,7 @@ func gatewayStatusMessage() (*Message, error) {
 	}
 
 	return &Message{
-		topic:    gs.Topic,
+		topic:    mqtt.GatewayStatus,
 		retained: false,
 		qos:      0,
 		payload:  msg,
@@ -117,7 +117,6 @@ func sensorStatusMessage() (*Message, error) {
 		up = true
 	}
 	ss := SensorStatus{
-		Topic:     mqtt.SensorStatus,
 		OK:        up,
 		Timestamp: time.Now(),
 	}
@@ -126,7 +125,7 @@ func sensorStatusMessage() (*Message, error) {
 		return nil, err
 	}
 	return &Message{
-		topic:    ss.Topic,
+		topic:    mqtt.SensorStatus,
 		retained: false,
 		qos:      0,
 		payload:  msg,

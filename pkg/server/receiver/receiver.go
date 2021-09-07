@@ -17,9 +17,7 @@ func NewReceiver(client paho.Client) (*Receiver, error) {
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
 		logrus.Errorf("unable to connect to MQTT: %s", token.Error())
 	}
-
 	db := webdb.NewPGConnector()
-
 	return &Receiver{
 		mqttConnection: client,
 		db:             db,

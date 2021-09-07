@@ -7,16 +7,11 @@ import (
 	"time"
 
 	"github.com/ntbloom/raincounter/pkg/common/database"
-
 	"github.com/ntbloom/raincounter/pkg/common/mqtt"
-
 	"github.com/ntbloom/raincounter/pkg/config/configkey"
-
 	"github.com/ntbloom/raincounter/pkg/gateway/tlv"
-
-	"github.com/spf13/viper"
-
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 )
 
 // values for static status messages
@@ -39,41 +34,36 @@ func process(p Payload) ([]byte, error) {
 		return nil, err
 	}
 	val := string(payload)
-	logrus.Debug(val)
+	logrus.Tracef("processing payload %s: ", val)
 	return payload, nil
 }
 
 // SensorEvent gives static message about what's happening to the sensor
 type SensorEvent struct {
-	Topic     string
 	Status    string
 	Timestamp time.Time
 }
 
 // TemperatureEvent sends current temperature in Celsius
 type TemperatureEvent struct {
-	Topic     string
 	TempC     int
 	Timestamp time.Time
 }
 
 // RainEvent sends message about rain event
 type RainEvent struct {
-	Topic       string
 	Millimeters string // send as a string to avoid floating point weirdness
 	Timestamp   time.Time
 }
 
 // GatewayStatus sends "OK" message at regular intervals
 type GatewayStatus struct {
-	Topic     string
 	OK        bool
 	Timestamp time.Time
 }
 
 // SensorStatus sends "OK" if sensor is reachable, else "Bad"
 type SensorStatus struct {
-	Topic     string
 	OK        bool
 	Timestamp time.Time
 }
@@ -120,7 +110,6 @@ func (m *Messenger) NewMessage(packet *tlv.TLV) (*Message, error) {
 	case tlv.Rain:
 		topic = mqtt.RainTopic
 		event = &RainEvent{
-			topic,
 			viper.GetString(configkey.SensorRainMm),
 			now,
 		}
@@ -129,7 +118,6 @@ func (m *Messenger) NewMessage(packet *tlv.TLV) (*Message, error) {
 		topic = mqtt.TemperatureTopic
 		tempC := packet.Value
 		event = &TemperatureEvent{
-			topic,
 			tempC,
 			now,
 		}
@@ -137,7 +125,6 @@ func (m *Messenger) NewMessage(packet *tlv.TLV) (*Message, error) {
 	case tlv.SoftReset:
 		topic = mqtt.SensorEvent
 		event = &SensorEvent{
-			topic,
 			SensorSoftReset,
 			now,
 		}
@@ -145,7 +132,6 @@ func (m *Messenger) NewMessage(packet *tlv.TLV) (*Message, error) {
 	case tlv.HardReset:
 		topic = mqtt.SensorEvent
 		event = &SensorEvent{
-			topic,
 			SensorHardReset,
 			now,
 		}
@@ -153,7 +139,6 @@ func (m *Messenger) NewMessage(packet *tlv.TLV) (*Message, error) {
 	case tlv.Pause:
 		topic = mqtt.SensorEvent
 		event = &SensorEvent{
-			topic,
 			SensorPause,
 			now,
 		}
@@ -161,7 +146,6 @@ func (m *Messenger) NewMessage(packet *tlv.TLV) (*Message, error) {
 	case tlv.Unpause:
 		topic = mqtt.SensorEvent
 		event = &SensorEvent{
-			topic,
 			SensorUnpause,
 			now,
 		}
@@ -181,5 +165,6 @@ func (m *Messenger) NewMessage(packet *tlv.TLV) (*Message, error) {
 		qos:      byte(viper.GetInt(configkey.MQTTQos)),
 		payload:  payload,
 	}
+	logrus.Debugf("topic=%s, payload=%s", topic, payload)
 	return &msg, nil
 }
