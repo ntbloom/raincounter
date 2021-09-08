@@ -82,14 +82,18 @@ func (suite *ReceiverTest) TestReceiveRainMessage() {
 	msg := mqtt.SampleRain()
 	suite.client.Publish(process(msg))
 	// wait for it to make it to the broker
-	time.Sleep(time.Second)
+	time.Sleep(time.Second * 3)
 
 	// verify the last rain matches what we put in the database
 	lastRain, err := suite.query.GetLastRainTime()
 	if err != nil {
 		suite.Fail("last rain error", err)
 	}
-	assert.Equal(suite.T(), mqtt.SampleTimestamp, lastRain)
+	timeDiff := msg.Timestamp.Sub(lastRain)
+	if timeDiff < 0 {
+		timeDiff = -timeDiff
+	}
+	assert.True(suite.T(), timeDiff < time.Second)
 }
 
 // TODO: come back to this test
