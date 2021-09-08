@@ -31,28 +31,28 @@ type DBQuery interface {
 	Select(string) (interface{}, error)
 
 	// TotalRainMMSince gets total rain from a time in the past to present
-	TotalRainMMSince(time.Time) float64
+	TotalRainMMSince(time.Time) (float64, error)
 
 	// TotalRainMMFrom gets total rain between two timestamps
-	TotalRainMMFrom(time.Time, time.Time) float64
+	TotalRainMMFrom(time.Time, time.Time) (float64, error)
 
 	// GetRainMMSince gets a RainEntriesMm from a time in the past to present
-	GetRainMMSince(time.Time) *RainEntriesMm
+	GetRainMMSince(time.Time) (*RainEntriesMm, error)
 
 	// GetRainMMFrom gets a RainEntriesMm between two timestamps
-	GetRainMMFrom(time.Time, time.Time) *RainEntriesMm
+	GetRainMMFrom(time.Time, time.Time) (*RainEntriesMm, error)
 
 	// GetLastRainTime shows the date of the last rain
-	GetLastRainTime() time.Time
+	GetLastRainTime() (time.Time, error)
 
 	// GetTempDataCSince gets a TempEntriesC from a time in the past to the present
-	GetTempDataCSince(time.Time) *TempEntriesC
+	GetTempDataCSince(time.Time) (*TempEntriesC, error)
 
 	// GetTempDataCFrom gets a TempEntriesC between two timestamps
-	GetTempDataCFrom(time.Time, time.Time) *TempEntriesC
+	GetTempDataCFrom(time.Time, time.Time) (*TempEntriesC, error)
 
 	// GetLastTempC shows the most recent temperature
-	GetLastTempC() int
+	GetLastTempC() (int, error)
 
 	// Close closes the connection with the database. Necessary for pooled connections
 	Close()

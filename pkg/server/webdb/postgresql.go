@@ -120,17 +120,17 @@ func (pg *PGConnector) Select(cmd string) (interface{}, error) {
 	return pg.genericQuery(cmd)
 }
 
-func (pg *PGConnector) TotalRainMMSince(since time.Time) float64 {
+func (pg *PGConnector) TotalRainMMSince(since time.Time) (float64, error) {
 	return pg.TotalRainMMFrom(since, time.Now())
 }
 
-func (pg *PGConnector) TotalRainMMFrom(from, to time.Time) float64 {
+func (pg *PGConnector) TotalRainMMFrom(from, to time.Time) (float64, error) {
 	sql := fmt.Sprintf(`SELECT sum(amount) FROM rain WHERE gw_timestamp BETWEEN '%s' and '%s';`,
 		from.Format(configkey.TimestampFormat), to.Format(configkey.TimestampFormat))
 	row, err := pg.genericQuery(sql)
 	if err != nil {
 		logrus.Error(err)
-		return floatErrVal
+		return floatErrVal, err
 	}
 	defer row.Close()
 	row.Next()
@@ -138,16 +138,16 @@ func (pg *PGConnector) TotalRainMMFrom(from, to time.Time) float64 {
 	err = row.Scan(&total)
 	if err != nil {
 		// means there is no value
-		return 0.0
+		return 0.0, nil
 	}
-	return total
+	return total, nil
 }
 
-func (pg *PGConnector) GetRainMMSince(since time.Time) *RainEntriesMm {
+func (pg *PGConnector) GetRainMMSince(since time.Time) (*RainEntriesMm, error) {
 	return pg.GetRainMMFrom(since, time.Now())
 }
 
-func (pg *PGConnector) GetRainMMFrom(from, to time.Time) *RainEntriesMm {
+func (pg *PGConnector) GetRainMMFrom(from, to time.Time) (*RainEntriesMm, error) {
 	sql := fmt.Sprintf(`
 		SELECT gw_timestamp, amount 
 		FROM rain 
@@ -158,7 +158,7 @@ func (pg *PGConnector) GetRainMMFrom(from, to time.Time) *RainEntriesMm {
 	rows, err := pg.genericQuery(sql)
 	if err != nil {
 		logrus.Error(err)
-		return nil
+		return nil, err
 	}
 	defer rows.Close()
 	var rain RainEntriesMm
@@ -168,21 +168,21 @@ func (pg *PGConnector) GetRainMMFrom(from, to time.Time) *RainEntriesMm {
 		err = rows.Scan(&stamp, &amt)
 		if err != nil {
 			logrus.Error(err)
-			return nil
+			return nil, err
 		}
 		rain = append(rain, RainEntryMm{
 			Timestamp:   stamp,
 			Millimeters: amt,
 		})
 	}
-	return &rain
+	return &rain, nil
 }
 
-func (pg *PGConnector) GetLastRainTime() time.Time {
+func (pg *PGConnector) GetLastRainTime() (time.Time, error) {
 	sql := `SELECT gw_timestamp FROM rain ORDER BY gw_timestamp DESC LIMIT 1;`
 	row, err := pg.genericQuery(sql)
 	if err != nil {
-		return errTime
+		return errTime, err
 	}
 	defer row.Close()
 	var stamp time.Time
@@ -190,18 +190,18 @@ func (pg *PGConnector) GetLastRainTime() time.Time {
 	err = row.Scan(&stamp)
 	if err != nil {
 		logrus.Errorf("failure to scan row for last rain timestamp: %s", err)
-		return errTime
+		return errTime, err
 	}
-	return stamp
+	return stamp, nil
 }
 
 /* QUERYING TEMPERATURE */
 
-func (pg *PGConnector) GetTempDataCSince(since time.Time) *TempEntriesC {
+func (pg *PGConnector) GetTempDataCSince(since time.Time) (*TempEntriesC, error) {
 	return pg.GetTempDataCFrom(since, time.Now())
 }
 
-func (pg *PGConnector) GetTempDataCFrom(from time.Time, to time.Time) *TempEntriesC {
+func (pg *PGConnector) GetTempDataCFrom(from time.Time, to time.Time) (*TempEntriesC, error) {
 	sql := fmt.Sprintf(`
 		SELECT gw_timestamp, value
 		FROM temperature
@@ -212,7 +212,7 @@ func (pg *PGConnector) GetTempDataCFrom(from time.Time, to time.Time) *TempEntri
 	rows, err := pg.genericQuery(sql)
 	if err != nil {
 		logrus.Errorf("bad query: `%s`", sql)
-		return nil
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -223,22 +223,22 @@ func (pg *PGConnector) GetTempDataCFrom(from time.Time, to time.Time) *TempEntri
 		err := rows.Scan(&timestamp, &tempC)
 		if err != nil {
 			logrus.Errorf("cannot retrieve timestamp/tempC row: %s", err)
-			return nil
+			return nil, err
 		}
 		temps = append(temps, TempEntryC{
 			timestamp,
 			tempC,
 		})
 	}
-	return &temps
+	return &temps, nil
 }
 
-func (pg *PGConnector) GetLastTempC() int {
+func (pg *PGConnector) GetLastTempC() (int, error) {
 	sql := `SELECT value FROM temperature ORDER BY gw_timestamp DESC LIMIT 1;`
 	row, err := pg.genericQuery(sql)
 	if err != nil {
 		logrus.Error(err)
-		return intErrVal
+		return intErrVal, err
 	}
 	defer row.Close()
 	var tempC int
@@ -246,9 +246,9 @@ func (pg *PGConnector) GetLastTempC() int {
 	err = row.Scan(&tempC)
 	if err != nil {
 		logrus.Errorf("failed to scan row for tempC: %s", err)
-		return intErrVal
+		return intErrVal, err
 	}
-	return tempC
+	return tempC, nil
 }
 
 /* RANDOM HELPER FUNCTIONS */

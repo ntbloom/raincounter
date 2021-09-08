@@ -85,7 +85,10 @@ func (suite *ReceiverTest) TestReceiveRainMessage() {
 	time.Sleep(time.Second)
 
 	// verify the last rain matches what we put in the database
-	lastRain := suite.query.GetLastRainTime()
+	lastRain, err := suite.query.GetLastRainTime()
+	if err != nil {
+		suite.Fail("last rain error", err)
+	}
 	assert.Equal(suite.T(), mqtt.SampleTimestamp, lastRain)
 }
 

@@ -139,7 +139,10 @@ func (suite *WebDBTest) TestInsertSelectTemperatureData() {
 		}
 	}
 	since := yearAgo
-	actual := suite.query.GetTempDataCSince(since)
+	actual, err := suite.query.GetTempDataCSince(since)
+	if err != nil {
+		suite.Fail("error getting temp data", err)
+	}
 	assert.True(suite.T(), len(*actual) == len(expected))
 	assert.NotNil(suite.T(), actual)
 	for i, v := range *actual {
@@ -184,7 +187,10 @@ func (suite *WebDBTest) TestInsertSelectSpecificTemperatureRange() {
 		temp++
 	}
 	// verify the query
-	actual := suite.query.GetTempDataCFrom(beginning, finish)
+	actual, err := suite.query.GetTempDataCFrom(beginning, finish)
+	if err != nil {
+		suite.Fail("error getting temperature data", err)
+	}
 	assert.Equal(suite.T(), len(expected), len(*actual))
 	for i, v := range *actual {
 		timeDiff := v.Timestamp.Sub(expected[i].Timestamp)
@@ -217,7 +223,10 @@ func (suite *WebDBTest) TestGetLastTempC() {
 			suite.Fail("error inserting temp data", err)
 		}
 	}
-	actual := suite.query.GetLastTempC()
+	actual, err := suite.query.GetLastTempC()
+	if err != nil {
+		suite.Fail("error getting last temp", err)
+	}
 	assert.Equal(suite.T(), maxTemp, actual)
 }
 
@@ -257,7 +266,10 @@ func (suite *WebDBTest) TestEnterAndRetrieveRainAllData() {
 			suite.Fail("failed to add rain amount", err)
 		}
 	}
-	actual := suite.query.GetRainMMSince(yearAgo)
+	actual, err := suite.query.GetRainMMSince(yearAgo)
+	if err != nil {
+		suite.Fail("error getting rain MM since", err)
+	}
 	assert.NotNil(suite.T(), actual)
 	var actTotalRain float64 = 0.0
 	for i, v := range *actual {
@@ -302,7 +314,10 @@ func (suite *WebDBTest) TestEnterAndRetrieveRainDataWithinRange() {
 			expTotal += amt
 		}
 	}
-	actual := suite.query.GetRainMMFrom(beginning, finish)
+	actual, err := suite.query.GetRainMMFrom(beginning, finish)
+	if err != nil {
+		suite.Fail("error getting rain mm from", err)
+	}
 	assert.NotNil(suite.T(), actual)
 	var actTotal float64 = 0.0
 	for i, v := range *actual {
@@ -317,7 +332,10 @@ func (suite *WebDBTest) TestEnterAndRetrieveRainDataWithinRange() {
 	assert.Equal(suite.T(), expTotal, actTotal, "total amounts are unequal")
 
 	// also verify the tallying function
-	queriedTotal := suite.query.TotalRainMMFrom(beginning, finish)
+	queriedTotal, err := suite.query.TotalRainMMFrom(beginning, finish)
+	if err != nil {
+		suite.Fail("error getting total rain mm from", err)
+	}
 	assert.Equal(suite.T(), expTotal, queriedTotal, "rain tallying function is incorrect")
 }
 
@@ -334,7 +352,10 @@ func (suite *WebDBTest) TestGetLastRainTime() {
 		}
 	}
 	//
-	lastRainTime := suite.query.GetLastRainTime()
+	lastRainTime, err := suite.query.GetLastRainTime()
+	if err != nil {
+		suite.Fail("error getting last rain time", err)
+	}
 	timeDiff := lastRainTime.Sub(oneHourAgo)
 	if timeDiff < 0 {
 		timeDiff = -timeDiff
@@ -400,13 +421,22 @@ func (suite *WebDBTest) TestEventAndStatusMessagesDontError() {
 func (suite *WebDBTest) TestEmptyResultsDontError() {
 	// test assumes all rows are empty
 
-	rainSince := suite.query.GetRainMMSince(time.Now())
+	rainSince, err := suite.query.GetRainMMSince(time.Now())
+	if err != nil {
+		suite.Fail("rain since errors on zero", err)
+	}
 	assert.Zero(suite.T(), len(*rainSince), "expected an empty struct")
 
-	rainBetween := suite.query.TotalRainMMFrom(time.Now(), time.Now())
+	rainBetween, err := suite.query.TotalRainMMFrom(time.Now(), time.Now())
+	if err != nil {
+		suite.Fail("rain from errors on zero", err)
+	}
 	assert.Zero(suite.T(), rainBetween, "function should return 0.0 when no matches")
 
-	tempSince := suite.query.GetTempDataCSince(time.Now())
+	tempSince, err := suite.query.GetTempDataCSince(time.Now())
+	if err != nil {
+		suite.Fail("temp since errors on zero", err)
+	}
 	assert.Zero(suite.T(), len(*tempSince), "expected an empty struct")
 
 }
