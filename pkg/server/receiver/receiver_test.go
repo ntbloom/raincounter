@@ -79,7 +79,8 @@ func (suite *ReceiverTest) TestBasicConnection() {
 
 // publish a rain topic, make sure it gets into the database
 func (suite *ReceiverTest) TestReceiveRainMessage() {
-	suite.client.Publish(process(mqtt.SampleRain))
+	msg := mqtt.SampleRain()
+	suite.client.Publish(process(msg))
 	// wait for it to make it to the broker
 	time.Sleep(time.Second)
 

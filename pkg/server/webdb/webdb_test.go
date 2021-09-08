@@ -145,6 +145,9 @@ func (suite *WebDBTest) TestInsertSelectTemperatureData() {
 	for i, v := range *actual {
 		// account for subtle rounding errors to go back and forth between postgresql and go
 		timeDiff := expected[i].Timestamp.Sub(v.Timestamp)
+		if timeDiff < 0 {
+			timeDiff = -timeDiff
+		}
 		assert.True(suite.T(), timeDiff < time.Second)
 		assert.Equal(suite.T(), expected[i].TempC, v.TempC, "mismatch on TempEntriesC entry")
 	}
@@ -185,6 +188,9 @@ func (suite *WebDBTest) TestInsertSelectSpecificTemperatureRange() {
 	assert.Equal(suite.T(), len(expected), len(*actual))
 	for i, v := range *actual {
 		timeDiff := v.Timestamp.Sub(expected[i].Timestamp)
+		if timeDiff < 0 {
+			timeDiff = -timeDiff
+		}
 		assert.True(suite.T(), timeDiff < time.Second)
 		assert.Equal(suite.T(), expected[i].TempC, v.TempC)
 	}
@@ -257,6 +263,9 @@ func (suite *WebDBTest) TestEnterAndRetrieveRainAllData() {
 	for i, v := range *actual {
 		actTotalRain += v.Millimeters
 		timeDiff := data[i].Timestamp.Sub(v.Timestamp)
+		if timeDiff < 0 {
+			timeDiff = -timeDiff
+		}
 		assert.True(suite.T(), timeDiff < time.Second)
 	}
 	assert.Equal(suite.T(), len(data), len(*actual), "length of actual and expected data are not equal")
@@ -299,6 +308,9 @@ func (suite *WebDBTest) TestEnterAndRetrieveRainDataWithinRange() {
 	for i, v := range *actual {
 		assert.Equal(suite.T(), v.Millimeters, amt, "amount was entered incorrectly")
 		timeDiff := v.Timestamp.Sub(expected[i].Timestamp)
+		if timeDiff < 0 {
+			timeDiff = -timeDiff
+		}
 		assert.True(suite.T(), timeDiff < time.Second, "timestamps do not match")
 		actTotal += amt
 	}
@@ -324,6 +336,9 @@ func (suite *WebDBTest) TestGetLastRainTime() {
 	//
 	lastRainTime := suite.query.GetLastRainTime()
 	timeDiff := lastRainTime.Sub(oneHourAgo)
+	if timeDiff < 0 {
+		timeDiff = -timeDiff
+	}
 	assert.True(suite.T(), timeDiff < time.Second)
 }
 

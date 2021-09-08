@@ -179,7 +179,7 @@ func (pg *PGConnector) GetRainMMFrom(from, to time.Time) *RainEntriesMm {
 }
 
 func (pg *PGConnector) GetLastRainTime() time.Time {
-	sql := `SELECT amount FROM rain ORDER BY gw_timestamp DESC LIMIT 1;`
+	sql := `SELECT gw_timestamp FROM rain ORDER BY gw_timestamp DESC LIMIT 1;`
 	row, err := pg.genericQuery(sql)
 	if err != nil {
 		return errTime

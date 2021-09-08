@@ -2,6 +2,9 @@ package receiver
 
 import (
 	"encoding/json"
+	"time"
+
+	"github.com/ntbloom/raincounter/pkg/config/configkey"
 
 	paho "github.com/eclipse/paho.mqtt.golang"
 	"github.com/ntbloom/raincounter/pkg/common/mqtt"
@@ -47,16 +50,21 @@ func (r *Receiver) handleTemperatureMessage() {
 }
 
 func (r *Receiver) handleRainTopic(client paho.Client, message paho.Message) {
-	logrus.Error(message)
 	var readable map[string]interface{}
-	err := json.Unmarshal(message.Payload(), &readable)
+	if err := json.Unmarshal(message.Payload(), &readable); err != nil {
+		logrus.Error(err)
+		return
+	}
+	stamp, err := time.Parse(configkey.TimestampFormat, readable["Timestamp"].(string))
 	if err != nil {
 		logrus.Error(err)
+		return
 	}
-	stamp := readable["Timestamp"]
-	mm := readable["Millimeters"]
-	logrus.Errorf("%s,%d", stamp, mm)
-
+	mm := readable["Millimeters"].(float64)
+	if err := r.db.AddRainMMEvent(mm, stamp); err != nil {
+		logrus.Error(err)
+		return
+	}
 }
 
 func (r *Receiver) handleSensorEvent() {

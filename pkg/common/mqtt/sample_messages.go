@@ -17,42 +17,58 @@ const (
 	SampleCelsius   = 23
 )
 
-var SampleRain = SampleMessage{
-	Topic: RainTopic,
-	Msg:   map[string]interface{}{"Millimeters": viper.GetFloat64(configkey.SensorRainMm), "Timestamp": SampleTimestamp},
+func SampleRain() SampleMessage {
+	return SampleMessage{
+		Topic: RainTopic,
+		Msg:   map[string]interface{}{"Millimeters": viper.GetFloat64(configkey.SensorRainMm), "Timestamp": SampleTimestamp},
+	}
 }
 
-var SampleTemp = SampleMessage{
-	Topic: TemperatureTopic,
-	Msg:   map[string]interface{}{"Tempc": SampleCelsius, "Timestamp": SampleTimestamp},
+func SampleTemp() SampleMessage {
+	return SampleMessage{
+		Topic: TemperatureTopic,
+		Msg:   map[string]interface{}{"Tempc": SampleCelsius, "Timestamp": SampleTimestamp},
+	}
 }
 
-var SampleSensorPause = SampleMessage{
-	Topic: SensorEventTopic,
-	Msg:   map[string]interface{}{"Status": SensorPauseEvent, "Timestamp": SampleTimestamp},
+func SampleSensorPause() SampleMessage {
+	return SampleMessage{
+		Topic: SensorEventTopic,
+		Msg:   map[string]interface{}{"Status": SensorPauseEvent, "Timestamp": SampleTimestamp},
+	}
 }
 
-var SampleSensorUnpause = SampleMessage{
-	Topic: SensorEventTopic,
-	Msg:   map[string]interface{}{"Status": SensorUnpauseEvent, "Timestamp": SampleTimestamp},
+func SampleSensorUnpause() SampleMessage {
+	return SampleMessage{
+		Topic: SensorEventTopic,
+		Msg:   map[string]interface{}{"Status": SensorUnpauseEvent, "Timestamp": SampleTimestamp},
+	}
 }
 
-var SampleSensorSoftReset = SampleMessage{
-	Topic: SensorEventTopic,
-	Msg:   map[string]interface{}{"Status": SensorSoftResetEvent, "Timestamp": SampleTimestamp},
+func SampleSensorSoftReset() SampleMessage {
+	return SampleMessage{
+		Topic: SensorEventTopic,
+		Msg:   map[string]interface{}{"Status": SensorSoftResetEvent, "Timestamp": SampleTimestamp},
+	}
 }
 
-var SampleSensorHardReset = SampleMessage{
-	Topic: SensorEventTopic,
-	Msg:   map[string]interface{}{"Status": SensorHardResetEvent, "Timestamp": SampleTimestamp},
+func SampleSensorHardReset() SampleMessage {
+	return SampleMessage{
+		Topic: SensorEventTopic,
+		Msg:   map[string]interface{}{"Status": SensorHardResetEvent, "Timestamp": SampleTimestamp},
+	}
 }
 
-var SampleSensorStatus = SampleMessage{
-	Topic: SensorStatusTopic,
-	Msg:   map[string]interface{}{"OK": true, "Timestamp": SampleTimestamp},
+func SampleSensorStatus() SampleMessage {
+	return SampleMessage{
+		Topic: SensorStatusTopic,
+		Msg:   map[string]interface{}{"OK": true, "Timestamp": SampleTimestamp},
+	}
 }
 
-var SampleGatewayStatus = SampleMessage{
-	Topic: GatewayStatusTopic,
-	Msg:   map[string]interface{}{"OK": true, "Timestamp": SampleTimestamp},
+func SampleGatewayStatus() SampleMessage {
+	return SampleMessage{
+		Topic: GatewayStatusTopic,
+		Msg:   map[string]interface{}{"OK": true, "Timestamp": SampleTimestamp},
+	}
 }

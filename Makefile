@@ -11,7 +11,9 @@ COMPOSEWAIT = 10
 COMPOSEFLAGS  = --remove-orphans
 COMPOSEFLAGS += -d
 
-TESTFLAGS  = -v
+TESTFLAGS  = -timeout 10s
+TESTFLAGS += -p 1
+#TESTFLAGS += -v
 
 ### BUILD ###
 
