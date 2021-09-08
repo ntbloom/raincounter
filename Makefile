@@ -12,7 +12,7 @@ COMPOSEFLAGS  = --remove-orphans
 COMPOSEFLAGS += -d
 
 TESTFLAGS  = -timeout 10s
-TESTFLAGS += -p 1
+#TESTFLAGS += -p 1
 #TESTFLAGS += -v
 
 ### BUILD ###
@@ -56,13 +56,27 @@ psql:
 	psql -U postgres -h localhost raincounter
 
 # server
-test-server:
-	- go test $(TESTFLAGS) $(SERVER)/...
+test-server: test-webdb test-receiver test-rest
 
+test-server-race: clean-test test-common-race test-webdb-race test-receiver-race test-rest-race
 
-test-server-race: clean-test test-common-race
-	@go clean -testcache
-	@go test $(TESTFLAGS) -race $(SERVER)/...
+test-webdb:
+	@-go test $(TESTFLAGS) $(SERVER)/webdb/
+
+test-webdb-race:
+	@-go test -race $(TESTFLAGS) $(SERVER)/webdb/
+
+test-receiver:
+	@-go test $(TESTFLAGS) $(SERVER)/receiver/
+
+test-receiver-race:
+	@-go test -race $(TESTFLAGS) $(SERVER)/receiver/
+
+test-rest:
+	@-go test $(TESTFLAGS) $(SERVER)/rest/
+
+test-rest-race:
+	@-go test -race $(TESTFLAGS) $(SERVER)/rest/
 
 ### RUN ###
 

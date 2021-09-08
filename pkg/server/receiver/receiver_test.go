@@ -82,7 +82,7 @@ func (suite *ReceiverTest) TestReceiveRainMessage() {
 	msg := mqtt.SampleRain()
 	suite.client.Publish(process(msg))
 	// wait for it to make it to the broker
-	time.Sleep(time.Second * 3)
+	time.Sleep(time.Second * 1)
 
 	// verify the last rain matches what we put in the database
 	lastRain, err := suite.query.GetLastRainTime()
