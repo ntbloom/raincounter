@@ -25,8 +25,7 @@ func process(p Payload) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	//val := string(payload)
-	//logrus.Tracef("processing payload %s: ", val)
+	logrus.Tracef("processing payload %s: ", string(payload))
 	return payload, nil
 }
 
@@ -44,7 +43,7 @@ type TemperatureEvent struct {
 
 // RainEvent sends message about rain event
 type RainEvent struct {
-	Millimeters string // send as a string to avoid floating point weirdness
+	Millimeters float64
 	Timestamp   time.Time
 }
 
@@ -102,7 +101,7 @@ func (m *Messenger) NewMessage(packet *tlv.TLV) (*Message, error) {
 	case tlv.Rain:
 		topic = mqtt.RainTopic
 		event = &RainEvent{
-			viper.GetString(configkey.SensorRainMm),
+			viper.GetFloat64(configkey.SensorRainMm),
 			now,
 		}
 		go database.MakeRainTallyEntry(m.db)

@@ -21,7 +21,7 @@ type DBWrapper interface {
 	AddIntRecord(tag, value int) (sql.Result, error)
 
 	// AddFloatRecord makes a single float entry into the database for a given tag
-	AddFloatRecord(tag int, value float32) (sql.Result, error)
+	AddFloatRecord(tag int, value float64) (sql.Result, error)
 
 	// Tally runs sql command to count database entries for a given topic
 	Tally(tag int) int
@@ -43,7 +43,7 @@ func MakeRainTallyEntry(db DBWrapper) {
 }
 
 // MakeRainValueEntry AddFloatRecord for a rain event
-func MakeRainValueEntry(db DBWrapper, value float32) {
+func MakeRainValueEntry(db DBWrapper, value float64) {
 	_, err := db.AddFloatRecord(tlv.RainValue, value)
 	if err != nil {
 		logrus.Error(err)

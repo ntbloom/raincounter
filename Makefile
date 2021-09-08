@@ -11,7 +11,7 @@ COMPOSEWAIT = 10
 COMPOSEFLAGS  = --remove-orphans
 COMPOSEFLAGS += -d
 
-#TESTFLAGS  = -v
+TESTFLAGS  = -v
 
 ### BUILD ###
 
@@ -55,7 +55,7 @@ psql:
 
 # server
 test-server:
-	@- go test $(TESTFLAGS) $(SERVER)/...
+	- go test $(TESTFLAGS) $(SERVER)/...
 
 
 test-server-race: clean-test test-common-race

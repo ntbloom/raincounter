@@ -51,10 +51,11 @@ func (r *Receiver) handleRainTopic(client paho.Client, message paho.Message) {
 	var readable map[string]interface{}
 	err := json.Unmarshal(message.Payload(), &readable)
 	if err != nil {
-		panic(err)
+		logrus.Error(err)
 	}
-	//stamp := readable["Timestamp"]
-	//mm, err := strconv.ParseFloat(readable["Millimeters"], 32)
+	stamp := readable["Timestamp"]
+	mm := readable["Millimeters"]
+	logrus.Errorf("%s,%d", stamp, mm)
 
 }
 

@@ -107,7 +107,7 @@ func (pg *PGConnector) AddTempCValue(tempC int, gwTimestamp time.Time) error {
 	return pg.Insert(sql)
 }
 
-func (pg *PGConnector) AddRainMMEvent(amount float32, gwTimestamp time.Time) error {
+func (pg *PGConnector) AddRainMMEvent(amount float64, gwTimestamp time.Time) error {
 	sql := fmt.Sprintf(
 		`INSERT INTO rain (gw_timestamp, server_timestamp, amount ) VALUES ('%s','%s','%f');`,
 		gwTimestamp.Format(configkey.TimestampFormat), time.Now().Format(configkey.TimestampFormat), amount)
@@ -120,11 +120,11 @@ func (pg *PGConnector) Select(cmd string) (interface{}, error) {
 	return pg.genericQuery(cmd)
 }
 
-func (pg *PGConnector) TotalRainMMSince(since time.Time) float32 {
+func (pg *PGConnector) TotalRainMMSince(since time.Time) float64 {
 	return pg.TotalRainMMFrom(since, time.Now())
 }
 
-func (pg *PGConnector) TotalRainMMFrom(from, to time.Time) float32 {
+func (pg *PGConnector) TotalRainMMFrom(from, to time.Time) float64 {
 	sql := fmt.Sprintf(`SELECT sum(amount) FROM rain WHERE gw_timestamp BETWEEN '%s' and '%s';`,
 		from.Format(configkey.TimestampFormat), to.Format(configkey.TimestampFormat))
 	row, err := pg.genericQuery(sql)
@@ -134,7 +134,7 @@ func (pg *PGConnector) TotalRainMMFrom(from, to time.Time) float32 {
 	}
 	defer row.Close()
 	row.Next()
-	var total float32
+	var total float64
 	err = row.Scan(&total)
 	if err != nil {
 		// means there is no value
@@ -163,7 +163,7 @@ func (pg *PGConnector) GetRainMMFrom(from, to time.Time) *RainEntriesMm {
 	defer rows.Close()
 	var rain RainEntriesMm
 	for rows.Next() {
-		var amt float32
+		var amt float64
 		var stamp time.Time
 		err = rows.Scan(&stamp, &amt)
 		if err != nil {

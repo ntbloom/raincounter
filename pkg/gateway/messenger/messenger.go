@@ -88,7 +88,6 @@ func (m *Messenger) sendStatus() {
 // get a status message about how the gateway is doing
 func gatewayStatusMessage() (*Message, error) {
 	gs := GatewayStatus{
-		//Topic:     mqtt.GatewayStatusTopic,
 		OK:        true,
 		Timestamp: time.Now(),
 	}

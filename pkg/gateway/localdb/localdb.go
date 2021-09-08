@@ -38,8 +38,8 @@ func (db *LocalDB) AddIntRecord(tag, value int) (sql.Result, error) {
 	return db.lite.EnterData(cmd)
 }
 
-func (db *LocalDB) AddFloatRecord(tag int, value float32) (sql.Result, error) {
-	panic("float not implemented the gateway")
+func (db *LocalDB) AddFloatRecord(tag int, value float64) (sql.Result, error) {
+	panic("float not implemented on the gateway")
 }
 
 func (db *LocalDB) Tally(tag int) int {

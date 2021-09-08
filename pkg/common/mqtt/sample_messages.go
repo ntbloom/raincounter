@@ -1,5 +1,10 @@
 package mqtt
 
+import (
+	"github.com/ntbloom/raincounter/pkg/config/configkey"
+	"github.com/spf13/viper"
+)
+
 // Examples of sample messages for use in testing, etc.
 
 type SampleMessage struct {
@@ -14,7 +19,7 @@ const (
 
 var SampleRain = SampleMessage{
 	Topic: RainTopic,
-	Msg:   map[string]interface{}{"Millimeters": "0.2794", "Timestamp": SampleTimestamp},
+	Msg:   map[string]interface{}{"Millimeters": viper.GetFloat64(configkey.SensorRainMm), "Timestamp": SampleTimestamp},
 }
 
 var SampleTemp = SampleMessage{

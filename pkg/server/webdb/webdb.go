@@ -19,7 +19,7 @@ type DBEntry interface {
 	AddStatusUpdate(int, time.Time) error
 
 	// AddRainMMEvent puts a rain event with a timestamp from the sensor
-	AddRainMMEvent(float32, time.Time) error
+	AddRainMMEvent(float64, time.Time) error
 
 	// Close closes the connection with the database. Necessary for pooled connections
 	Close()
@@ -31,10 +31,10 @@ type DBQuery interface {
 	Select(string) (interface{}, error)
 
 	// TotalRainMMSince gets total rain from a time in the past to present
-	TotalRainMMSince(time.Time) float32
+	TotalRainMMSince(time.Time) float64
 
 	// TotalRainMMFrom gets total rain between two timestamps
-	TotalRainMMFrom(time.Time, time.Time) float32
+	TotalRainMMFrom(time.Time, time.Time) float64
 
 	// GetRainMMSince gets a RainEntriesMm from a time in the past to present
 	GetRainMMSince(time.Time) *RainEntriesMm
@@ -64,7 +64,7 @@ type RainEntriesMm []RainEntryMm
 // RainEntryMm is a single timestamp/mm of rain entry
 type RainEntryMm struct {
 	Timestamp   time.Time
-	Millimeters float32
+	Millimeters float64
 }
 
 // TempEntriesC is an ordered slice of TempEntryC values

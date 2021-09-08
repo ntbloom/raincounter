@@ -33,7 +33,7 @@ type WebDBTest struct {
 	suite.Suite
 	entry   webdb.DBEntry
 	query   webdb.DBQuery
-	rainAmt float32
+	rainAmt float64
 }
 
 func TestWebDB(t *testing.T) {
@@ -51,7 +51,7 @@ func (suite *WebDBTest) SetupSuite() {
 	query = db
 	suite.entry = entry
 	suite.query = query
-	suite.rainAmt = float32(viper.GetFloat64(configkey.SensorRainMm))
+	suite.rainAmt = viper.GetFloat64(configkey.SensorRainMm)
 }
 func (suite *WebDBTest) TearDownSuite() {
 	// close the connections
@@ -243,7 +243,7 @@ func generateRandomTempEntriesC(n int) webdb.TempEntriesC {
 func (suite *WebDBTest) TestEnterAndRetrieveRainAllData() {
 	// generate random array of data
 	data := generateRandomRainEntriesMM(100)
-	var expTotalRain float32 = 0.0
+	var expTotalRain float64 = 0.0
 	for _, entry := range data {
 		err := suite.entry.AddRainMMEvent(entry.Millimeters, entry.Timestamp)
 		expTotalRain += entry.Millimeters
@@ -253,7 +253,7 @@ func (suite *WebDBTest) TestEnterAndRetrieveRainAllData() {
 	}
 	actual := suite.query.GetRainMMSince(yearAgo)
 	assert.NotNil(suite.T(), actual)
-	var actTotalRain float32 = 0.0
+	var actTotalRain float64 = 0.0
 	for i, v := range *actual {
 		actTotalRain += v.Millimeters
 		timeDiff := data[i].Timestamp.Sub(v.Timestamp)
@@ -265,9 +265,9 @@ func (suite *WebDBTest) TestEnterAndRetrieveRainAllData() {
 
 // test all the rain values on a selected range
 func (suite *WebDBTest) TestEnterAndRetrieveRainDataWithinRange() {
-	amt := float32(viper.GetFloat64(configkey.SensorRainMm))
+	amt := viper.GetFloat64(configkey.SensorRainMm)
 	var expected webdb.RainEntriesMm
-	var expTotal float32 = 0
+	var expTotal float64 = 0.0
 
 	// set a time range to query against
 	start := 4
@@ -295,7 +295,7 @@ func (suite *WebDBTest) TestEnterAndRetrieveRainDataWithinRange() {
 	}
 	actual := suite.query.GetRainMMFrom(beginning, finish)
 	assert.NotNil(suite.T(), actual)
-	var actTotal float32 = 0
+	var actTotal float64 = 0.0
 	for i, v := range *actual {
 		assert.Equal(suite.T(), v.Millimeters, amt, "amount was entered incorrectly")
 		timeDiff := v.Timestamp.Sub(expected[i].Timestamp)
@@ -312,7 +312,7 @@ func (suite *WebDBTest) TestEnterAndRetrieveRainDataWithinRange() {
 // Insert some rain values, get timestamp from the last entry entered
 func (suite *WebDBTest) TestGetLastRainTime() {
 	// make 2 timestamps, enter rain event for it
-	amt := float32(viper.GetFloat64(configkey.SensorRainMm))
+	amt := viper.GetFloat64(configkey.SensorRainMm)
 	twoHoursAgo := time.Now().Add(time.Hour * -2)
 	oneHourAgo := time.Now().Add(time.Hour * -1)
 	for _, stamp := range []time.Time{twoHoursAgo, oneHourAgo} {
@@ -330,7 +330,7 @@ func (suite *WebDBTest) TestGetLastRainTime() {
 // generate a random RainEntriesMM struct
 func generateRandomRainEntriesMM(n int) webdb.RainEntriesMm {
 	stamps := generateOrderedTimestamps(n)
-	amt := float32(viper.GetFloat64(configkey.SensorRainMm))
+	amt := viper.GetFloat64(configkey.SensorRainMm)
 	var rain webdb.RainEntriesMm
 	for _, stamp := range *stamps {
 		entry := webdb.RainEntryMm{
