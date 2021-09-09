@@ -249,11 +249,11 @@ func (pg *PGConnector) GetLastTempC() (int, error) {
 }
 
 func (pg *PGConnector) IsGatewayUp(since time.Duration) (bool, error) {
-	panic("implement me!")
+	return pg.getLastStatusMessage(since, "gateway")
 }
 
 func (pg *PGConnector) IsSensorUp(since time.Duration) (bool, error) {
-	panic("Implement me!")
+	return pg.getLastStatusMessage(since, "sensor")
 }
 
 /* RANDOM HELPER FUNCTIONS */
@@ -262,4 +262,32 @@ func (pg *PGConnector) IsSensorUp(since time.Duration) (bool, error) {
 func (pg *PGConnector) genericQuery(cmd string) (pgx.Rows, error) {
 	logrus.Debugf("pgsql: %s", cmd)
 	return pg.pool.Query(pg.ctx, cmd)
+}
+
+func (pg *PGConnector) getLastStatusMessage(since time.Duration, asset string) (bool, error) {
+	sql := fmt.Sprintf(`
+SELECT gw_timestamp 
+FROM status_log 
+LEFT JOIN status_codes on status_log.asset = status_codes.id 
+WHERE status_codes.asset = '%s'
+ORDER BY gw_timestamp DESC
+LIMIT 1
+;`, asset)
+	row, err := pg.genericQuery(sql)
+	if err != nil {
+		logrus.Error(err)
+		return false, err
+	}
+	defer row.Close()
+	row.Next()
+
+	var timestamp time.Time
+	err = row.Scan(&timestamp)
+	if err != nil {
+		logrus.Error(err)
+		return false, err
+	}
+	now := time.Now()
+	diff := now.Sub(timestamp)
+	return diff < since, nil
 }

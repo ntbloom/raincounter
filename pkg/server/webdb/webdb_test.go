@@ -442,17 +442,21 @@ func (suite *WebDBTest) TestEmptyResultsDontError() {
 
 // make sure we can get the most recent status message
 func (suite *WebDBTest) TestLastStatusMessage() {
-	// enter the status messages 5 minutes ago
-	timestamp := time.Now().Add(time.Minute * -5)
-	for _, v := range []int{configkey.SensorStatus, configkey.SensorStatus} {
-		err := suite.entry.AddStatusUpdate(v, timestamp)
-		if err != nil {
-			suite.Fail("unable to add sensor status message", err)
+	// enter status OK messages 5 and 7 minutes ago
+	for _, timestamp := range []time.Time{
+		time.Now().Add(time.Minute * -5),
+		time.Now().Add(time.Minute * -7),
+	} {
+		for _, v := range []int{configkey.GatewayStatus, configkey.SensorStatus} {
+			err := suite.entry.AddStatusUpdate(v, timestamp)
+			if err != nil {
+				suite.Fail("unable to add sensor status message", err)
+			}
 		}
 	}
 
-	// we expect to find the message within the duration
-	good := time.Minute * 4
+	// will match the 5-minute but not 7-minute message
+	good := time.Minute * 6
 	gwTrue, err := suite.query.IsGatewayUp(good)
 	if err != nil {
 		suite.Fail("problem querying gw status", err)
@@ -464,8 +468,8 @@ func (suite *WebDBTest) TestLastStatusMessage() {
 	assert.True(suite.T(), gwTrue)
 	assert.True(suite.T(), sensorTrue)
 
-	// we expect to lose the sensor/gateway within the duration
-	bad := time.Minute * 6
+	// shouldn't match either message
+	bad := time.Minute * 4
 	gwFalse, err := suite.query.IsGatewayUp(bad)
 	if err != nil {
 		suite.Fail("problem querying gw status", err)
