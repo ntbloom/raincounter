@@ -40,7 +40,7 @@ func SampleRain() SampleMessage {
 func SampleTemp() SampleMessage {
 	return SampleMessage{
 		Topic:     TemperatureTopic,
-		Msg:       map[string]interface{}{"Tempc": SampleCelsius, "Timestamp": timestamp()},
+		Msg:       map[string]interface{}{"TempC": SampleCelsius, "Timestamp": timestamp()},
 		Timestamp: timestamp(),
 	}
 }

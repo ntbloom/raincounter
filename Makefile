@@ -49,6 +49,8 @@ docker-up:
 docker-down:
 	@$(COMPOSE) down
 
+docker-cycle: docker-down docker-up
+
 docker-pglogs:
 	@$(COMPOSE) logs -f postgresql
 

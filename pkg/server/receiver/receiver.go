@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/spf13/viper"
+
 	"github.com/ntbloom/raincounter/pkg/config/configkey"
 
 	paho "github.com/eclipse/paho.mqtt.golang"
@@ -33,6 +35,13 @@ func NewReceiver(client paho.Client) (*Receiver, error) {
 	return &recv, nil
 }
 
+func (r *Receiver) Close() {
+	logrus.Info("disconnecting Receiver from mqtt")
+	r.mqttConnection.Disconnect(viper.GetUint(configkey.MQTTQuiescence))
+	logrus.Info("disconnecting Receiver from the database")
+	r.db.Close()
+}
+
 func (r *Receiver) IsConnected() bool {
 	return r.mqttConnection.IsConnected()
 }
@@ -49,6 +58,7 @@ func (r *Receiver) handleTemperatureMessage() {
 	panic("not implemented!")
 }
 
+// callback when a rain message is sent
 func (r *Receiver) handleRainTopic(client paho.Client, message paho.Message) {
 	var readable map[string]interface{}
 	if err := json.Unmarshal(message.Payload(), &readable); err != nil {

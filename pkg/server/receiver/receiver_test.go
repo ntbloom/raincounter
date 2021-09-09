@@ -5,6 +5,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ntbloom/raincounter/pkg/config/configkey"
+	"github.com/spf13/viper"
+
 	paho "github.com/eclipse/paho.mqtt.golang"
 	"github.com/sirupsen/logrus"
 
@@ -24,6 +27,7 @@ type ReceiverTest struct {
 	receiver *receiver.Receiver
 	client   paho.Client
 	query    webdb.DBQuery
+	entry    webdb.DBEntry
 }
 
 func TestReceiver(t *testing.T) {
@@ -48,14 +52,26 @@ func (suite *ReceiverTest) SetupSuite() {
 
 	// control the database as well
 	var query webdb.DBQuery
+	var entry webdb.DBEntry
 	db := webdb.NewPGConnector()
 	query = db
+	entry = db
 	suite.query = query
+	suite.entry = entry
 }
 
-func (suite *ReceiverTest) TearDownSuite() {}
+func (suite *ReceiverTest) TearDownSuite() {
+	logrus.Debug("closing the database pool")
+	suite.query.Close()
+	suite.entry.Close()
+	logrus.Debug("disconnecting the client from mqtt")
+	suite.client.Disconnect(viper.GetUint(configkey.MQTTQuiescence))
+	logrus.Debug("disconnecting test receiver from mqtt")
+	suite.receiver.Close()
+}
 
 func (suite *ReceiverTest) SetupTest() {
+	logrus.Info("deleting all rows from receiver_test.go")
 	// delete all database rows
 	for _, sql := range []string{
 		"DELETE FROM temperature;",
@@ -64,18 +80,14 @@ func (suite *ReceiverTest) SetupTest() {
 		"DELETE FROM status_log;",
 	} {
 		// `Select` can still execute arbitrary SQL
-		_, err := suite.query.Select(sql)
+		err := suite.entry.Insert(sql)
 		if err != nil {
+			logrus.Error(err)
 			suite.Fail("can't delete table rows", err)
 		}
 	}
 }
 func (suite *ReceiverTest) TearDownTest() {}
-
-// can we actually connect to the mqtt container?
-func (suite *ReceiverTest) TestBasicConnection() {
-	assert.True(suite.T(), suite.receiver.IsConnected())
-}
 
 // publish a rain topic, make sure it gets into the database
 func (suite *ReceiverTest) TestReceiveRainMessage() {
@@ -94,6 +106,17 @@ func (suite *ReceiverTest) TestReceiveRainMessage() {
 		timeDiff = -timeDiff
 	}
 	assert.True(suite.T(), timeDiff < time.Second)
+}
+
+func (suite *ReceiverTest) TestReceiveTemperatureMessage() {
+	msg := mqtt.SampleTemp()
+	suite.client.Publish(process(msg))
+	lastTemp, err := suite.query.GetLastTempC()
+	if err != nil {
+		suite.Fail("last temperature error", err)
+	}
+	expTemp := msg.Msg["TempC"]
+	assert.Equal(suite.T(), lastTemp, expTemp)
 }
 
 // TODO: come back to this test
