@@ -42,4 +42,6 @@ const (
 	TimestampFormat   = time.RFC3339
 	SensorStatus      = 1
 	GatewayStatus     = 2
+	IntErrVal         = -99
+	FloatErrVal       = -999.0
 )

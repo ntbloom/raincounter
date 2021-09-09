@@ -111,12 +111,15 @@ func (suite *ReceiverTest) TestReceiveRainMessage() {
 func (suite *ReceiverTest) TestReceiveTemperatureMessage() {
 	msg := mqtt.SampleTemp()
 	suite.client.Publish(process(msg))
+	// wait for it
+	time.Sleep(time.Second)
+
 	lastTemp, err := suite.query.GetLastTempC()
 	if err != nil {
 		suite.Fail("last temperature error", err)
 	}
 	expTemp := msg.Msg["TempC"]
-	assert.Equal(suite.T(), lastTemp, expTemp)
+	assert.Equal(suite.T(), expTemp, lastTemp)
 }
 
 // TODO: come back to this test

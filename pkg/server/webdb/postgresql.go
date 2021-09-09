@@ -25,10 +25,7 @@ import (
 // tables because we don't really care about events, just the rain and
 // temperature data.
 
-const (
-	intErrVal   = -999
-	floatErrVal = -999.0
-)
+const ()
 
 var errTime time.Time = time.Unix(0, 0)
 
@@ -130,7 +127,7 @@ func (pg *PGConnector) TotalRainMMFrom(from, to time.Time) (float64, error) {
 	row, err := pg.genericQuery(sql)
 	if err != nil {
 		logrus.Error(err)
-		return floatErrVal, err
+		return configkey.FloatErrVal, err
 	}
 	defer row.Close()
 	row.Next()
@@ -238,7 +235,7 @@ func (pg *PGConnector) GetLastTempC() (int, error) {
 	row, err := pg.genericQuery(sql)
 	if err != nil {
 		logrus.Error(err)
-		return intErrVal, err
+		return configkey.IntErrVal, err
 	}
 	defer row.Close()
 	var tempC int
@@ -246,7 +243,7 @@ func (pg *PGConnector) GetLastTempC() (int, error) {
 	err = row.Scan(&tempC)
 	if err != nil {
 		logrus.Errorf("failed to scan row for tempC: %s", err)
-		return intErrVal, err
+		return configkey.IntErrVal, err
 	}
 	return tempC, nil
 }

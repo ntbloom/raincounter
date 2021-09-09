@@ -32,6 +32,7 @@ func NewReceiver(client paho.Client) (*Receiver, error) {
 	}
 
 	client.Subscribe(mqtt.RainTopic, mqtt.Qos, recv.handleRainTopic)
+	client.Subscribe(mqtt.TemperatureTopic, mqtt.Qos, recv.handleTemperatureTopic)
 	return &recv, nil
 }
 
@@ -46,6 +47,8 @@ func (r *Receiver) IsConnected() bool {
 	return r.mqttConnection.IsConnected()
 }
 
+/* Topic subscription callbacks */
+
 func (r *Receiver) handleGatewayStatusMessage() {
 	panic("not implemented!")
 }
@@ -54,29 +57,46 @@ func (r *Receiver) handleSensorStatusMessage() {
 	panic("not implemented!")
 }
 
-func (r *Receiver) handleTemperatureMessage() {
-	panic("not implemented!")
-}
-
-// callback when a rain message is sent
-func (r *Receiver) handleRainTopic(client paho.Client, message paho.Message) {
-	var readable map[string]interface{}
-	if err := json.Unmarshal(message.Payload(), &readable); err != nil {
-		logrus.Error(err)
+func (r *Receiver) handleTemperatureTopic(_ paho.Client, message paho.Message) {
+	stamp, readable, err := parseMessage(message)
+	if err != nil {
+		logrus.Errorf("skipping message on %s", message.Topic())
 		return
 	}
-	stamp, err := time.Parse(configkey.TimestampFormat, readable["Timestamp"].(string))
-	if err != nil {
+	temp := int(readable["TempC"].(float64))
+	if err := r.db.AddTempCValue(temp, stamp); err != nil {
 		logrus.Error(err)
+	}
+}
+
+func (r *Receiver) handleRainTopic(_ paho.Client, message paho.Message) {
+	stamp, readable, err := parseMessage(message)
+	if err != nil {
+		logrus.Errorf("skipping message on %s", message.Topic())
 		return
 	}
 	mm := readable["Millimeters"].(float64)
 	if err := r.db.AddRainMMEvent(mm, stamp); err != nil {
 		logrus.Error(err)
-		return
 	}
 }
 
 func (r *Receiver) handleSensorEvent() {
 	panic("not implemented!")
+}
+
+/* HELPER METHODS */
+
+func parseMessage(msg paho.Message) (time.Time, map[string]interface{}, error) {
+	var readable map[string]interface{}
+	if err := json.Unmarshal(msg.Payload(), &readable); err != nil {
+		logrus.Error(err)
+		return time.Time{}, nil, err
+	}
+	stamp, err := time.Parse(configkey.TimestampFormat, readable["Timestamp"].(string))
+	if err != nil {
+		logrus.Error(err)
+		return time.Time{}, nil, err
+	}
+	return stamp, readable, nil
 }
