@@ -15,7 +15,7 @@ type DBEntry interface {
 	// AddTempCValue puts a Celsius temperature value in the database
 	AddTempCValue(int, time.Time) error
 
-	// AddStatus
+	// AddStatusUpdate adds a status message for an asset with an integer ID
 	AddStatusUpdate(int, time.Time) error
 
 	// AddRainMMEvent puts a rain event with a timestamp from the sensor
@@ -53,6 +53,12 @@ type DBQuery interface {
 
 	// GetLastTempC shows the most recent temperature
 	GetLastTempC() (int, error)
+
+	// IsGatewayUp tells whether the gateway has published a status message in a certain time
+	IsGatewayUp(time.Duration) (bool, error)
+
+	// IsSensorUp tells whether the sensor has published a status message in a certain time
+	IsSensorUp(time.Duration) (bool, error)
 
 	// Close closes the connection with the database. Necessary for pooled connections
 	Close()

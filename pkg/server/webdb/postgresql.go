@@ -248,6 +248,14 @@ func (pg *PGConnector) GetLastTempC() (int, error) {
 	return tempC, nil
 }
 
+func (pg *PGConnector) IsGatewayUp(since time.Duration) (bool, error) {
+	panic("implement me!")
+}
+
+func (pg *PGConnector) IsSensorUp(since time.Duration) (bool, error) {
+	panic("Implement me!")
+}
+
 /* RANDOM HELPER FUNCTIONS */
 
 // executes arbitrary sql. we need to close the connection after each value, either for

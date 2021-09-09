@@ -438,6 +438,44 @@ func (suite *WebDBTest) TestEmptyResultsDontError() {
 		suite.Fail("temp since errors on zero", err)
 	}
 	assert.Zero(suite.T(), len(*tempSince), "expected an empty struct")
+}
+
+// make sure we can get the most recent status message
+func (suite *WebDBTest) TestLastStatusMessage() {
+	// enter the status messages 5 minutes ago
+	timestamp := time.Now().Add(time.Minute * -5)
+	for _, v := range []int{configkey.SensorStatus, configkey.SensorStatus} {
+		err := suite.entry.AddStatusUpdate(v, timestamp)
+		if err != nil {
+			suite.Fail("unable to add sensor status message", err)
+		}
+	}
+
+	// we expect to find the message within the duration
+	good := time.Minute * 4
+	gwTrue, err := suite.query.IsGatewayUp(good)
+	if err != nil {
+		suite.Fail("problem querying gw status", err)
+	}
+	sensorTrue, err := suite.query.IsSensorUp(good)
+	if err != nil {
+		suite.Fail("problem querying sensor status", err)
+	}
+	assert.True(suite.T(), gwTrue)
+	assert.True(suite.T(), sensorTrue)
+
+	// we expect to lose the sensor/gateway within the duration
+	bad := time.Minute * 6
+	gwFalse, err := suite.query.IsGatewayUp(bad)
+	if err != nil {
+		suite.Fail("problem querying gw status", err)
+	}
+	sensorFalse, err := suite.query.IsSensorUp(bad)
+	if err != nil {
+		suite.Fail("problem querying sensor status", err)
+	}
+	assert.False(suite.T(), gwFalse)
+	assert.False(suite.T(), sensorFalse)
 
 }
 
