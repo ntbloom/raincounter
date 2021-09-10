@@ -20,7 +20,7 @@ type Receiver struct {
 }
 
 // NewReceiver creates a new Receiver struct
-// mqtt connection is created automatically
+// The mqtt connection is created automatically and must be closed
 func NewReceiver(client paho.Client) (*Receiver, error) {
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
 		logrus.Errorf("unable to connect to MQTT: %s", token.Error())
@@ -47,7 +47,7 @@ func (r *Receiver) IsConnected() bool {
 	return r.mqttConnection.IsConnected()
 }
 
-/* Topic subscription callbacks */
+/* TOPIC SUBSCRIPTION CALLBACKS */
 
 func (r *Receiver) handleGatewayStatusMessage() {
 	panic("not implemented!")
