@@ -33,6 +33,9 @@ func NewReceiver(client paho.Client) (*Receiver, error) {
 
 	client.Subscribe(mqtt.RainTopic, mqtt.Qos, recv.handleRainTopic)
 	client.Subscribe(mqtt.TemperatureTopic, mqtt.Qos, recv.handleTemperatureTopic)
+	client.Subscribe(mqtt.GatewayStatusTopic, mqtt.Qos, recv.handleGatewayStatusMessage)
+	client.Subscribe(mqtt.SensorStatusTopic, mqtt.Qos, recv.handleSensorStatusMessage)
+	client.Subscribe(mqtt.SensorEventTopic, mqtt.Qos, recv.handleSensorEvent)
 	return &recv, nil
 }
 
@@ -49,11 +52,11 @@ func (r *Receiver) IsConnected() bool {
 
 /* TOPIC SUBSCRIPTION CALLBACKS */
 
-func (r *Receiver) handleGatewayStatusMessage() {
+func (r *Receiver) handleGatewayStatusMessage(_ paho.Client, message paho.Message) {
 	panic("not implemented!")
 }
 
-func (r *Receiver) handleSensorStatusMessage() {
+func (r *Receiver) handleSensorStatusMessage(_ paho.Client, message paho.Message) {
 	panic("not implemented!")
 }
 
@@ -81,7 +84,7 @@ func (r *Receiver) handleRainTopic(_ paho.Client, message paho.Message) {
 	}
 }
 
-func (r *Receiver) handleSensorEvent() {
+func (r *Receiver) handleSensorEvent(_ paho.Client, message paho.Message) {
 	panic("not implemented!")
 }
 

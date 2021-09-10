@@ -338,7 +338,12 @@ LIMIT 1
 		return false, err
 	}
 	defer row.Close()
-	row.Next()
+	hasRow := row.Next()
+	if !hasRow {
+		// table is empty, likely to only happen in a
+		logrus.Warning("No rows available querying for status message. Should the table be empty?")
+		return false, nil
+	}
 
 	var timestamp time.Time
 	err = row.Scan(&timestamp)
