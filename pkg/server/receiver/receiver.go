@@ -53,17 +53,16 @@ func (r *Receiver) IsConnected() bool {
 /* TOPIC SUBSCRIPTION CALLBACKS */
 
 func (r *Receiver) handleGatewayStatusMessage(_ paho.Client, message paho.Message) {
-	panic("not implemented!")
+	r.processStatusMessage(message, configkey.GatewayStatus)
 }
 
 func (r *Receiver) handleSensorStatusMessage(_ paho.Client, message paho.Message) {
-	panic("not implemented!")
+	r.processStatusMessage(message, configkey.SensorStatus)
 }
 
 func (r *Receiver) handleTemperatureTopic(_ paho.Client, message paho.Message) {
 	stamp, readable, err := parseMessage(message)
 	if err != nil {
-		logrus.Errorf("skipping message on %s", message.Topic())
 		return
 	}
 	temp := int(readable["TempC"].(float64))
@@ -75,7 +74,6 @@ func (r *Receiver) handleTemperatureTopic(_ paho.Client, message paho.Message) {
 func (r *Receiver) handleRainTopic(_ paho.Client, message paho.Message) {
 	stamp, readable, err := parseMessage(message)
 	if err != nil {
-		logrus.Errorf("skipping message on %s", message.Topic())
 		return
 	}
 	mm := readable["Millimeters"].(float64)
@@ -90,15 +88,28 @@ func (r *Receiver) handleSensorEvent(_ paho.Client, message paho.Message) {
 
 /* HELPER METHODS */
 
+// send a sensor or gateway status message
+func (r *Receiver) processStatusMessage(msg paho.Message, asset int) {
+	stamp, _, err := parseMessage(msg)
+	if err != nil {
+		return
+	}
+	if err := r.db.AddStatusUpdate(asset, stamp); err != nil {
+		logrus.Error(err)
+		return
+	}
+}
+
+// parse the messages and have unified error logging for all topics
 func parseMessage(msg paho.Message) (time.Time, map[string]interface{}, error) {
 	var readable map[string]interface{}
 	if err := json.Unmarshal(msg.Payload(), &readable); err != nil {
-		logrus.Error(err)
+		logrus.Errorf("skipping message on %s: %s", msg.Topic(), err)
 		return time.Time{}, nil, err
 	}
 	stamp, err := time.Parse(configkey.TimestampFormat, readable["Timestamp"].(string))
 	if err != nil {
-		logrus.Error(err)
+		logrus.Errorf("skipping message on %s: %s", msg.Topic(), err)
 		return time.Time{}, nil, err
 	}
 	return stamp, readable, nil
