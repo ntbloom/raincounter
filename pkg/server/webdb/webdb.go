@@ -60,6 +60,12 @@ type DBQuery interface {
 	// IsSensorUp tells whether the sensor has published a status message in a certain time
 	IsSensorUp(time.Duration) (bool, error)
 
+	// GetEventMessagesSince gets an EventEntries from a time in the past to present. Specify tag or -1 for all tags
+	GetEventMessagesSince(int, time.Time) (*EventEntries, error)
+
+	// GetEventMessagesFrom gets an EventEntries between two timestamps. Specify tag or -1 for all tags
+	GetEventMessagesFrom(int, time.Time, time.Time) (*EventEntries, error)
+
 	// Close closes the connection with the database. Necessary for pooled connections
 	Close()
 }
@@ -80,4 +86,15 @@ type TempEntriesC []TempEntryC
 type TempEntryC struct {
 	Timestamp time.Time
 	TempC     int
+}
+
+// EventEntries is a slice of EventEntry structs
+type EventEntries []EventEntry
+
+// EventEntry is a single sensor event
+type EventEntry struct {
+	Timestamp time.Time
+	Tag       int
+	Value     int
+	Longname  string
 }

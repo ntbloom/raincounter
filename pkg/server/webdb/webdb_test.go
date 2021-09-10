@@ -480,7 +480,62 @@ func (suite *WebDBTest) TestLastStatusMessage() {
 	}
 	assert.False(suite.T(), gwFalse)
 	assert.False(suite.T(), sensorFalse)
+}
 
+// make sure we can query event messages
+func (suite *WebDBTest) TestEventMessages() {
+	// enter one of each kind of int at 2 different intervals
+	fiveMinutesAgo := time.Now().Add(time.Minute * -5)
+	tenMinutesAgo := time.Now().Add(time.Minute * -10)
+	elevenMinutesAgo := time.Now().Add(time.Minute * -11)
+	fifteenMinutesAgo := time.Now().Add(time.Minute * -15)
+	for _, stamp := range []time.Time{fiveMinutesAgo, tenMinutesAgo, elevenMinutesAgo, fifteenMinutesAgo} {
+		for tag, value := range map[int]uint{
+			tlv.Pause:     tlv.PauseValue,
+			tlv.Unpause:   tlv.UnpauseValue,
+			tlv.SoftReset: tlv.SoftResetValue,
+			tlv.HardReset: tlv.HardResetValue,
+		} {
+			err := suite.entry.AddTagValue(tag, int(value), stamp)
+			if err != nil {
+				suite.Fail("failed to add tagged event", err)
+			}
+		}
+	}
+
+	// query to find just the 10- and 11-minute messages
+	target := tlv.Pause // just pick one, should be good enough
+	targetVal := tlv.PauseValue
+	res, err := suite.query.GetEventMessagesFrom(target, time.Now().Add(time.Minute*-12), time.Now().Add(time.Minute*-9))
+	if err != nil {
+		suite.Fail("problem querying event message range", err)
+	}
+	assert.Equal(suite.T(), 2, len(*res), "date range is incorrect")
+	for _, v := range *res {
+		timeDiff := time.Until(v.Timestamp)
+		if timeDiff < 0 {
+			timeDiff = -timeDiff
+		}
+		assert.True(suite.T(), timeDiff < time.Minute*13, "timestamp is too old")
+		assert.True(suite.T(), timeDiff > time.Minute*8, "timestamp is too recent")
+		assert.Equal(suite.T(), target, v.Tag, "tag doesn't match")
+		assert.Equal(suite.T(), targetVal, v.Value, "value doesn't match")
+	}
+
+	// repeat with all of the entries
+	res, err = suite.query.GetEventMessagesFrom(-1, time.Now().Add(time.Minute*-12), time.Now().Add(time.Minute*-9))
+	if err != nil {
+		suite.Fail("problem querying all entries with -1", err)
+	}
+	assert.Equal(suite.T(), 4*2, len(*res), "doesn't all match")
+
+	// rough check that the values are the same without having to iterate over a bunch of times
+	expectedSum := 2 * (tlv.Pause + tlv.Unpause + tlv.SoftReset + tlv.HardReset)
+	var actualSum int
+	for _, v := range *res {
+		actualSum += v.Tag
+	}
+	assert.Equal(suite.T(), expectedSum, actualSum, "not all tags were represented")
 }
 
 /* HELPER FUNCTIONS */

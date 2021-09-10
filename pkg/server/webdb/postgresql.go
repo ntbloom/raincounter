@@ -256,6 +256,65 @@ func (pg *PGConnector) IsSensorUp(since time.Duration) (bool, error) {
 	return pg.getLastStatusMessage(since, "sensor")
 }
 
+func (pg *PGConnector) GetEventMessagesSince(tag int, since time.Time) (*EventEntries, error) {
+	return pg.GetEventMessagesFrom(tag, since, time.Now())
+}
+
+func (pg *PGConnector) GetEventMessagesFrom(tag int, from, to time.Time) (*EventEntries, error) {
+	sqlAll := fmt.Sprintf(`
+SELECT mappings.longname, event_log.gw_timestamp, event_log.tag, event_log.value
+FROM event_log
+LEFT JOIN mappings on event_log.tag = mappings.id
+WHERE gw_timestamp BETWEEN '%s' and '%s'
+ORDER BY gw_timestamp DESC
+;`, from.Format(configkey.TimestampFormat), to.Format(configkey.TimestampFormat))
+	sqlTag := fmt.Sprintf(`
+SELECT mappings.longname, event_log.gw_timestamp, event_log.tag, event_log.value
+FROM event_log
+LEFT JOIN mappings on event_log.tag = mappings.id
+WHERE event_log.tag = %d
+AND gw_timestamp BETWEEN '%s' and '%s'
+ORDER BY gw_timestamp DESC
+`, tag, from.Format(configkey.TimestampFormat), to.Format(configkey.TimestampFormat))
+
+	var query string
+	if tag >= 2 && tag <= 5 {
+		query = sqlTag
+	} else if tag == -1 {
+		query = sqlAll
+	} else {
+		return nil, fmt.Errorf("illegal tag %d", tag)
+	}
+	rows, err := pg.genericQuery(query)
+	if err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var entries EventEntries
+	for rows.Next() {
+		var longname string
+		var timestamp time.Time
+		var tag int
+		var value int
+		err = rows.Scan(&longname, &timestamp, &tag, &value)
+		if err != nil {
+			logrus.Error(err)
+			return nil, err
+		}
+		entry := EventEntry{
+			Timestamp: timestamp,
+			Tag:       tag,
+			Value:     value,
+			Longname:  longname,
+		}
+		entries = append(entries, entry)
+	}
+	return &entries, nil
+
+}
+
 /* RANDOM HELPER FUNCTIONS */
 
 // executes arbitrary sql. we need to close the connection after each value, either for
