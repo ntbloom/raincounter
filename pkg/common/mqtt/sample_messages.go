@@ -18,7 +18,7 @@ type SampleMessage struct {
 }
 
 const (
-	SampleTimestamp = "2022-09-06T21:57:32.779567444-04:00"
+	SampleTimestamp = "2020-09-06T21:57:32.779567444-04:00"
 )
 
 var SampleCelsius = 23
