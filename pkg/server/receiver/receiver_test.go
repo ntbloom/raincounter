@@ -160,16 +160,36 @@ func (suite *ReceiverTest) TestStatusMessages() {
 // make sure we can handle a sensor event
 func (suite *ReceiverTest) TestSensorEvent() {
 	testEvent := tlv.SoftReset
+	testValue := tlv.SoftResetValue
+	testPayload := mqtt.SampleSensorSoftReset
 
 	// verify there aren't any events yet
-	basicallyForever := time.Now().Add(-time.Hour * 24 * 365 * 100)
-	res, err := suite.query.GetEventMessagesSince(testEvent, basicallyForever)
+	timestamp := time.Now().Add(-time.Hour)
+	res, err := suite.query.GetEventMessagesSince(testEvent, timestamp)
 	if err != nil {
 		suite.Fail("problem querying empty event messages", err)
 	}
 	assert.Nil(suite.T(), *res)
 
-	//suite.entry.AddTagValue()
+	// add an event over mqtt
+	suite.client.Publish(process(testPayload()))
+	time.Sleep(time.Second)
+
+	// verify it's in the database
+	res, err = suite.query.GetEventMessagesSince(testEvent, timestamp)
+	if err != nil {
+		suite.Fail("problem querying event messages", err)
+	}
+	assert.Equal(suite.T(), 1, len(*res), "should have received one and only one message")
+	actualEntry := (*res)[0]
+	timeDiff := actualEntry.Timestamp.Sub(timestamp)
+	if timeDiff < 0 {
+		timeDiff = -timeDiff
+	}
+	assert.True(suite.T(), timeDiff < time.Second)
+	assert.Equal(suite.T(), testEvent, actualEntry.Tag, "mismatched tag")
+	assert.Equal(suite.T(), testValue, actualEntry.Value, "mismatched value")
+
 }
 
 //// run through all of the messages and make sure there aren't any panics from unimplemented methods
