@@ -50,7 +50,7 @@ func NewPGConnector() *PGConnector {
 	}
 	if err != nil {
 		logrus.Fatal(err)
-		os.Exit(exitcodes.PostgresqlConnnectionError)
+		os.Exit(exitcodes.PostgresqlConnectionError)
 	}
 	return &PGConnector{pgpool}
 }

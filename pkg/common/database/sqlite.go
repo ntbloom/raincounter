@@ -17,14 +17,15 @@ const (
 
 // Connection gets a DB and Conn struct for a sqlite File
 type Connection struct {
-	Database *sql.DB
-	Conn     *sql.Conn
+	Database *sql.DB   // database struct
+	Conn     *sql.Conn // connection struct
 }
 
+// Sqlite handles connections to sqlite database
 type Sqlite struct {
-	File     *os.File
-	FullPath string
-	Driver   string
+	File     *os.File // name of the .db file
+	FullPath string   // full POSIX path
+	Driver   string   // sqlite driver
 }
 
 // NewSqlite makes a new connector struct for any sqlite database
@@ -54,6 +55,7 @@ func NewSqlite(fullPath string, clobber bool, schema string) (*Sqlite, error) {
 	return &db, nil
 }
 
+// Connect attaches to the sqlite database
 func (db *Sqlite) Connect() (*Connection, error) {
 	// get variables ready
 	var (
@@ -82,6 +84,7 @@ func (db *Sqlite) Connect() (*Connection, error) {
 	return &Connection{dbPtr, conn}, nil
 }
 
+// Disconnect closes the connection to the database
 func (c *Connection) Disconnect() {
 	if err := c.Conn.Close(); err != nil {
 		logrus.Error(err)
@@ -91,10 +94,12 @@ func (c *Connection) Disconnect() {
 	}
 }
 
+// MakeSchema creates all of the database tables, etc.
 func (db *Sqlite) MakeSchema(schema string) (sql.Result, error) {
 	return db.EnterData(schema)
 }
 
+// EnterData enters a generic sql INSERT statement
 func (db *Sqlite) EnterData(cmd string) (sql.Result, error) {
 	var c *Connection
 	var err error

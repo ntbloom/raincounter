@@ -2,6 +2,7 @@ package cli
 
 import "github.com/spf13/cobra"
 
+// RootCmd is the base of all command-line arguments
 var RootCmd = &cobra.Command{} //nolint:gochecknoglobals
 
 // Configure sets global CLI configs

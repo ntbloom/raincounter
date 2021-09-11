@@ -2,7 +2,12 @@
 package exitcodes
 
 const (
-	SerialPortNotFound         = 1
-	TLSError                   = 2
-	PostgresqlConnnectionError = 3
+	// SerialPortNotFound errors when we can't connect to the database
+	SerialPortNotFound = 1
+
+	// TLSError is when we can't connect to mqtt using TLS certs
+	TLSError = 2
+
+	// PostgresqlConnectionError happens when we can't connect to postgres
+	PostgresqlConnectionError = 3
 )

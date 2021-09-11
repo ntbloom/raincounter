@@ -92,22 +92,27 @@ func MakeTemperatureEntry(db DBWrapper, tempC int) {
 
 /* GETTERS, MOSTLY FOR TESTING */
 
+// GetRainEntries gets rain entries
 func GetRainEntries(db DBWrapper) int {
 	return db.Tally(tlv.Rain)
 }
 
+// GetSoftResetEntries gets soft reset entries
 func GetSoftResetEntries(db DBWrapper) int {
 	return db.Tally(tlv.SoftReset)
 }
 
+// GetHardResetEntries gets hard reset entries
 func GetHardResetEntries(db DBWrapper) int {
 	return db.Tally(tlv.HardReset)
 }
 
+// GetPauseEntries gets pause entries
 func GetPauseEntries(db DBWrapper) int {
 	return db.Tally(tlv.Pause)
 }
 
+// GetUnpauseEntries gets pause entries
 func GetUnpauseEntries(db DBWrapper) int {
 	return db.Tally(tlv.Unpause)
 }

@@ -89,6 +89,12 @@ run-gateway-race: build-race
 	@$(EXE)-race gateway
 
 
+### LINT ###
+
+lint:
+	@golint ./...
+
+
 ### CLEAN ###
 
 clean-test:
