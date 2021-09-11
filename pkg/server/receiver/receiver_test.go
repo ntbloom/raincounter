@@ -126,38 +126,39 @@ func (suite *ReceiverTest) TestReceiveTemperatureMessage() {
 	assert.Equal(suite.T(), expTemp, lastTemp)
 }
 
-//func (suite *ReceiverTest) TestStatusMessages() {
-//	duration := time.Minute * -5
-//
-//	// assert that the sensor and gateway are not up
-//	gwUp, err := suite.query.IsGatewayUp(duration)
-//	if err != nil {
-//		suite.Fail("unhandled error on empty IsGatewayUp", err)
-//	}
-//	sensorUp, err := suite.query.IsSensorUp(duration)
-//	if err != nil {
-//		suite.Fail("unhandled error on empty IsSensorUp", err)
-//	}
-//	assert.False(suite.T(), sensorUp, "sensor should not be up")
-//	assert.False(suite.T(), gwUp, "gateway should not be up")
-//
-//	// publish the messages and wait for a minute
-//	suite.client.Publish(process(mqtt.SampleSensorStatus()))
-//	suite.client.Publish(process(mqtt.SampleGatewayStatus()))
-//	time.Sleep(time.Second)
-//
-//	// verify the items were put into the database
-//	gwUp, err = suite.query.IsGatewayUp(duration)
-//	if err != nil {
-//		suite.Fail("error querying gateway is up", err)
-//	}
-//	sensorUp, err = suite.query.IsSensorUp(duration)
-//	if err != nil {
-//		suite.Fail("error querying sensor is up", err)
-//	}
-//	assert.True(suite.T(), gwUp, "gateway should be reporting as up")
-//	assert.True(suite.T(), sensorUp, "sensor should be reporting as up")
-//}
+func (suite *ReceiverTest) TestStatusMessages() {
+	duration := time.Minute * 5
+	now := time.Now()
+
+	// assert that the sensor and gateway are not up
+	gwUp, err := suite.query.IsGatewayUp(duration)
+	if err != nil {
+		suite.Fail("unhandled error on empty IsGatewayUp", err)
+	}
+	sensorUp, err := suite.query.IsSensorUp(duration)
+	if err != nil {
+		suite.Fail("unhandled error on empty IsSensorUp", err)
+	}
+	assert.False(suite.T(), sensorUp, "sensor should not be up")
+	assert.False(suite.T(), gwUp, "gateway should not be up")
+
+	// publish the messages and wait for a second
+	suite.client.Publish(process(mqtt.SampleSensorStatus(now)))
+	suite.client.Publish(process(mqtt.SampleGatewayStatus(now)))
+	time.Sleep(time.Second)
+
+	// verify the items were put into the database
+	gwUp, err = suite.query.IsGatewayUp(duration)
+	if err != nil {
+		suite.Fail("error querying gateway is up", err)
+	}
+	sensorUp, err = suite.query.IsSensorUp(duration)
+	if err != nil {
+		suite.Fail("error querying sensor is up", err)
+	}
+	assert.True(suite.T(), gwUp, "gateway should be reporting as up")
+	assert.True(suite.T(), sensorUp, "sensor should be reporting as up")
+}
 
 // make sure we can handle a sensor event
 func (suite *ReceiverTest) TestSensorEvent() {

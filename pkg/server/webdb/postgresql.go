@@ -349,5 +349,8 @@ LIMIT 1
 	}
 	now := time.Now()
 	diff := now.Sub(timestamp)
+	if diff < 0 {
+		diff = -diff
+	}
 	return diff < since, nil
 }
