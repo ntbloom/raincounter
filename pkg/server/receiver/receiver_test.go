@@ -93,7 +93,8 @@ func (suite *ReceiverTest) TearDownTest() {}
 
 // publish a rain topic, make sure it gets into the database
 func (suite *ReceiverTest) TestReceiveRainMessage() {
-	msg := mqtt.SampleRain()
+	stamp := time.Now().Add(time.Minute * -1)
+	msg := mqtt.SampleRain(stamp)
 	suite.client.Publish(process(msg))
 	// wait for it to make it to the broker
 	time.Sleep(time.Second * 1)
@@ -103,15 +104,16 @@ func (suite *ReceiverTest) TestReceiveRainMessage() {
 	if err != nil {
 		suite.Fail("last rain error", err)
 	}
-	timeDiff := msg.Timestamp.Sub(lastRain)
+	timeDiff := stamp.Sub(lastRain)
 	if timeDiff < 0 {
 		timeDiff = -timeDiff
 	}
-	assert.True(suite.T(), timeDiff < time.Second)
+	logrus.Infof("timeDiff:%s, stamp:%s, lastRain:%s", timeDiff, stamp, lastRain)
+	assert.True(suite.T(), timeDiff < time.Minute*2, "time mismatch on rain message")
 }
 
 func (suite *ReceiverTest) TestReceiveTemperatureMessage() {
-	msg := mqtt.SampleTemp()
+	msg := mqtt.SampleTemp(time.Now().Add(time.Minute * -1))
 	suite.client.Publish(process(msg))
 	// wait for it
 	time.Sleep(time.Second)
@@ -162,6 +164,7 @@ func (suite *ReceiverTest) TestSensorEvent() {
 	testEvent := tlv.SoftReset
 	testValue := tlv.SoftResetValue
 	testPayload := mqtt.SampleSensorSoftReset
+	testTimestamp := time.Now().Add(time.Minute * -5)
 
 	// verify there aren't any events yet
 	longTime := time.Now().Add(time.Hour * 24 * 365 * -100)
@@ -172,7 +175,7 @@ func (suite *ReceiverTest) TestSensorEvent() {
 	assert.Nil(suite.T(), *res)
 
 	// add an event over mqtt
-	suite.client.Publish(process(testPayload()))
+	suite.client.Publish(process(testPayload(testTimestamp)))
 	time.Sleep(time.Second)
 
 	// verify it's in the database
@@ -182,7 +185,7 @@ func (suite *ReceiverTest) TestSensorEvent() {
 	}
 	assert.Equal(suite.T(), 1, len(*res), "should have received one and only one message")
 	actualEntry := (*res)[0]
-	timeDiff := actualEntry.Timestamp.Sub(testPayload().Timestamp)
+	timeDiff := actualEntry.Timestamp.Sub(testPayload(testTimestamp).Timestamp)
 	if timeDiff < 0 {
 		timeDiff = -timeDiff
 	}
@@ -193,15 +196,16 @@ func (suite *ReceiverTest) TestSensorEvent() {
 
 // run through all of the messages and make sure there aren't any panics from unimplemented methods
 func (suite *ReceiverTest) TestNoPanics() {
+	now := time.Now()
 	for _, message := range []mqtt.SampleMessage{
-		mqtt.SampleRain(),
-		mqtt.SampleTemp(),
-		mqtt.SampleSensorPause(),
-		mqtt.SampleSensorUnpause(),
-		mqtt.SampleSensorSoftReset(),
-		mqtt.SampleSensorHardReset(),
-		mqtt.SampleSensorStatus(),
-		mqtt.SampleGatewayStatus(),
+		mqtt.SampleRain(now),
+		mqtt.SampleTemp(now),
+		mqtt.SampleSensorPause(now),
+		mqtt.SampleSensorUnpause(now),
+		mqtt.SampleSensorSoftReset(now),
+		mqtt.SampleSensorHardReset(now),
+		mqtt.SampleSensorStatus(now),
+		mqtt.SampleGatewayStatus(now),
 	} {
 		suite.client.Publish(process(message))
 	}

@@ -12,7 +12,7 @@ COMPOSEFLAGS  = --remove-orphans
 COMPOSEFLAGS += -d
 
 TESTFLAGS  = -timeout 10s
-#TESTFLAGS += -p 1
+TESTFLAGS += -p 1
 #TESTFLAGS += -v
 
 ### BUILD ###

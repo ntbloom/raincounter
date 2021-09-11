@@ -23,88 +23,88 @@ const (
 
 var SampleCelsius = 23
 
-func timestamp() time.Time {
-	var stamp string = string(SampleTimestamp)
-	val, err := time.Parse(configkey.TimestampFormat, stamp)
-	if err != nil {
-		panic(err)
-	}
-	return val
-}
+//func fixTimestamp(stamp time.Time) time.Time {
+//	var stamp string = string(SampleTimestamp)
+//	val, err := time.Parse(configkey.TimestampFormat, stamp)
+//	if err != nil {
+//		panic(err)
+//	}
+//	return val
+//}
 
-func genericEventMessage(tag, value int, event string) map[string]interface{} {
+func genericEventMessage(tag, value int, event string, timestamp time.Time) map[string]interface{} {
 	return map[string]interface{}{
 		"Tag":       tag,
 		"Value":     value,
 		"Event":     event,
-		"Timestamp": timestamp(),
+		"Timestamp": timestamp,
 	}
 }
 
-func SampleRain() SampleMessage {
+func SampleRain(timestamp time.Time) SampleMessage {
 	return SampleMessage{
 		Topic:     RainTopic,
-		Msg:       map[string]interface{}{"Millimeters": viper.GetFloat64(configkey.SensorRainMm), "Timestamp": timestamp()},
-		Timestamp: timestamp(),
+		Msg:       map[string]interface{}{"Millimeters": viper.GetFloat64(configkey.SensorRainMm), "Timestamp": timestamp},
+		Timestamp: timestamp,
 	}
 }
 
-func SampleTemp() SampleMessage {
+func SampleTemp(timestamp time.Time) SampleMessage {
 	return SampleMessage{
 		Topic:     TemperatureTopic,
-		Msg:       map[string]interface{}{"TempC": SampleCelsius, "Timestamp": timestamp()},
-		Timestamp: timestamp(),
+		Msg:       map[string]interface{}{"TempC": SampleCelsius, "Timestamp": timestamp},
+		Timestamp: timestamp,
 	}
 }
 
-func SampleSensorPause() SampleMessage {
-	msg := genericEventMessage(tlv.Pause, tlv.PauseValue, SensorPauseEvent)
+func SampleSensorPause(timestamp time.Time) SampleMessage {
+	msg := genericEventMessage(tlv.Pause, tlv.PauseValue, SensorPauseEvent, timestamp)
 	return SampleMessage{
 		Topic:     SensorEventTopic,
 		Msg:       msg,
-		Timestamp: timestamp(),
+		Timestamp: timestamp,
 	}
 }
 
-func SampleSensorUnpause() SampleMessage {
-	msg := genericEventMessage(tlv.Unpause, tlv.UnpauseValue, SensorUnpauseEvent)
+func SampleSensorUnpause(timestamp time.Time) SampleMessage {
+	msg := genericEventMessage(tlv.Unpause, tlv.UnpauseValue, SensorUnpauseEvent, timestamp)
 	return SampleMessage{
 		Topic:     SensorEventTopic,
 		Msg:       msg,
-		Timestamp: timestamp(),
+		Timestamp: timestamp,
 	}
 }
 
-func SampleSensorSoftReset() SampleMessage {
-	msg := genericEventMessage(tlv.SoftReset, tlv.SoftResetValue, SensorSoftResetEvent)
+func SampleSensorSoftReset(timestamp time.Time) SampleMessage {
+	msg := genericEventMessage(tlv.SoftReset, tlv.SoftResetValue, SensorSoftResetEvent, timestamp)
 	return SampleMessage{
 		Topic:     SensorEventTopic,
 		Msg:       msg,
-		Timestamp: timestamp(),
+		Timestamp: timestamp,
 	}
 }
 
-func SampleSensorHardReset() SampleMessage {
-	msg := genericEventMessage(tlv.HardReset, tlv.HardResetValue, SensorHardResetEvent)
+func SampleSensorHardReset(timestamp time.Time) SampleMessage {
+	msg := genericEventMessage(tlv.HardReset, tlv.HardResetValue, SensorHardResetEvent, timestamp)
 	return SampleMessage{
 		Topic:     SensorEventTopic,
 		Msg:       msg,
-		Timestamp: timestamp(),
+		Timestamp: timestamp,
 	}
 }
 
-func SampleSensorStatus() SampleMessage {
+func SampleSensorStatus(timestamp time.Time) SampleMessage {
 	return SampleMessage{
 		Topic:     SensorStatusTopic,
-		Msg:       map[string]interface{}{"OK": true, "Timestamp": timestamp()},
-		Timestamp: timestamp(),
+		Msg:       map[string]interface{}{"OK": true, "Timestamp": timestamp},
+		Timestamp: timestamp,
 	}
 }
 
-func SampleGatewayStatus() SampleMessage {
+func SampleGatewayStatus(timestamp time.Time) SampleMessage {
 	return SampleMessage{
 		Topic:     GatewayStatusTopic,
-		Msg:       map[string]interface{}{"OK": true, "Timestamp": timestamp()},
-		Timestamp: timestamp(),
+		Msg:       map[string]interface{}{"OK": true, "Timestamp": timestamp},
+		Timestamp: timestamp,
 	}
 }
