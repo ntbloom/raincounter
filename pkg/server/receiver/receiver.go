@@ -83,7 +83,15 @@ func (r *Receiver) handleRainTopic(_ paho.Client, message paho.Message) {
 }
 
 func (r *Receiver) handleSensorEvent(_ paho.Client, message paho.Message) {
-	panic("not implemented!")
+	stamp, readable, err := parseMessage(message)
+	if err != nil {
+		return
+	}
+	tag := int(readable["Tag"].(float64))
+	value := int(readable["Value"].(float64))
+	if err := r.db.AddTagValue(tag, value, stamp); err != nil {
+		return
+	}
 }
 
 /* HELPER METHODS */

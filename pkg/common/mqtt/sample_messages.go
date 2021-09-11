@@ -3,6 +3,8 @@ package mqtt
 import (
 	"time"
 
+	"github.com/ntbloom/raincounter/pkg/gateway/tlv"
+
 	"github.com/ntbloom/raincounter/pkg/config/configkey"
 	"github.com/spf13/viper"
 )
@@ -30,6 +32,15 @@ func timestamp() time.Time {
 	return val
 }
 
+func genericEventMessage(tag, value int, event string) map[string]interface{} {
+	return map[string]interface{}{
+		"Tag":       tag,
+		"Value":     value,
+		"Event":     event,
+		"Timestamp": timestamp(),
+	}
+}
+
 func SampleRain() SampleMessage {
 	return SampleMessage{
 		Topic:     RainTopic,
@@ -47,33 +58,37 @@ func SampleTemp() SampleMessage {
 }
 
 func SampleSensorPause() SampleMessage {
+	msg := genericEventMessage(tlv.Pause, tlv.PauseValue, SensorPauseEvent)
 	return SampleMessage{
 		Topic:     SensorEventTopic,
-		Msg:       map[string]interface{}{"Status": SensorPauseEvent, "Timestamp": timestamp()},
+		Msg:       msg,
 		Timestamp: timestamp(),
 	}
 }
 
 func SampleSensorUnpause() SampleMessage {
+	msg := genericEventMessage(tlv.Unpause, tlv.UnpauseValue, SensorUnpauseEvent)
 	return SampleMessage{
 		Topic:     SensorEventTopic,
-		Msg:       map[string]interface{}{"Status": SensorUnpauseEvent, "Timestamp": timestamp()},
+		Msg:       msg,
 		Timestamp: timestamp(),
 	}
 }
 
 func SampleSensorSoftReset() SampleMessage {
+	msg := genericEventMessage(tlv.SoftReset, tlv.SoftResetValue, SensorSoftResetEvent)
 	return SampleMessage{
 		Topic:     SensorEventTopic,
-		Msg:       map[string]interface{}{"Status": SensorSoftResetEvent, "Timestamp": timestamp()},
+		Msg:       msg,
 		Timestamp: timestamp(),
 	}
 }
 
 func SampleSensorHardReset() SampleMessage {
+	msg := genericEventMessage(tlv.HardReset, tlv.HardResetValue, SensorHardResetEvent)
 	return SampleMessage{
 		Topic:     SensorEventTopic,
-		Msg:       map[string]interface{}{"Status": SensorHardResetEvent, "Timestamp": timestamp()},
+		Msg:       msg,
 		Timestamp: timestamp(),
 	}
 }

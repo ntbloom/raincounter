@@ -31,32 +31,34 @@ func process(p Payload) ([]byte, error) {
 
 // SensorEvent gives static message about what's happening to the sensor
 type SensorEvent struct {
-	Status    string
-	Timestamp time.Time
+	Tag       int       // tag code for the event
+	Value     int       // value, generally 1
+	Event     string    //  human readable event, matches 1-to-1 with Tag
+	Timestamp time.Time // timestamp as the event actually was recorded on the gateway
 }
 
 // TemperatureEvent sends current temperature in Celsius
 type TemperatureEvent struct {
-	TempC     int
-	Timestamp time.Time
+	TempC     int       // tempC value
+	Timestamp time.Time // timestamp when temp was recorded on the gateway
 }
 
 // RainEvent sends message about rain event
 type RainEvent struct {
-	Millimeters float64
-	Timestamp   time.Time
+	Millimeters float64   // amount of rain in millimeters
+	Timestamp   time.Time // timestamp when rain was measured on the gateway
 }
 
 // GatewayStatus sends "OK" message at regular intervals
 type GatewayStatus struct {
-	OK        bool
-	Timestamp time.Time
+	OK        bool      // generic message
+	Timestamp time.Time // time message was sent by the gateway
 }
 
 // SensorStatus sends "OK" if sensor is reachable, else "Bad"
 type SensorStatus struct {
-	OK        bool
-	Timestamp time.Time
+	OK        bool      // generic message
+	Timestamp time.Time // time message was sent by the gateway
 }
 
 // Process turn static value into mqtt payload
@@ -116,6 +118,8 @@ func (m *Messenger) NewMessage(packet *tlv.TLV) (*Message, error) {
 	case tlv.SoftReset:
 		topic = mqtt.SensorEventTopic
 		event = &SensorEvent{
+			tlv.SoftReset,
+			tlv.SoftResetValue,
 			mqtt.SensorSoftResetEvent,
 			now,
 		}
@@ -123,6 +127,8 @@ func (m *Messenger) NewMessage(packet *tlv.TLV) (*Message, error) {
 	case tlv.HardReset:
 		topic = mqtt.SensorEventTopic
 		event = &SensorEvent{
+			tlv.SoftReset,
+			tlv.SoftResetValue,
 			mqtt.SensorHardResetEvent,
 			now,
 		}
@@ -130,6 +136,8 @@ func (m *Messenger) NewMessage(packet *tlv.TLV) (*Message, error) {
 	case tlv.Pause:
 		topic = mqtt.SensorEventTopic
 		event = &SensorEvent{
+			tlv.HardReset,
+			tlv.HardResetValue,
 			mqtt.SensorPauseEvent,
 			now,
 		}
@@ -137,6 +145,8 @@ func (m *Messenger) NewMessage(packet *tlv.TLV) (*Message, error) {
 	case tlv.Unpause:
 		topic = mqtt.SensorEventTopic
 		event = &SensorEvent{
+			tlv.Unpause,
+			tlv.UnpauseValue,
 			mqtt.SensorUnpauseEvent,
 			now,
 		}

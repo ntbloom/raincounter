@@ -164,7 +164,7 @@ func (suite *ReceiverTest) TestSensorEvent() {
 	testPayload := mqtt.SampleSensorSoftReset
 
 	// verify there aren't any events yet
-	timestamp := time.Now().Add(-time.Hour)
+	timestamp := time.Now().Add(time.Hour * -1)
 	res, err := suite.query.GetEventMessagesSince(testEvent, timestamp)
 	if err != nil {
 		suite.Fail("problem querying empty event messages", err)
