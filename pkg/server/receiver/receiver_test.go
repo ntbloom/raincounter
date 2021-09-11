@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ntbloom/raincounter/pkg/gateway/tlv"
+
 	"github.com/ntbloom/raincounter/pkg/config/configkey"
 	"github.com/spf13/viper"
 
@@ -153,6 +155,21 @@ func (suite *ReceiverTest) TestStatusMessages() {
 	}
 	assert.True(suite.T(), gwUp)
 	assert.True(suite.T(), sensorUp)
+}
+
+// make sure we can handle a sensor event
+func (suite *ReceiverTest) TestSensorEvent() {
+	testEvent := tlv.SoftReset
+
+	// verify there aren't any events yet
+	basicallyForever := time.Now().Add(-time.Hour * 24 * 365 * 100)
+	res, err := suite.query.GetEventMessagesSince(testEvent, basicallyForever)
+	if err != nil {
+		suite.Fail("problem querying empty event messages", err)
+	}
+	assert.Nil(suite.T(), *res)
+
+	//suite.entry.AddTagValue()
 }
 
 //// run through all of the messages and make sure there aren't any panics from unimplemented methods
