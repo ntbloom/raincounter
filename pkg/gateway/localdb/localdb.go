@@ -1,6 +1,7 @@
 package localdb
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"time"
@@ -59,7 +60,7 @@ func (db *LocalDB) GetSingleInt(query string) int {
 	c, _ := db.lite.Connect() // don't handle the error, just return -1
 	defer c.Disconnect()
 
-	if rows, err = c.Conn.QueryContext(db.lite.Ctx, query); err != nil {
+	if rows, err = c.Conn.QueryContext(context.Background(), query); err != nil {
 		return -1
 	}
 	closed := func() {

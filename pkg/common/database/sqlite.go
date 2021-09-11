@@ -25,7 +25,6 @@ type Sqlite struct {
 	File     *os.File
 	FullPath string
 	Driver   string
-	Ctx      context.Context
 }
 
 // NewSqlite makes a new connector struct for any sqlite database
@@ -45,7 +44,6 @@ func NewSqlite(fullPath string, clobber bool, schema string) (*Sqlite, error) {
 		File:     file,
 		FullPath: fullPath,
 		Driver:   sqliteDriver,
-		Ctx:      context.Background(),
 	}
 	if clobber {
 		_, err = db.MakeSchema(schema)
@@ -73,7 +71,7 @@ func (db *Sqlite) Connect() (*Connection, error) {
 		}
 
 		// make a Conn
-		conn, err = dbPtr.Conn(db.Ctx)
+		conn, err = dbPtr.Conn(context.Background())
 		if err != nil {
 			logrus.Error("unable to get a connection struct")
 			return nil, err
@@ -108,5 +106,5 @@ func (db *Sqlite) EnterData(cmd string) (sql.Result, error) {
 	}
 	defer c.Disconnect()
 
-	return c.Conn.ExecContext(db.Ctx, safeCmd)
+	return c.Conn.ExecContext(context.Background(), safeCmd)
 }
