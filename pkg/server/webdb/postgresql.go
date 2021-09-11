@@ -25,17 +25,13 @@ import (
 // tables because we don't really care about events, just the rain and
 // temperature data.
 
-const ()
-
-var errTime time.Time = time.Unix(0, 0)
+var errTime = time.Unix(0, 0)
 
 type PGConnector struct {
-	ctx  context.Context
 	pool *pgxpool.Pool
 }
 
 func NewPGConnector() *PGConnector {
-	ctx := context.Background()
 	dbName := viper.GetString(configkey.PGDatabaseName)
 	password := viper.GetString(configkey.PGPassword)
 	url := fmt.Sprintf("postgresql://postgres:%s@127.0.0.1:5432/%s", password, dbName)
@@ -46,7 +42,7 @@ func NewPGConnector() *PGConnector {
 	var pgpool *pgxpool.Pool
 	var err error
 	for i := 0; i < totalWait; i++ {
-		pgpool, err = pgxpool.Connect(ctx, url)
+		pgpool, err = pgxpool.Connect(context.Background(), url)
 		if err == nil {
 			break
 		}
@@ -56,7 +52,7 @@ func NewPGConnector() *PGConnector {
 		logrus.Fatal(err)
 		os.Exit(exitcodes.PostgresqlConnnectionError)
 	}
-	return &PGConnector{ctx, pgpool}
+	return &PGConnector{pgpool}
 }
 
 func (pg *PGConnector) Close() {
@@ -320,7 +316,7 @@ ORDER BY gw_timestamp DESC
 // executes arbitrary sql. we need to close the connection after each value, either for
 func (pg *PGConnector) genericQuery(cmd string) (pgx.Rows, error) {
 	logrus.Debugf("pgsql: %s", cmd)
-	return pg.pool.Query(pg.ctx, cmd)
+	return pg.pool.Query(context.Background(), cmd)
 }
 
 func (pg *PGConnector) getLastStatusMessage(since time.Duration, asset string) (bool, error) {
