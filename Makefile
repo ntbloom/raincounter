@@ -92,7 +92,7 @@ run-gateway-race: build-race
 ### LINT ###
 
 lint:
-	@golint ./...
+	@golangci-lint run
 
 
 ### CLEAN ###

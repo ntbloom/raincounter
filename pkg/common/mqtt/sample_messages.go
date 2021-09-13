@@ -11,26 +11,15 @@ import (
 
 // Examples of sample messages for use in testing, etc.
 
+// SampleMessage is a dummy message
 type SampleMessage struct {
 	Topic     string
 	Msg       map[string]interface{}
 	Timestamp time.Time
 }
 
-const (
-	SampleTimestamp = "2020-09-06T21:57:32.779567444-04:00"
-)
-
+// SampleCelsius is a random temperature value picked for no reason
 var SampleCelsius = 23
-
-//func fixTimestamp(stamp time.Time) time.Time {
-//	var stamp string = string(SampleTimestamp)
-//	val, err := time.Parse(configkey.TimestampFormat, stamp)
-//	if err != nil {
-//		panic(err)
-//	}
-//	return val
-//}
 
 func genericEventMessage(tag, value int, event string, timestamp time.Time) map[string]interface{} {
 	return map[string]interface{}{
@@ -41,6 +30,7 @@ func genericEventMessage(tag, value int, event string, timestamp time.Time) map[
 	}
 }
 
+// SampleRain is a test mqtt message for a rain event
 func SampleRain(timestamp time.Time) SampleMessage {
 	return SampleMessage{
 		Topic:     RainTopic,
@@ -49,6 +39,7 @@ func SampleRain(timestamp time.Time) SampleMessage {
 	}
 }
 
+// SampleTemp is a test mqtt message for a temperature measurement in C
 func SampleTemp(timestamp time.Time) SampleMessage {
 	return SampleMessage{
 		Topic:     TemperatureTopic,
@@ -57,6 +48,7 @@ func SampleTemp(timestamp time.Time) SampleMessage {
 	}
 }
 
+// SampleSensorPause is a test mqtt message for a pause event
 func SampleSensorPause(timestamp time.Time) SampleMessage {
 	msg := genericEventMessage(tlv.Pause, tlv.PauseValue, SensorPauseEvent, timestamp)
 	return SampleMessage{
@@ -66,6 +58,7 @@ func SampleSensorPause(timestamp time.Time) SampleMessage {
 	}
 }
 
+// SampleSensorUnpause is a test mqtt message for an unpause event
 func SampleSensorUnpause(timestamp time.Time) SampleMessage {
 	msg := genericEventMessage(tlv.Unpause, tlv.UnpauseValue, SensorUnpauseEvent, timestamp)
 	return SampleMessage{
@@ -75,6 +68,7 @@ func SampleSensorUnpause(timestamp time.Time) SampleMessage {
 	}
 }
 
+// SampleSensorSoftReset is a test mqtt message for a soft reset event
 func SampleSensorSoftReset(timestamp time.Time) SampleMessage {
 	msg := genericEventMessage(tlv.SoftReset, tlv.SoftResetValue, SensorSoftResetEvent, timestamp)
 	return SampleMessage{
@@ -84,6 +78,7 @@ func SampleSensorSoftReset(timestamp time.Time) SampleMessage {
 	}
 }
 
+// SampleSensorHardReset is a test mqtt message for a hard reset event
 func SampleSensorHardReset(timestamp time.Time) SampleMessage {
 	msg := genericEventMessage(tlv.HardReset, tlv.HardResetValue, SensorHardResetEvent, timestamp)
 	return SampleMessage{
@@ -93,6 +88,7 @@ func SampleSensorHardReset(timestamp time.Time) SampleMessage {
 	}
 }
 
+// SampleSensorStatus is a test mqtt message for a sensor status message
 func SampleSensorStatus(timestamp time.Time) SampleMessage {
 	return SampleMessage{
 		Topic:     SensorStatusTopic,
@@ -101,6 +97,7 @@ func SampleSensorStatus(timestamp time.Time) SampleMessage {
 	}
 }
 
+// SampleGatewayStatus is a test mqtt message for a gateway status message
 func SampleGatewayStatus(timestamp time.Time) SampleMessage {
 	return SampleMessage{
 		Topic:     GatewayStatusTopic,
