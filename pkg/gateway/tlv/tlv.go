@@ -101,7 +101,7 @@ func NewTLV(packet []byte) (*TLV, error) {
 		rawValue := packet[2:6] // packet[6] is newline
 		value = concatenateBytesToInt(rawValue)
 	default:
-		err := fmt.Errorf("unsupported value %d", value)
+		err := fmt.Errorf("unsupported tag/length/value: %d/%d/%d", tag, length, value)
 		return nil, err
 	}
 

@@ -101,6 +101,7 @@ func (serial *Serial) waitForMessage() {
 	tlvPacket, err := tlv.NewTLV(packet)
 	if err != nil {
 		logrus.Errorf("unexpected TLV packet: %s", err)
+		return
 	}
 	msg, err := serial.Messenger.NewMessage(tlvPacket)
 	if err != nil {
