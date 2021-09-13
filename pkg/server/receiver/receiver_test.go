@@ -219,5 +219,6 @@ func process(msg mqtt.SampleMessage) (string, byte, bool, []byte) {
 		logrus.Error(err)
 		panic("problem marshalling json")
 	}
-	return msg.Topic, mqtt.Qos, false, payload
+	qos := byte(viper.GetUint(configkey.MQTTQos))
+	return msg.Topic, qos, false, payload
 }

@@ -31,11 +31,12 @@ func NewReceiver(client paho.Client) (*Receiver, error) {
 		db:             db,
 	}
 
-	client.Subscribe(mqtt.RainTopic, mqtt.Qos, recv.handleRainTopic)
-	client.Subscribe(mqtt.TemperatureTopic, mqtt.Qos, recv.handleTemperatureTopic)
-	client.Subscribe(mqtt.GatewayStatusTopic, mqtt.Qos, recv.handleGatewayStatusMessage)
-	client.Subscribe(mqtt.SensorStatusTopic, mqtt.Qos, recv.handleSensorStatusMessage)
-	client.Subscribe(mqtt.SensorEventTopic, mqtt.Qos, recv.handleSensorEvent)
+	qos := byte(viper.GetUint(configkey.MQTTQos))
+	client.Subscribe(mqtt.RainTopic, qos, recv.handleRainTopic)
+	client.Subscribe(mqtt.TemperatureTopic, qos, recv.handleTemperatureTopic)
+	client.Subscribe(mqtt.GatewayStatusTopic, qos, recv.handleGatewayStatusMessage)
+	client.Subscribe(mqtt.SensorStatusTopic, qos, recv.handleSensorStatusMessage)
+	client.Subscribe(mqtt.SensorEventTopic, qos, recv.handleSensorEvent)
 	return &recv, nil
 }
 

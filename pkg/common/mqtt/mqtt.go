@@ -14,8 +14,6 @@ import (
 	paho "github.com/eclipse/paho.mqtt.golang"
 )
 
-const Qos = 1
-
 // BrokerConfig configures the mqtt connection
 type BrokerConfig struct {
 	broker            string
