@@ -75,6 +75,7 @@ func NewConnection() (paho.Client, error) {
 
 	// miscellaneous options
 	options.SetConnectTimeout(config.connectionTimeout)
+	options.SetOrderMatters(false)
 
 	client := paho.NewClient(options)
 	return client,

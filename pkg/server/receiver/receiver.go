@@ -15,8 +15,9 @@ import (
 )
 
 type Receiver struct {
-	mqttConnection paho.Client
-	db             webdb.DBEntry
+	client paho.Client
+	db     webdb.DBEntry
+	state  chan int
 }
 
 // NewReceiver creates a new Receiver struct
@@ -26,9 +27,11 @@ func NewReceiver(client paho.Client) (*Receiver, error) {
 		logrus.Errorf("unable to connect to MQTT: %s", token.Error())
 	}
 	db := webdb.NewPGConnector()
+	state := make(chan int)
 	recv := Receiver{
-		mqttConnection: client,
-		db:             db,
+		client: client,
+		db:     db,
+		state:  state,
 	}
 
 	qos := byte(viper.GetUint(configkey.MQTTQos))
@@ -40,59 +43,99 @@ func NewReceiver(client paho.Client) (*Receiver, error) {
 	return &recv, nil
 }
 
+// Start runs the main loop, basically just waiting to be told to stop
+func (r *Receiver) Start() {
+	defer r.Close()
+	for {
+		state := <-r.state
+		switch state {
+		case configkey.Kill:
+			logrus.Debug("received `Closed` signal on receiver.state channel")
+			return
+		default:
+			logrus.Errorf("unexpected message on receiver.state channel: %d", state)
+		}
+	}
+}
+
+// Stop kills the main loop
+func (r *Receiver) Stop() {
+	logrus.Info("Stopping receiver and closing mqtt connection")
+	r.state <- configkey.Kill
+}
+
+// Close closes the connection
 func (r *Receiver) Close() {
+	topics := []string{
+		mqtt.RainTopic,
+		mqtt.TemperatureTopic,
+		mqtt.GatewayStatusTopic,
+		mqtt.SensorStatusTopic,
+		mqtt.SensorEventTopic,
+	}
+	r.client.Unsubscribe(topics...)
 	logrus.Info("disconnecting Receiver from mqtt")
-	r.mqttConnection.Disconnect(viper.GetUint(configkey.MQTTQuiescence))
+	r.client.Disconnect(viper.GetUint(configkey.MQTTQuiescence))
 	logrus.Info("disconnecting Receiver from the database")
 	r.db.Close()
 }
 
 func (r *Receiver) IsConnected() bool {
-	return r.mqttConnection.IsConnected()
+	return r.client.IsConnected()
 }
 
 /* TOPIC SUBSCRIPTION CALLBACKS */
 
 func (r *Receiver) handleGatewayStatusMessage(_ paho.Client, message paho.Message) {
-	r.processStatusMessage(message, configkey.GatewayStatus)
+	go func() {
+		r.processStatusMessage(message, configkey.GatewayStatus)
+	}()
 }
 
 func (r *Receiver) handleSensorStatusMessage(_ paho.Client, message paho.Message) {
-	r.processStatusMessage(message, configkey.SensorStatus)
+	go func() {
+		r.processStatusMessage(message, configkey.SensorStatus)
+	}()
 }
 
 func (r *Receiver) handleTemperatureTopic(_ paho.Client, message paho.Message) {
-	stamp, readable, err := parseMessage(message)
-	if err != nil {
-		return
-	}
-	temp := int(readable["TempC"].(float64))
-	if err := r.db.AddTempCValue(temp, stamp); err != nil {
-		logrus.Error(err)
-	}
+	go func() {
+		stamp, readable, err := parseMessage(message)
+		if err != nil {
+			return
+		}
+		temp := int(readable["TempC"].(float64))
+		if err := r.db.AddTempCValue(temp, stamp); err != nil {
+			logrus.Error(err)
+		}
+	}()
 }
 
 func (r *Receiver) handleRainTopic(_ paho.Client, message paho.Message) {
-	stamp, readable, err := parseMessage(message)
-	if err != nil {
-		return
-	}
-	mm := readable["Millimeters"].(float64)
-	if err := r.db.AddRainMMEvent(mm, stamp); err != nil {
-		logrus.Error(err)
-	}
+	go func() {
+		stamp, readable, err := parseMessage(message)
+		if err != nil {
+			return
+		}
+		mm := readable["Millimeters"].(float64)
+		if err := r.db.AddRainMMEvent(mm, stamp); err != nil {
+			logrus.Error(err)
+		}
+	}()
 }
 
 func (r *Receiver) handleSensorEvent(_ paho.Client, message paho.Message) {
-	stamp, readable, err := parseMessage(message)
-	if err != nil {
-		return
-	}
-	tag := int(readable["Tag"].(float64))
-	value := int(readable["Value"].(float64))
-	if err := r.db.AddTagValue(tag, value, stamp); err != nil {
-		return
-	}
+	go func() {
+		stamp, readable, err := parseMessage(message)
+		if err != nil {
+			return
+		}
+		tag := int(readable["Tag"].(float64))
+		value := int(readable["Value"].(float64))
+		if err := r.db.AddTagValue(tag, value, stamp); err != nil {
+			return
+		}
+	}()
 }
 
 /* HELPER METHODS */

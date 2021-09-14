@@ -1,23 +1,40 @@
-package main
+package raincloud
 
-//// connect to mqtt
-//func connectToMQTT() paho.Client {
-//	client, err := mqtt.Connect(mqtt.NewBrokerConfig())
-//	if err != nil {
-//		panic(err)
-//	}
-//	return client
-//}
-//
-//// connect to the localdb postgresql
-//func connectToDatabase() *database.Sqlite {
-//	db, err := database.NewSqlite(viper.GetString(configkey.DatabaseRemoteDevFile), true)
-//	if err != nil {
-//		panic(err)
-//	}
-//	return db
-//}
+import (
+	"os"
+	"os/signal"
+	"syscall"
 
-func main() {
+	"github.com/ntbloom/raincounter/pkg/config"
 
+	"github.com/sirupsen/logrus"
+
+	"github.com/ntbloom/raincounter/pkg/common/mqtt"
+	"github.com/ntbloom/raincounter/pkg/server/receiver"
+)
+
+func Start() {
+	config.Configure()
+
+	client, err := mqtt.NewConnection()
+	if err != nil {
+		panic(err)
+	}
+	recv, err := receiver.NewReceiver(client)
+	if err != nil {
+		panic(err)
+	}
+	defer recv.Close()
+	go recv.Start()
+	terminalSignals := make(chan os.Signal, 1)
+	signal.Notify(terminalSignals, syscall.SIGINT, syscall.SIGTERM)
+	for {
+		select {
+		case sig := <-terminalSignals:
+			logrus.Infof("program received %s signal, exiting", sig)
+			recv.Stop()
+		default:
+			continue
+		}
+	}
 }

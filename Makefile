@@ -88,6 +88,11 @@ run-gateway: build
 run-gateway-race: build-race
 	@$(EXE)-race gateway
 
+run-receiver: build
+	@$(EXE) receiver
+
+run-receiver-race: build-race
+	@$(EXE) race receiver
 
 ### LINT ###
 
