@@ -15,4 +15,6 @@ func main() {
 	if err := cli.RootCmd.Execute(); err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)
 	}
+
+	//cli.AddSubcommand("--insecure", "disable TLS and connect over 1883 (for development only)", func())
 }

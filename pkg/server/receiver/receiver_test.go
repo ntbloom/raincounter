@@ -22,8 +22,6 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-const localhost = "127.0.0.1"
-
 type ReceiverTest struct {
 	suite.Suite
 	receiver *receiver.Receiver
@@ -41,7 +39,7 @@ func (suite *ReceiverTest) SetupSuite() {
 	config.Configure()
 
 	// connect to the docker container without auth
-	client, err := mqtt.NewConnection(mqtt.NewBrokerConfigNoAuth(localhost, 1883))
+	client, err := mqtt.NewConnection()
 	if err != nil {
 		suite.Fail("unable to connect to mqtt", err)
 	}

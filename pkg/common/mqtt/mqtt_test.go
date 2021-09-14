@@ -14,7 +14,7 @@ import (
 // reusable mqtt function
 func pahoFixture(t *testing.T) paho.Client {
 	config.Configure()
-	pahoConfig := mqtt.NewBrokerConfig()
+	pahoConfig := mqtt.newBrokerConfig()
 	client, err := mqtt.NewConnection(pahoConfig)
 	if err != nil {
 		t.Fail()

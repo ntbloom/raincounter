@@ -14,6 +14,9 @@ import (
 	paho "github.com/eclipse/paho.mqtt.golang"
 )
 
+const localhost = "127.0.0.1"
+const localport = 1883
+
 // BrokerConfig configures the mqtt connection
 type BrokerConfig struct {
 	broker            string
@@ -22,11 +25,10 @@ type BrokerConfig struct {
 	clientCert        string
 	clientKey         string
 	connectionTimeout time.Duration
-	auth              bool
 }
 
-// NewBrokerConfig get mqtt configuration details from viper directly
-func NewBrokerConfig() *BrokerConfig {
+// newBrokerConfig get mqtt configuration details from viper directly
+func newBrokerConfig() *BrokerConfig {
 	return &BrokerConfig{
 		broker:            viper.GetString(configkey.MQTTBrokerIP),
 		port:              viper.GetInt(configkey.MQTTBrokerPort),
@@ -34,31 +36,18 @@ func NewBrokerConfig() *BrokerConfig {
 		clientCert:        viper.GetString(configkey.MQTTClientCert),
 		clientKey:         viper.GetString(configkey.MQTTClientKey),
 		connectionTimeout: viper.GetDuration(configkey.MQTTConnectionTimeout),
-		auth:              true,
-	}
-}
-
-// NewBrokerConfigNoAuth broker config with no auth, for testing only
-func NewBrokerConfigNoAuth(host string, port int) *BrokerConfig {
-	return &BrokerConfig{
-		broker:            host,
-		port:              port,
-		caCert:            "/dev/null",
-		clientCert:        "/dev/null",
-		clientKey:         "/dev/null",
-		connectionTimeout: viper.GetDuration(configkey.MQTTConnectionTimeout),
-		auth:              false,
 	}
 }
 
 // NewConnection creates a new MQTT connection or error
-func NewConnection(config *BrokerConfig) (paho.Client, error) {
+func NewConnection() (paho.Client, error) {
 	options := paho.NewClientOptions()
+	config := newBrokerConfig()
 
 	// add broker, authenticate if necessary
-	scheme := "mqtt"
-	if config.auth {
-		scheme = "ssl"
+	scheme := viper.GetString(configkey.MQTTScheme)
+	switch scheme {
+	case "ssl":
 		logrus.Debug("using TLS to connect")
 		// configure tls
 		tlsConfig, err := configureTLSConfig(config.caCert, config.clientCert, config.clientKey)
@@ -66,8 +55,12 @@ func NewConnection(config *BrokerConfig) (paho.Client, error) {
 			return nil, err
 		}
 		options.SetTLSConfig(tlsConfig)
-	} else {
-		logrus.Debug("skipping TLS on connection")
+	case "mqtt":
+		logrus.Warning("Connecting to MQTT broker on localhost:1883 without encryption, for testing only")
+		config.broker = localhost
+		config.port = localport
+	default:
+		panic(fmt.Sprintf("unsupported mqtt scheme: %s", scheme))
 	}
 
 	server := fmt.Sprintf("%s://%s:%d", scheme, config.broker, config.port)

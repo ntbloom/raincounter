@@ -13,6 +13,7 @@ const (
 	MQTTBrokerIP          = "mqtt.broker.ip"
 	MQTTBrokerPort        = "mqtt.broker.port"
 	MQTTCaCert            = "mqtt.certs.ca"
+	MQTTScheme            = "mqtt.scheme"
 	MQTTClientCert        = "mqtt.certs.client"
 	MQTTClientKey         = "mqtt.certs.key"
 	MQTTConnectionTimeout = "mqtt.connection.timeout"
