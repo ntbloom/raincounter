@@ -2,6 +2,7 @@
 package messenger
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -23,13 +24,13 @@ type Messenger struct {
 }
 
 // NewMessenger gets a new messenger
-func NewMessenger(client paho.Client, db *localdb.LocalDB) *Messenger {
+func NewMessenger(client paho.Client, db *localdb.LocalDB) (*Messenger, error) {
 	state := make(chan uint8, 1)
 	data := make(chan *Message, 1)
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
-		logrus.Errorf("unable to connect to MQTT: %s", token.Error())
+		return nil, fmt.Errorf("unable to connect to MQTT: %s", token.Error())
 	}
-	return &Messenger{client, db, state, data}
+	return &Messenger{client, db, state, data}, nil
 }
 
 // Start waits for packet to publish or to receive signal interrupt

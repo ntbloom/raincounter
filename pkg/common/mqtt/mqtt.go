@@ -45,7 +45,13 @@ func NewConnection() (paho.Client, error) {
 	config := newBrokerConfig()
 
 	// add broker, authenticate if necessary
-	scheme := viper.GetString(configkey.MQTTScheme)
+	var scheme string
+	useTLS := viper.GetBool(configkey.MQTTUseTLS)
+	if useTLS {
+		scheme = "ssl"
+	} else {
+		scheme = "mqtt"
+	}
 	switch scheme {
 	case "ssl":
 		logrus.Debug("using TLS to connect")

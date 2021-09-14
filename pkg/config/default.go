@@ -12,9 +12,9 @@ var defaultConfig = map[string]interface{}{ //nolint:gochecknoglobals
 	configkey.USBPacketLengthMax:      7, //nolint:gomnd
 	configkey.USBConnectionPort:       "/dev/ttyACM99",
 	configkey.USBConnectionTimeout:    time.Second * 10, //nolint:gomnd
-	configkey.MQTTScheme:              "ssl",
+	configkey.MQTTUseTLS:              true,
 	configkey.MQTTBrokerIP:            "127.0.0.1",
-	configkey.MQTTBrokerPort:          "1883",
+	configkey.MQTTBrokerPort:          "8883",
 	configkey.MQTTCaCert:              "/etc/raincounter/ssl/client/ca.pem",
 	configkey.MQTTClientCert:          "/etc/raincounter/ssl/client/client.crt",
 	configkey.MQTTClientKey:           "/etc/raincounter/ssl/client/client.key",

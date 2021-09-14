@@ -24,7 +24,7 @@ import (
 
 // connect to mqtt
 func connectToMQTT() paho.Client {
-	client, err := mqtt.NewConnection(mqtt.newBrokerConfig())
+	client, err := mqtt.NewConnection()
 	if err != nil {
 		panic(err)
 	}
@@ -58,7 +58,10 @@ func connectSerialPort(msgr *messenger.Messenger) *serial.Serial {
 func run() {
 	client := connectToMQTT()
 	db := connectToDatabase()
-	msgr := messenger.NewMessenger(client, db)
+	msgr, err := messenger.NewMessenger(client, db)
+	if err != nil {
+		panic(err)
+	}
 	conn := connectSerialPort(msgr)
 
 	// start the listening threads
