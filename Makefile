@@ -94,6 +94,12 @@ run-receiver: build
 run-receiver-race: build-race
 	@$(EXE) race receiver
 
+run-server: build
+	@$(EXE) server
+
+run-server-race: build-race
+	@$(EXE) race server
+
 ### LINT ###
 
 lint:

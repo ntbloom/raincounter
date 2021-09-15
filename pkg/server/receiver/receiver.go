@@ -50,7 +50,6 @@ func NewReceiver() (*Receiver, error) {
 
 // Start runs the main loop, basically just waiting to be told to stop
 func (r *Receiver) Start() {
-	//defer r.Close()
 	for {
 		state := <-r.state
 		switch state {

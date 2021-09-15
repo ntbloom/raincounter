@@ -10,8 +10,8 @@ import (
 	"github.com/ntbloom/raincounter/pkg/server/receiver"
 )
 
-// Start runs the main receiver loop
-func Start() {
+// Receive runs the main receiver loop
+func Receive() {
 	recv, err := receiver.NewReceiver()
 	if err != nil {
 		panic(err)
@@ -24,4 +24,10 @@ func Start() {
 	sig := <-terminalSignals
 	logrus.Infof("program received %s signal, exiting", sig)
 	logrus.Info("Done!")
+}
+
+// Serve serves the web server
+func Serve() {
+	logrus.Error("implement me!")
+	os.Exit(-1)
 }
