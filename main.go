@@ -4,13 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ntbloom/raincounter/pkg/config"
-
-	raincloud "github.com/ntbloom/raincounter/pkg/raincloud"
-
 	"github.com/ntbloom/raincounter/cli"
-
+	"github.com/ntbloom/raincounter/pkg/config"
 	"github.com/ntbloom/raincounter/pkg/rainbase"
+	"github.com/ntbloom/raincounter/pkg/raincloud"
 )
 
 func main() {
