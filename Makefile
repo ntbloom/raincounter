@@ -34,6 +34,8 @@ test-common-race:
 
 test-all: clean test-common test-gateway test-server
 
+test-all-race: clean test-gateway-race test-server-race
+
 # gateway
 
 test-gateway:
