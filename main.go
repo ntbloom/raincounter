@@ -19,5 +19,4 @@ func main() {
 	if err := cli.RootCmd.Execute(); err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)
 	}
-
 }

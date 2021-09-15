@@ -32,6 +32,11 @@ const (
 	MessengerStatusInterval = "messenger.status.interval"
 
 	MainLoopDuration = "main.loop.duration"
+
+	RestIP      = "rest.ip.address"
+	RestPort    = "rest.ip.port"
+	RestScheme  = "rest.scheme"
+	RestVersion = "rest.version"
 )
 
 // random constants, not tied to config

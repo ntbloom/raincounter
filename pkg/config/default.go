@@ -29,4 +29,8 @@ var defaultConfig = map[string]interface{}{ //nolint:gochecknoglobals
 	configkey.PGConnectionRetryWait:   time.Millisecond * 500, //nolint:gomnd
 	configkey.MessengerStatusInterval: time.Second * 10,       //nolint:gomnd
 	configkey.MainLoopDuration:        time.Second * -10,      //nolint:gomnd
+	configkey.RestScheme:              "http",
+	configkey.RestIP:                  "127.0.0.1",
+	configkey.RestPort:                8080, //nolint:gomnd
+	configkey.RestVersion:             "v1.0",
 }
