@@ -2,6 +2,7 @@ package receiver_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
@@ -43,8 +44,13 @@ func (suite *ReceiverTest) SetupSuite() {
 	if err != nil {
 		suite.Fail("unable to connect to mqtt", err)
 	}
+	if token := client.Connect(); token.Wait() && token.Error() != nil {
+		suite.Fail(fmt.Sprintf("unable to connect to MQTT: %s", token.Error()))
+
+	}
+
 	suite.client = client
-	r, err := receiver.NewReceiver(client)
+	r, err := receiver.NewReceiver()
 	if err != nil {
 		suite.Fail("unable to make a new Receiver struct", err)
 	}

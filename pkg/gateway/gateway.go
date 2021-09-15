@@ -10,7 +10,6 @@ import (
 
 	"github.com/ntbloom/raincounter/pkg/common/mqtt"
 
-	"github.com/ntbloom/raincounter/pkg/config"
 	"github.com/ntbloom/raincounter/pkg/config/configkey"
 
 	"github.com/ntbloom/raincounter/pkg/gateway/messenger"
@@ -54,8 +53,8 @@ func connectSerialPort(msgr *messenger.Messenger) *serial.Serial {
 	return conn
 }
 
-// run launches program for seconds or indefinitely if duration is negative
-func run() {
+// Start launches program for seconds or indefinitely if duration is negative
+func Start() {
 	client := connectToMQTT()
 	db := connectToDatabase()
 	msgr, err := messenger.NewMessenger(client, db)
@@ -103,12 +102,4 @@ func stopProgram(msgr *messenger.Messenger, conn *serial.Serial, timer *time.Tim
 	time.Sleep(time.Second * 1)
 	logrus.Info("Done!")
 	os.Exit(0)
-}
-
-func Start() {
-	// read config from the config file
-	config.Configure()
-
-	// run the main listening loop
-	run()
 }

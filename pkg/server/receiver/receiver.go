@@ -22,7 +22,12 @@ type Receiver struct {
 
 // NewReceiver creates a new Receiver struct
 // The mqtt connection is created automatically and must be closed
-func NewReceiver(client paho.Client) (*Receiver, error) {
+func NewReceiver() (*Receiver, error) {
+	client, err := mqtt.NewConnection()
+	if err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
 		logrus.Errorf("unable to connect to MQTT: %s", token.Error())
 	}
@@ -35,22 +40,23 @@ func NewReceiver(client paho.Client) (*Receiver, error) {
 	}
 
 	qos := byte(viper.GetUint(configkey.MQTTQos))
-	client.Subscribe(mqtt.RainTopic, qos, recv.handleRainTopic)
-	client.Subscribe(mqtt.TemperatureTopic, qos, recv.handleTemperatureTopic)
-	client.Subscribe(mqtt.GatewayStatusTopic, qos, recv.handleGatewayStatusMessage)
-	client.Subscribe(mqtt.SensorStatusTopic, qos, recv.handleSensorStatusMessage)
-	client.Subscribe(mqtt.SensorEventTopic, qos, recv.handleSensorEvent)
+	recv.client.Subscribe(mqtt.RainTopic, qos, recv.handleRainTopic)
+	recv.client.Subscribe(mqtt.TemperatureTopic, qos, recv.handleTemperatureTopic)
+	recv.client.Subscribe(mqtt.GatewayStatusTopic, qos, recv.handleGatewayStatusMessage)
+	recv.client.Subscribe(mqtt.SensorStatusTopic, qos, recv.handleSensorStatusMessage)
+	recv.client.Subscribe(mqtt.SensorEventTopic, qos, recv.handleSensorEvent)
 	return &recv, nil
 }
 
 // Start runs the main loop, basically just waiting to be told to stop
 func (r *Receiver) Start() {
-	defer r.Close()
+	//defer r.Close()
 	for {
 		state := <-r.state
 		switch state {
 		case configkey.Kill:
 			logrus.Debug("received `Closed` signal on receiver.state channel")
+			r.Close()
 			return
 		default:
 			logrus.Errorf("unexpected message on receiver.state channel: %d", state)

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/ntbloom/raincounter/pkg/config"
+
 	raincloud "github.com/ntbloom/raincounter/pkg/server"
 
 	"github.com/ntbloom/raincounter/cli"
@@ -12,6 +14,7 @@ import (
 )
 
 func main() {
+	config.Configure()
 	cli.Configure()
 	cli.AddSubcommand("gateway", "shuffle data from sensor to MQTT on the gateway", gateway.Start)
 	cli.AddSubcommand("receiver", "receive data over MQTT on the server", raincloud.Start)
