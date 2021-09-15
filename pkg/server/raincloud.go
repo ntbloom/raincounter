@@ -10,22 +10,18 @@ import (
 	"github.com/ntbloom/raincounter/pkg/server/receiver"
 )
 
+// Start runs the main receiver loop
 func Start() {
 	recv, err := receiver.NewReceiver()
 	if err != nil {
 		panic(err)
 	}
-	defer recv.Close()
+	defer recv.Stop()
 	go recv.Start()
 	terminalSignals := make(chan os.Signal, 1)
 	signal.Notify(terminalSignals, syscall.SIGINT, syscall.SIGTERM)
-	for {
-		select {
-		case sig := <-terminalSignals:
-			logrus.Infof("program received %s signal, exiting", sig)
-			recv.Stop()
-		default:
-			continue
-		}
-	}
+
+	sig := <-terminalSignals
+	logrus.Infof("program received %s signal, exiting", sig)
+	logrus.Info("Done!")
 }

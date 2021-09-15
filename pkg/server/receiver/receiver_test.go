@@ -46,10 +46,10 @@ func (suite *ReceiverTest) SetupSuite() {
 	}
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
 		suite.Fail(fmt.Sprintf("unable to connect to MQTT: %s", token.Error()))
-
 	}
-
 	suite.client = client
+
+	// initialize a receiver
 	r, err := receiver.NewReceiver()
 	if err != nil {
 		suite.Fail("unable to make a new Receiver struct", err)
