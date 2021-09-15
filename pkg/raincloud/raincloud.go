@@ -7,7 +7,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/ntbloom/raincounter/pkg/server/receiver"
+	"github.com/ntbloom/raincounter/pkg/raincloud/receiver"
 )
 
 // Receive runs the main receiver loop

@@ -16,8 +16,8 @@ import (
 
 	"github.com/ntbloom/raincounter/pkg/common/mqtt"
 	"github.com/ntbloom/raincounter/pkg/config"
-	"github.com/ntbloom/raincounter/pkg/server/receiver"
-	"github.com/ntbloom/raincounter/pkg/server/webdb"
+	"github.com/ntbloom/raincounter/pkg/raincloud/receiver"
+	"github.com/ntbloom/raincounter/pkg/raincloud/webdb"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"

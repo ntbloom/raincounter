@@ -16,7 +16,7 @@ import (
 	"github.com/jackc/pgx/v4"
 
 	"github.com/ntbloom/raincounter/pkg/config/configkey"
-	"github.com/ntbloom/raincounter/pkg/server/webdb"
+	"github.com/ntbloom/raincounter/pkg/raincloud/webdb"
 	"github.com/spf13/viper"
 
 	"github.com/ntbloom/raincounter/pkg/config"

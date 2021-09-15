@@ -6,7 +6,7 @@ import (
 
 	"github.com/ntbloom/raincounter/pkg/config"
 
-	raincloud "github.com/ntbloom/raincounter/pkg/server"
+	raincloud "github.com/ntbloom/raincounter/pkg/raincloud"
 
 	"github.com/ntbloom/raincounter/cli"
 

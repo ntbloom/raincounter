@@ -10,7 +10,7 @@ import (
 
 	paho "github.com/eclipse/paho.mqtt.golang"
 	"github.com/ntbloom/raincounter/pkg/common/mqtt"
-	"github.com/ntbloom/raincounter/pkg/server/webdb"
+	"github.com/ntbloom/raincounter/pkg/raincloud/webdb"
 	"github.com/sirupsen/logrus"
 )
 
