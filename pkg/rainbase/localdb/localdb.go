@@ -40,7 +40,7 @@ func (db *LocalDB) AddIntRecord(tag, value int) (sql.Result, error) {
 }
 
 func (db *LocalDB) AddFloatRecord(tag int, value float64) (sql.Result, error) {
-	panic("float not implemented on the gateway")
+	panic("float not implemented on the rainbase")
 }
 
 func (db *LocalDB) Tally(tag int) int {

@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/ntbloom/raincounter/pkg/gateway/tlv"
+	"github.com/ntbloom/raincounter/pkg/rainbase/tlv"
 
 	"github.com/jackc/pgx/v4"
 

@@ -10,7 +10,7 @@ import (
 
 	"github.com/ntbloom/raincounter/pkg/common/mqtt"
 	"github.com/ntbloom/raincounter/pkg/config/configkey"
-	"github.com/ntbloom/raincounter/pkg/gateway/localdb"
+	"github.com/ntbloom/raincounter/pkg/rainbase/localdb"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )

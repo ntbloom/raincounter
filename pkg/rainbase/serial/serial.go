@@ -8,8 +8,8 @@ import (
 
 	"github.com/ntbloom/raincounter/pkg/common/exitcodes"
 
-	"github.com/ntbloom/raincounter/pkg/gateway/messenger"
-	"github.com/ntbloom/raincounter/pkg/gateway/tlv"
+	"github.com/ntbloom/raincounter/pkg/rainbase/messenger"
+	"github.com/ntbloom/raincounter/pkg/rainbase/tlv"
 
 	"github.com/sirupsen/logrus"
 )

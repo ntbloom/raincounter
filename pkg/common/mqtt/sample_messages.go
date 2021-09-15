@@ -3,7 +3,7 @@ package mqtt
 import (
 	"time"
 
-	"github.com/ntbloom/raincounter/pkg/gateway/tlv"
+	"github.com/ntbloom/raincounter/pkg/rainbase/tlv"
 
 	"github.com/ntbloom/raincounter/pkg/config/configkey"
 	"github.com/spf13/viper"

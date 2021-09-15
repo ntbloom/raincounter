@@ -6,7 +6,7 @@ import (
 	"testing"
 	"testing/quick"
 
-	"github.com/ntbloom/raincounter/pkg/gateway/localdb"
+	"github.com/ntbloom/raincounter/pkg/rainbase/localdb"
 
 	"github.com/ntbloom/raincounter/pkg/common/database"
 

@@ -31,14 +31,9 @@ sensor:
 database:
   local:
     prod:
-      file: /etc/rainbase/rainbase-gateway-prod.db
+      file: /etc/rainbase/rainbase-prod.db
     dev:
       file: /tmp/rainbase.db
-  remote:
-    prod:
-      file: /etc/raincloud/raincloud-gateway-prod.db
-    dev:
-      file: /tmp/raincloud.db
 
 messenger:
   status:

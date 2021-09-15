@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ntbloom/raincounter/pkg/gateway/tlv"
+	"github.com/ntbloom/raincounter/pkg/rainbase/tlv"
 
 	"github.com/stretchr/testify/assert"
 
@@ -394,7 +394,7 @@ func (suite *WebDBTest) TestEventAndStatusMessagesDontError() {
 	// do a few quick and dirty sql queries just to make sure something made it into the database
 
 	// status page
-	statusQuery := `SELECT sum(asset) FROM status_log;` // should be 1(sensor) + 2(gateway), so 3
+	statusQuery := `SELECT sum(asset) FROM status_log;` // should be 1(sensor) + 2(gateway // ), so 3
 	val, err := suite.query.Select(statusQuery)
 	if err != nil {
 		suite.Fail("unable to query status_log table", err)

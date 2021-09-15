@@ -1,5 +1,5 @@
 HOMEDIR = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
-GW = $(HOMEDIR)pkg/gateway
+GW = $(HOMEDIR)pkg/rainbase
 SERVER = $(HOMEDIR)pkg/server
 COMMON = $(HOMEDIR)pkg/common
 EXE = ./raincounter
@@ -36,7 +36,7 @@ test-all: clean test-common test-gateway test-server
 
 test-all-race: clean test-gateway-race test-server-race
 
-# gateway
+# rainbase
 
 test-gateway:
 	@go test $(TESTFLAGS) $(GW)/...
