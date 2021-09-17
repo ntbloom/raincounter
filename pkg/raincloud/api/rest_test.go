@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 
@@ -38,7 +39,7 @@ func (suite *RestTest) SetupSuite() {
 		suite.Fail("error making rest server", err)
 	}
 	suite.rest = rest
-	suite.rest.Run()
+	go suite.rest.Run()
 
 	// get a base API to query against
 	scheme := viper.GetString(configkey.RestScheme)
@@ -56,7 +57,9 @@ func (suite *RestTest) SetupTest()    {}
 func (suite *RestTest) TearDownTest() {}
 
 func (suite *RestTest) TestHelloWorld() {
-	url := fmt.Sprintf("%s?hello", suite.url)
+	time.Sleep(time.Millisecond * 500)
+	url := fmt.Sprintf("%s/hello", suite.url)
+	logrus.Debugf("url=%s", url)
 	resp, err := http.Get(url)
 	if err != nil {
 		suite.Fail("error getting hello world", err)
@@ -72,7 +75,9 @@ func (suite *RestTest) TestHelloWorld() {
 	if err != nil {
 		suite.Fail("error reading response", err)
 	}
+	message := string(body)
+	logrus.Error(message)
 
 	assert.Equal(suite.T(), 200, resp.StatusCode)
-	assert.Equal(suite.T(), "hello world", body)
+	assert.Equal(suite.T(), "Hello, world!", message)
 }
