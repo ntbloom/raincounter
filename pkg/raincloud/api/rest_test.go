@@ -19,6 +19,8 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+/* TESTING FIXTURES */
+
 type RestTest struct {
 	suite.Suite
 	rest *api.RestServer
@@ -52,6 +54,23 @@ func (suite *RestTest) SetupSuite() {
 	assert.True(suite.T(), suite.connectToServer(), "unable to connect to server")
 }
 
+func (suite *RestTest) TearDownSuite() {
+	logrus.Info("stopping the rest API from the test suite")
+	suite.rest.Stop()
+}
+
+/* HELPER METHODS */
+
+// just get the response from a , fail if there's an error
+func (suite *RestTest) callEndpoint(endpoint string) *http.Response {
+	url := fmt.Sprintf("%s%s", suite.url, endpoint)
+	resp, err := http.Get(url) //nolint
+	if err != nil {
+		suite.Fail(fmt.Sprintf("failure to call %s", url), err)
+	}
+	return resp
+}
+
 func (suite *RestTest) connectToServer() bool {
 	var resp *http.Response
 	var err error
@@ -73,13 +92,9 @@ func (suite *RestTest) connectToServer() bool {
 	return true
 }
 
-func (suite *RestTest) TearDownSuite() {
-	logrus.Info("stopping the rest API from the test suite")
-	suite.rest.Stop()
-}
-func (suite *RestTest) SetupTest()    {}
-func (suite *RestTest) TearDownTest() {}
+/* TESTS */
 
+// dumb hello world test
 func (suite *RestTest) TestHelloWorld() {
 	resp := suite.callEndpoint("/hello") //nolint:bodyclose
 	defer func() {
@@ -96,14 +111,4 @@ func (suite *RestTest) TestHelloWorld() {
 
 	assert.Equal(suite.T(), 200, resp.StatusCode)
 	assert.Equal(suite.T(), "Hello, world!", message)
-}
-
-// just get the response from a , fail if there's an error
-func (suite *RestTest) callEndpoint(endpoint string) *http.Response {
-	url := fmt.Sprintf("%s%s", suite.url, endpoint)
-	resp, err := http.Get(url) //nolint
-	if err != nil {
-		suite.Fail(fmt.Sprintf("failure to call %s", url), err)
-	}
-	return resp
 }

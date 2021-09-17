@@ -11,8 +11,8 @@ COMPOSEWAIT = 10
 COMPOSEFLAGS  = --remove-orphans
 COMPOSEFLAGS += -d
 
-TESTFLAGS  = -timeout 10s
-TESTFLAGS += -p 1
+TESTFLAGS   = -p 1
+#TESTFLAGS  = -timeout 10s
 #TESTFLAGS += -v
 
 ### BUILD ###
@@ -77,10 +77,10 @@ test-receiver-race:
 	@-go test -race $(TESTFLAGS) $(RAINCLOUD)/receiver/
 
 test-rest:
-	@-go test $(TESTFLAGS) $(RAINCLOUD)/rest/
+	@-go test $(TESTFLAGS) $(RAINCLOUD)/api/
 
 test-rest-race:
-	@-go test -race $(TESTFLAGS) $(RAINCLOUD)/rest/
+	@-go test -race $(TESTFLAGS) $(RAINCLOUD)/api/
 
 ### RUN ###
 
