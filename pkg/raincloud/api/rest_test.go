@@ -94,9 +94,8 @@ func (suite *RestTest) connectToServer() bool {
 
 /* TESTS */
 
-// dumb hello world test
-func (suite *RestTest) TestHelloWorld() {
-	resp := suite.callEndpoint("/hello") //nolint:bodyclose
+func (suite *RestTest) TestTeapot() {
+	resp := suite.callEndpoint("/teapot") //nolint:bodyclose
 	defer func() {
 		err := resp.Body.Close()
 		if err != nil {
@@ -107,8 +106,9 @@ func (suite *RestTest) TestHelloWorld() {
 	if err != nil {
 		suite.Fail("error reading response", err)
 	}
-	message := string(body)
+	expected := "{\"hello\":\"teapot\"}"
+	actual := string(body)
 
-	assert.Equal(suite.T(), 200, resp.StatusCode)
-	assert.Equal(suite.T(), "Hello, world!", message)
+	assert.Equal(suite.T(), http.StatusTeapot, resp.StatusCode)
+	assert.Equal(suite.T(), expected, actual)
 }

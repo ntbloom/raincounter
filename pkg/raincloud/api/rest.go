@@ -1,7 +1,7 @@
 package api
 
 import (
-	"io"
+	"encoding/json"
 	"net/http"
 
 	"github.com/ntbloom/raincounter/pkg/config/configkey"
@@ -43,7 +43,6 @@ func NewRestServer() (*RestServer, error) {
 
 // Run launches the main loop
 func (rest *RestServer) Run() {
-	rest.mux.HandleFunc("/v1.0/hello", handleHello)
 	rest.mux.HandleFunc("/v1.0/teapot", handleTeapot)
 
 	go logrus.Fatalf("problem with ListenAndServe: %s", rest.server.ListenAndServe())
@@ -61,18 +60,23 @@ func (rest *RestServer) Run() {
 	}
 }
 
-func handleHello(w http.ResponseWriter, _ *http.Request) {
-	if _, err := io.WriteString(w, "Hello, world!"); err != nil {
-		logrus.Error(err)
-	}
-}
-
-func handleTeapot(w http.ResponseWriter, _ *http.Request) {
-	w.WriteHeader(http.StatusTeapot)
-}
-
 // Stop kills the server
 func (rest *RestServer) Stop() {
 	logrus.Info("killing the rest API server")
 	rest.state <- configkey.Kill
+}
+
+// return teapot messages as bellweather for general server
+func handleTeapot(w http.ResponseWriter, res *http.Request) {
+	w.WriteHeader(http.StatusTeapot)
+	logrus.Infof("request headers=%s", res.Header)
+
+	var payload []byte
+	var err error
+	if payload, err = json.Marshal(map[string]string{"hello": "teapot"}); err != nil {
+		logrus.Error(err)
+	}
+	if _, err = w.Write(payload); err != nil {
+		logrus.Error(err)
+	}
 }
