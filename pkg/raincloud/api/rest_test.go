@@ -48,9 +48,29 @@ func (suite *RestTest) SetupSuite() {
 	version := viper.Get(configkey.RestVersion)
 	suite.url = fmt.Sprintf("%s://%s:%s/%s", scheme, baseurl, port, version)
 
-	//for i := 0; i < 5; i++ {
-	//	suite.
-	//}
+	// wait for the server to be up
+	assert.True(suite.T(), suite.connectToServer(), "unable to connect to server")
+}
+
+func (suite *RestTest) connectToServer() bool {
+	var resp *http.Response
+	var err error
+	for i := 0; i < 5; i++ {
+		url := fmt.Sprintf("%s%s", suite.url, "/teapot")
+		resp, err = http.Get(url) //nolint
+		if resp != nil {
+			break
+		}
+		time.Sleep(time.Millisecond * 100)
+	}
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			suite.Fail("not a teapot!", err)
+		}
+	}()
+	assert.Nil(suite.T(), err, fmt.Sprintf("error retreiving teapot: %s", err))
+	assert.Equal(suite.T(), resp.StatusCode, http.StatusTeapot)
+	return true
 }
 
 func (suite *RestTest) TearDownSuite() {
@@ -61,30 +81,29 @@ func (suite *RestTest) SetupTest()    {}
 func (suite *RestTest) TearDownTest() {}
 
 func (suite *RestTest) TestHelloWorld() {
-	time.Sleep(time.Millisecond * 500)
-	url := suite.buildUrl("/hello")
-	resp, err := http.Get(url)
-	if err != nil {
-		suite.Fail("error getting hello world", err)
-	}
+	resp := suite.callEndpoint("/hello") //nolint:bodyclose
 	defer func() {
-		err = resp.Body.Close()
+		err := resp.Body.Close()
 		if err != nil {
 			suite.Fail("error closing body", err)
 		}
 	}()
-
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		suite.Fail("error reading response", err)
 	}
 	message := string(body)
-	logrus.Error(message)
 
 	assert.Equal(suite.T(), 200, resp.StatusCode)
 	assert.Equal(suite.T(), "Hello, world!", message)
 }
 
-func (suite *RestTest) buildUrl(endpoint string) string {
-	return fmt.Sprintf("%s%s", suite.url, endpoint)
+// just get the response from a , fail if there's an error
+func (suite *RestTest) callEndpoint(endpoint string) *http.Response {
+	url := fmt.Sprintf("%s%s", suite.url, endpoint)
+	resp, err := http.Get(url) //nolint
+	if err != nil {
+		suite.Fail(fmt.Sprintf("failure to call %s", url), err)
+	}
+	return resp
 }
