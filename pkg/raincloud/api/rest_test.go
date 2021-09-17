@@ -47,6 +47,10 @@ func (suite *RestTest) SetupSuite() {
 	port := viper.GetString(configkey.RestPort)
 	version := viper.Get(configkey.RestVersion)
 	suite.url = fmt.Sprintf("%s://%s:%s/%s", scheme, baseurl, port, version)
+
+	//for i := 0; i < 5; i++ {
+	//	suite.
+	//}
 }
 
 func (suite *RestTest) TearDownSuite() {
@@ -58,8 +62,7 @@ func (suite *RestTest) TearDownTest() {}
 
 func (suite *RestTest) TestHelloWorld() {
 	time.Sleep(time.Millisecond * 500)
-	url := fmt.Sprintf("%s/hello", suite.url)
-	logrus.Debugf("url=%s", url)
+	url := suite.buildUrl("/hello")
 	resp, err := http.Get(url)
 	if err != nil {
 		suite.Fail("error getting hello world", err)
@@ -80,4 +83,8 @@ func (suite *RestTest) TestHelloWorld() {
 
 	assert.Equal(suite.T(), 200, resp.StatusCode)
 	assert.Equal(suite.T(), "Hello, world!", message)
+}
+
+func (suite *RestTest) buildUrl(endpoint string) string {
+	return fmt.Sprintf("%s%s", suite.url, endpoint)
 }
