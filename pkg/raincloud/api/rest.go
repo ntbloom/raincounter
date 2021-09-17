@@ -2,11 +2,17 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/ntbloom/raincounter/pkg/config/configkey"
 
 	"github.com/sirupsen/logrus"
+)
+
+const (
+	contentType = "Content-Type"
+	appJson     = "application/json"
 )
 
 type RestServer struct {
@@ -66,17 +72,31 @@ func (rest *RestServer) Stop() {
 	rest.state <- configkey.Kill
 }
 
-// return teapot messages as bellweather for general server
+// return teapot messages as bellweather for general server and for bootstrapping
+// may be able to delete this later as the API is developed
 func handleTeapot(w http.ResponseWriter, res *http.Request) {
-	w.WriteHeader(http.StatusTeapot)
-	logrus.Infof("request headers=%s", res.Header)
-
 	var payload []byte
 	var err error
+
+	encoding := res.Header.Get(contentType)
+	if encoding != appJson {
+		w.WriteHeader(http.StatusUnsupportedMediaType)
+		msg := []byte(fmt.Sprintf("Must request %s", appJson))
+		if _, err = w.Write(msg); err != nil {
+			logrus.Error(err)
+			return
+		}
+	}
+	w.WriteHeader(http.StatusTeapot)
 	if payload, err = json.Marshal(map[string]string{"hello": "teapot"}); err != nil {
 		logrus.Error(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 	if _, err = w.Write(payload); err != nil {
 		logrus.Error(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
+	return
 }

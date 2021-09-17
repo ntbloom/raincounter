@@ -1,6 +1,7 @@
 package api_test
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -27,7 +28,7 @@ type RestTest struct {
 	url  string
 }
 
-func TestReceiver(t *testing.T) {
+func TestApi(t *testing.T) {
 	test := new(RestTest)
 	suite.Run(t, test)
 }
@@ -61,41 +62,55 @@ func (suite *RestTest) TearDownSuite() {
 
 /* HELPER METHODS */
 
-// just get the response from a , fail if there's an error
-func (suite *RestTest) callEndpoint(endpoint string) *http.Response {
+// just get the response from a GET, fail if there's an error
+func (suite *RestTest) getEndpoint(endpoint string) (*http.Response, error) {
+	var err error
+	var req *http.Request
+	var resp *http.Response
+
 	url := fmt.Sprintf("%s%s", suite.url, endpoint)
-	resp, err := http.Get(url) //nolint
-	if err != nil {
-		suite.Fail(fmt.Sprintf("failure to call %s", url), err)
+	var headers = map[string]string{
+		"content-type": "application/json",
 	}
-	return resp
+
+	if req, err = http.NewRequestWithContext(context.Background(), http.MethodGet, url, nil); err != nil {
+		return nil, err
+	}
+	for k, v := range headers {
+		req.Header.Add(k, v)
+	}
+
+	resp, err = http.DefaultClient.Do(req)
+	return resp, err
 }
 
 func (suite *RestTest) connectToServer() bool {
 	var resp *http.Response
 	var err error
-	for i := 0; i < 5; i++ {
-		url := fmt.Sprintf("%s%s", suite.url, "/teapot")
-		resp, err = http.Get(url) //nolint
+	for i := 0; i < 20; i++ {
+		resp, err = suite.getEndpoint("/teapot")
 		if resp != nil {
 			break
 		}
-		time.Sleep(time.Millisecond * 100)
+		time.Sleep(time.Millisecond * 500)
 	}
 	defer func() {
-		if err := resp.Body.Close(); err != nil {
+		if err = resp.Body.Close(); err != nil {
 			suite.Fail("not a teapot!", err)
 		}
 	}()
 	assert.Nil(suite.T(), err, fmt.Sprintf("error retreiving teapot: %s", err))
-	assert.Equal(suite.T(), resp.StatusCode, http.StatusTeapot)
+	assert.Equal(suite.T(), http.StatusTeapot, resp.StatusCode)
 	return true
 }
 
 /* TESTS */
 
 func (suite *RestTest) TestTeapot() {
-	resp := suite.callEndpoint("/teapot") //nolint:bodyclose
+	resp, err := suite.getEndpoint("/teapot") //nolint:bodyclose
+	if err != nil {
+		suite.Fail("problem getting teapot", err)
+	}
 	defer func() {
 		err := resp.Body.Close()
 		if err != nil {
@@ -111,4 +126,20 @@ func (suite *RestTest) TestTeapot() {
 
 	assert.Equal(suite.T(), http.StatusTeapot, resp.StatusCode)
 	assert.Equal(suite.T(), expected, actual)
+}
+
+// make sure we get a bad response if we forget to set application/json content-type header
+func (suite *RestTest) TestNoJsonHeaders() {
+	var resp *http.Response
+	var err error
+	url := fmt.Sprintf("%s%s", suite.url, "/teapot")
+	resp, err = http.Get(url) //nolint
+	if resp != nil {
+		defer func() {
+			if err = resp.Body.Close(); err != nil {
+				suite.Fail("not a teapot!", err)
+			}
+		}()
+	}
+	assert.Equal(suite.T(), http.StatusUnsupportedMediaType, resp.StatusCode)
 }
