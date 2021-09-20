@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/ntbloom/raincounter/pkg/config/configkey"
@@ -70,42 +69,4 @@ func (rest *RestServer) Run() {
 func (rest *RestServer) Stop() {
 	logrus.Info("killing the rest API server")
 	rest.state <- configkey.Kill
-}
-
-// return teapot messages as bellweather for general server and for bootstrapping
-// may be able to delete this later as the API is developed
-func handleTeapot(w http.ResponseWriter, res *http.Request) {
-	var payload []byte
-	var err error
-
-	if payload, err = json.Marshal(map[string]string{"hello": "teapot"}); err != nil {
-		logrus.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-	} else {
-		w.WriteHeader(http.StatusTeapot)
-		if _, err = w.Write(payload); err != nil {
-			logrus.Error(err)
-		}
-	}
-}
-
-// template for json payload messages
-func handleHello(w http.ResponseWriter, res *http.Request) {
-	var payload []byte
-	var err error
-
-	encoding := res.Header.Get(contentType)
-	if encoding != appJson {
-		w.WriteHeader(http.StatusUnsupportedMediaType)
-		return
-	}
-	if payload, err = json.Marshal(map[string]string{"hello": "world"}); err != nil {
-		logrus.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(http.StatusOK)
-	if _, err = w.Write(payload); err != nil {
-		logrus.Error(err)
-	}
 }
