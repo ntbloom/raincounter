@@ -92,7 +92,7 @@ func (suite *RestTest) connectToServer() bool {
 		if resp != nil {
 			break
 		}
-		time.Sleep(time.Millisecond * 500)
+		time.Sleep(time.Millisecond * 100)
 	}
 	defer func() {
 		if err = resp.Body.Close(); err != nil {
@@ -160,4 +160,9 @@ func (suite *RestTest) TestNoJsonHeaders() {
 	}
 	assert.Equal(suite.T(), "", string(body), "should not be returning any payload")
 	assert.Equal(suite.T(), http.StatusUnsupportedMediaType, resp.StatusCode)
+}
+
+//
+func (suite *RestTest) TestGetLastRain() {
+	panic("implement me!")
 }

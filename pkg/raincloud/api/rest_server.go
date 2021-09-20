@@ -8,11 +8,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const (
-	contentType = "Content-Type"
-	appJson     = "application/json"
-)
-
 type RestServer struct {
 	server *http.Server
 	mux    *http.ServeMux
@@ -49,6 +44,7 @@ func NewRestServer() (*RestServer, error) {
 func (rest *RestServer) Run() {
 	rest.mux.HandleFunc("/v1.0/teapot", handleTeapot)
 	rest.mux.HandleFunc("/v1.0/hello", handleHello)
+	rest.mux.HandleFunc("/v1.0/rain", handleRain)
 
 	go logrus.Fatalf("problem with ListenAndServe: %s", rest.server.ListenAndServe())
 	for {
