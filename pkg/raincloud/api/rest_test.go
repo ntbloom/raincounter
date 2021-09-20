@@ -112,19 +112,32 @@ func (suite *RestTest) TestTeapot() {
 		suite.Fail("problem getting teapot", err)
 	}
 	defer func() {
-		err := resp.Body.Close()
+		err = resp.Body.Close()
 		if err != nil {
 			suite.Fail("error closing body", err)
+		}
+	}()
+	assert.Equal(suite.T(), http.StatusTeapot, resp.StatusCode)
+}
+
+func (suite *RestTest) TestHello() {
+	resp, err := suite.getEndpoint("/hello") // nolint:bodyclose
+	if err != nil {
+		suite.Fail("problem getting hello", err)
+	}
+	defer func() {
+		if err = resp.Body.Close(); err != nil {
+			suite.Fail("failed to close body", err)
 		}
 	}()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		suite.Fail("error reading response", err)
 	}
-	expected := "{\"hello\":\"teapot\"}"
+	expected := "{\"hello\":\"world\"}"
 	actual := string(body)
 
-	assert.Equal(suite.T(), http.StatusTeapot, resp.StatusCode)
+	assert.Equal(suite.T(), http.StatusOK, resp.StatusCode)
 	assert.Equal(suite.T(), expected, actual)
 }
 
@@ -132,12 +145,12 @@ func (suite *RestTest) TestTeapot() {
 func (suite *RestTest) TestNoJsonHeaders() {
 	var resp *http.Response
 	var err error
-	url := fmt.Sprintf("%s%s", suite.url, "/teapot")
+	url := fmt.Sprintf("%s%s", suite.url, "/hello")
 	resp, err = http.Get(url) //nolint
 	if resp != nil {
 		defer func() {
 			if err = resp.Body.Close(); err != nil {
-				suite.Fail("not a teapot!", err)
+				suite.Fail("error closing hello", err)
 			}
 		}()
 	}
