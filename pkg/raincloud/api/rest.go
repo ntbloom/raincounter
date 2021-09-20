@@ -78,8 +78,6 @@ func handleTeapot(w http.ResponseWriter, res *http.Request) {
 	var payload []byte
 	var err error
 
-	encoding := res.Header.Get(contentType)
-	logrus.Debugf("recevied request with `%s` encoding", encoding)
 	if payload, err = json.Marshal(map[string]string{"hello": "teapot"}); err != nil {
 		logrus.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -97,18 +95,17 @@ func handleHello(w http.ResponseWriter, res *http.Request) {
 	var err error
 
 	encoding := res.Header.Get(contentType)
-	logrus.Debugf("recevied request with `%s` encoding", encoding)
 	if encoding != appJson {
 		w.WriteHeader(http.StatusUnsupportedMediaType)
-	} else {
-		if payload, err = json.Marshal(map[string]string{"hello": "world"}); err != nil {
-			logrus.Error(err)
-			w.WriteHeader(http.StatusInternalServerError)
-		} else {
-			w.WriteHeader(http.StatusOK)
-			if _, err = w.Write(payload); err != nil {
-				logrus.Error(err)
-			}
-		}
+		return
+	}
+	if payload, err = json.Marshal(map[string]string{"hello": "world"}); err != nil {
+		logrus.Error(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	if _, err = w.Write(payload); err != nil {
+		logrus.Error(err)
 	}
 }

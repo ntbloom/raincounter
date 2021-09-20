@@ -154,5 +154,10 @@ func (suite *RestTest) TestNoJsonHeaders() {
 			}
 		}()
 	}
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		suite.Fail("error reading empty message", err)
+	}
+	assert.Equal(suite.T(), "", string(body), "should not be returning any payload")
 	assert.Equal(suite.T(), http.StatusUnsupportedMediaType, resp.StatusCode)
 }
