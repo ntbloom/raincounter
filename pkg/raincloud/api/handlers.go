@@ -26,21 +26,23 @@ func handleTeapot(w http.ResponseWriter, res *http.Request) {
 
 // template for json payload messages
 func handleHello(w http.ResponseWriter, res *http.Request) {
-	var payload []byte
-	var err error
+	if payload, err := json.Marshal(map[string]string{"hello": "world"}); err != nil {
+		logrus.Error(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	} else {
+		genericJSONHandler(payload, w, res)
+	}
+}
 
+func genericJSONHandler(payload []byte, w http.ResponseWriter, res *http.Request) {
 	encoding := res.Header.Get(contentType)
 	if encoding != appJson {
 		w.WriteHeader(http.StatusUnsupportedMediaType)
 		return
 	}
-	if payload, err = json.Marshal(map[string]string{"hello": "world"}); err != nil {
-		logrus.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 	w.WriteHeader(http.StatusOK)
-	if _, err = w.Write(payload); err != nil {
+	if _, err := w.Write(payload); err != nil {
 		logrus.Error(err)
 	}
 }

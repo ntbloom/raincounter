@@ -36,7 +36,7 @@ func Serve() {
 		logrus.Fatal("unable to run the rest API")
 		panic(err)
 	}
-	var duration time.Duration = 10
+	var duration time.Duration = 15
 	logrus.Infof("In debug mode, running for %d seconds", duration)
 	go rest.Run()
 	time.Sleep(time.Second * duration)
