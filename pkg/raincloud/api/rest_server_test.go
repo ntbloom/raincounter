@@ -85,7 +85,7 @@ func (suite *RestTest) getEndpoint(endpoint string) (*http.Response, error) {
 }
 
 // read
-func (suite *RestTest) toJson(resp *http.Response, passedErr error) ([]byte, int) {
+func (suite *RestTest) toJSON(resp *http.Response, passedErr error) ([]byte, int) {
 	status := resp.StatusCode
 	if passedErr != nil {
 		suite.Fail("error getting response", passedErr)
@@ -101,7 +101,6 @@ func (suite *RestTest) toJson(resp *http.Response, passedErr error) ([]byte, int
 		suite.Fail("error reading response body", err)
 	}
 	return body, status
-
 }
 
 func (suite *RestTest) connectToServer() bool {
@@ -140,16 +139,6 @@ func (suite *RestTest) TestTeapot() {
 	assert.Equal(suite.T(), http.StatusTeapot, resp.StatusCode)
 }
 
-func (suite *RestTest) TestHello() {
-	body, status := suite.toJson(suite.getEndpoint("/hello"))
-
-	expected := `{"hello":"world"}`
-	actual := string(body)
-
-	assert.Equal(suite.T(), http.StatusOK, status)
-	assert.Equal(suite.T(), expected, actual)
-}
-
 // make sure we get a bad response if we forget to set application/json content-type header
 func (suite *RestTest) TestNoJsonHeaders() {
 	var resp *http.Response
@@ -169,6 +158,16 @@ func (suite *RestTest) TestNoJsonHeaders() {
 	}
 	assert.Equal(suite.T(), "", string(body), "should not be returning any payload")
 	assert.Equal(suite.T(), http.StatusUnsupportedMediaType, resp.StatusCode)
+}
+
+func (suite *RestTest) TestHello() {
+	body, status := suite.toJSON(suite.getEndpoint("/hello"))
+
+	expected := `{"hello":"world"}`
+	actual := string(body)
+
+	assert.Equal(suite.T(), http.StatusOK, status)
+	assert.Equal(suite.T(), expected, actual)
 }
 
 ////
