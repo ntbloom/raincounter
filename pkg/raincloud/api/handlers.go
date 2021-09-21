@@ -3,6 +3,9 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"time"
+
+	"github.com/ntbloom/raincounter/pkg/raincloud/webdb"
 
 	"github.com/sirupsen/logrus"
 )
@@ -56,6 +59,22 @@ func handleHello(w http.ResponseWriter, res *http.Request) {
 }
 
 /* PRODUCTION ENDPOINT HANDLERS */
+
+// handle requests for the last rain
+func handleLastRain(w http.ResponseWriter, res *http.Request) {
+	db := webdb.NewPGConnector()
+	defer db.Close()
+	payload, err := db.GetLastRainTime()
+	if err != nil {
+		logrus.Error(err)
+		return
+	}
+	resp, err := json.Marshal(map[string]time.Time{"timestamp": payload})
+	if err != nil {
+		logrus.Error(err)
+	}
+	genericJSONHandler(resp, w, res)
+}
 
 // handle rain requests
 func handleRain(w http.ResponseWriter, res *http.Request) {

@@ -2,6 +2,7 @@ package api_test
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -160,6 +161,7 @@ func (suite *RestTest) TestNoJsonHeaders() {
 	assert.Equal(suite.T(), http.StatusUnsupportedMediaType, resp.StatusCode)
 }
 
+// make sure we can connect to the API
 func (suite *RestTest) TestHello() {
 	body, status := suite.toJSON(suite.getEndpoint("/hello"))
 
@@ -170,7 +172,13 @@ func (suite *RestTest) TestHello() {
 	assert.Equal(suite.T(), expected, actual)
 }
 
-////
-//func (suite *RestTest) TestGetLastRain() {
-//	data := suite.getEndpoint("/lastRain")
-//}
+// get the last rain value as a timestamp, tests that we can connect to the database
+func (suite *RestTest) TestGetLastRain() {
+	rain, status := suite.toJSON(suite.getEndpoint("/lastRain"))
+	var actual map[string]time.Time
+	err := json.Unmarshal(rain, &actual)
+
+	assert.Equal(suite.T(), http.StatusOK, status)
+	assert.NotNil(suite.T(), actual)
+	assert.Nil(suite.T(), err)
+}

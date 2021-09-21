@@ -32,12 +32,16 @@ type PGConnector struct {
 }
 
 func NewPGConnector() *PGConnector {
+	logrus.Infof("initializing new PGConnector")
 	dbName := viper.GetString(configkey.PGDatabaseName)
 	password := viper.GetString(configkey.PGPassword)
 	url := fmt.Sprintf("postgresql://postgres:%s@127.0.0.1:5432/%s", password, dbName)
 	logrus.Debugf("connecting to postgres: %s", url)
 
 	duration := viper.GetDuration(configkey.PGConnectionRetryWait)
+	if duration == 0 {
+		panic("about to divide by zero!")
+	}
 	totalWait := int((viper.GetDuration(configkey.PGConnectionTimeout)) / duration)
 	var pgpool *pgxpool.Pool
 	var err error

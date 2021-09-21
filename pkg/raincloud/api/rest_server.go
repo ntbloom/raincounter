@@ -44,6 +44,7 @@ func NewRestServer() (*RestServer, error) {
 func (rest *RestServer) Run() {
 	rest.mux.HandleFunc("/v1.0/teapot", handleTeapot)
 	rest.mux.HandleFunc("/v1.0/hello", handleHello)
+	rest.mux.HandleFunc("/v1.0/lastRain", handleLastRain)
 	rest.mux.HandleFunc("/v1.0/rain", handleRain)
 
 	go logrus.Fatalf("problem with ListenAndServe: %s", rest.server.ListenAndServe())

@@ -16,6 +16,7 @@ const (
 
 // Configure process config files and set log level
 func Configure() {
+	logrus.Info("Pulling in viper config")
 	for k, v := range defaultConfig {
 		viper.SetDefault(k, v)
 	}
