@@ -363,28 +363,28 @@ func (suite *WebDBTest) TestGetLastRainTime() {
 	assert.True(suite.T(), timeDiff < time.Second)
 }
 
-// dummy test, but get a bunch of stuff in the database
-func (suite *WebDBTest) TestGenerateLotsOfData() {
-	n := 500
-	for _, v := range generateRandomRainEntriesMM(n) {
-		if err := suite.entry.AddRainMMEvent(v.Millimeters, v.Timestamp); err != nil {
-			suite.Fail("unable to enter rain", err)
-		}
-	}
-	for _, v := range generateRandomTempEntriesC(n) {
-		if err := suite.entry.AddTempCValue(v.TempC, v.Timestamp); err != nil {
-			suite.Fail("unable to enter temp", err)
-		}
-	}
-	for _, v := range *generateOrderedTimestamps(n) {
-		if err := suite.entry.AddStatusUpdate(configkey.SensorStatus, v); err != nil {
-			suite.Fail("failure to add sensor status", err)
-		}
-		if err := suite.entry.AddStatusUpdate(configkey.GatewayStatus, v); err != nil {
-			suite.Fail("failure to add gw status", err)
-		}
-	}
-}
+//// dummy test, but get a bunch of stuff in the database
+//func (suite *WebDBTest) TestGenerateLotsOfData() {
+//	n := 500
+//	for _, v := range generateRandomRainEntriesMM(n) {
+//		if err := suite.entry.AddRainMMEvent(v.Millimeters, v.Timestamp); err != nil {
+//			suite.Fail("unable to enter rain", err)
+//		}
+//	}
+//	for _, v := range generateRandomTempEntriesC(n) {
+//		if err := suite.entry.AddTempCValue(v.TempC, v.Timestamp); err != nil {
+//			suite.Fail("unable to enter temp", err)
+//		}
+//	}
+//	for _, v := range *generateOrderedTimestamps(n) {
+//		if err := suite.entry.AddStatusUpdate(configkey.SensorStatus, v); err != nil {
+//			suite.Fail("failure to add sensor status", err)
+//		}
+//		if err := suite.entry.AddStatusUpdate(configkey.GatewayStatus, v); err != nil {
+//			suite.Fail("failure to add gw status", err)
+//		}
+//	}
+//}
 
 // generate a random RainEntriesMM struct
 func generateRandomRainEntriesMM(n int) webdb.RainEntriesMm {

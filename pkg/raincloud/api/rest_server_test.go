@@ -84,6 +84,26 @@ func (suite *RestTest) getEndpoint(endpoint string) (*http.Response, error) {
 	return resp, err
 }
 
+// read
+func (suite *RestTest) toJson(resp *http.Response, passedErr error) ([]byte, int) {
+	status := resp.StatusCode
+	if passedErr != nil {
+		suite.Fail("error getting response", passedErr)
+		return nil, status
+	}
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			suite.Fail("failure to close body", err)
+		}
+	}()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		suite.Fail("error reading response body", err)
+	}
+	return body, status
+
+}
+
 func (suite *RestTest) connectToServer() bool {
 	var resp *http.Response
 	var err error
@@ -121,23 +141,12 @@ func (suite *RestTest) TestTeapot() {
 }
 
 func (suite *RestTest) TestHello() {
-	resp, err := suite.getEndpoint("/hello") // nolint:bodyclose
-	if err != nil {
-		suite.Fail("problem getting hello", err)
-	}
-	defer func() {
-		if err = resp.Body.Close(); err != nil {
-			suite.Fail("failed to close body", err)
-		}
-	}()
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		suite.Fail("error reading response", err)
-	}
-	expected := "{\"hello\":\"world\"}"
+	body, status := suite.toJson(suite.getEndpoint("/hello"))
+
+	expected := `{"hello":"world"}`
 	actual := string(body)
 
-	assert.Equal(suite.T(), http.StatusOK, resp.StatusCode)
+	assert.Equal(suite.T(), http.StatusOK, status)
 	assert.Equal(suite.T(), expected, actual)
 }
 
@@ -162,7 +171,7 @@ func (suite *RestTest) TestNoJsonHeaders() {
 	assert.Equal(suite.T(), http.StatusUnsupportedMediaType, resp.StatusCode)
 }
 
-//
-func (suite *RestTest) TestGetLastRain() {
-	panic("implement me!")
-}
+////
+//func (suite *RestTest) TestGetLastRain() {
+//	data := suite.getEndpoint("/lastRain")
+//}
