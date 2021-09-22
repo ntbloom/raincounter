@@ -37,10 +37,7 @@ type restHandler struct {
 // newRestHandler makes a new rest handler with read-only access to the database
 func newRestHandler() restHandler {
 	logrus.Debug("creating new restHandler")
-	var query webdb.DBQuery
-	db := webdb.NewPGConnector()
-	query = db
-	return restHandler{db: query}
+	return restHandler{db: webdb.NewPGConnector()}
 }
 
 // close frees any resources needed by the handler
@@ -64,6 +61,8 @@ func (handler restHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		handler.handleLastRain(w, r)
 	case urlLastTemp:
 		handler.handleLastTemp(w, r)
+	case urlSensorStatus:
+		handler.handleSensorStatus(w, r)
 	default:
 		w.WriteHeader(http.StatusNotFound)
 	}
@@ -142,7 +141,17 @@ func (handler restHandler) handleLastTemp(w http.ResponseWriter, res *http.Reque
 	genericJSONHandler(resp, w, res)
 }
 
-// handle rain requests
-func handleRain(w http.ResponseWriter, res *http.Request) {
-	panic("implement me!")
+// handle requests for sensor status
+func (handler restHandler) handleSensorStatus(w http.ResponseWriter, res *http.Request) {
+	duration := time.Second * 100
+	isUp, err := handler.db.IsSensorUp(duration)
+	if err != nil {
+		logrus.Error(err)
+		return
+	}
+	resp, err := json.Marshal(map[string]interface{}{"sensor_active": isUp})
+	if err != nil {
+		logrus.Error(err)
+	}
+	genericJSONHandler(resp, w, res)
 }

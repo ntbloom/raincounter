@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ntbloom/raincounter/pkg/raincloud/webdb"
+
 	"github.com/stretchr/testify/assert"
 
 	"github.com/ntbloom/raincounter/pkg/config/configkey"
@@ -25,8 +27,9 @@ import (
 
 type RestTest struct {
 	suite.Suite
-	rest *api.RestServer
-	url  string
+	rest  *api.RestServer
+	entry webdb.DBEntry
+	url   string
 }
 
 func TestApi(t *testing.T) {
@@ -36,6 +39,9 @@ func TestApi(t *testing.T) {
 
 func (suite *RestTest) SetupSuite() {
 	config.Configure()
+
+	// add a query connector
+	suite.entry = webdb.NewPGConnector()
 
 	// launch the rest API
 	rest, err := api.NewRestServer()
@@ -194,6 +200,41 @@ func (suite *RestTest) TestGetLastTempC() {
 	assert.NotNil(suite.T(), actual)
 	assert.Equal(suite.T(), 1, len(actual), "should only have 1 result")
 	assert.Nil(suite.T(), err)
+}
+
+func (suite *RestTest) TestGetStatus() {
+	// we expect there to not be anything at the beginning since the dummy data are old
+	var actual map[string]interface{}
+	var err error
+	endpoint := "/sensorStatus?since=300"
+
+	beforeStatus, status := suite.toJSON(suite.getEndpoint(endpoint))
+	err = json.Unmarshal(beforeStatus, &actual)
+	inactive := actual["sensor_active"].(bool)
+
+	assert.Equal(suite.T(), http.StatusOK, status)
+	assert.False(suite.T(), inactive, "shouldn't be an entry yet")
+	assert.Nil(suite.T(), err)
+
+	// add a more updated entry, remove it when we're done
+	if err = suite.entry.AddStatusUpdate(configkey.SensorStatus, time.Now()); err != nil {
+		suite.Fail("problem entering status message", err)
+	}
+	defer func() {
+		cmd := `DELETE FROM status_log WHERE id=(SELECT id FROM status_log ORDER BY gw_timestamp DESC LIMIT 1);`
+		if err = suite.entry.Insert(cmd); err != nil {
+			logrus.Warning("did not erase last sensor entry")
+		}
+	}()
+
+	afterStatus, status := suite.toJSON(suite.getEndpoint(endpoint))
+	err = json.Unmarshal(afterStatus, &actual)
+	active := actual["sensor_active"].(bool)
+
+	assert.Equal(suite.T(), http.StatusOK, status)
+	assert.True(suite.T(), active, "should be picked up")
+	assert.Nil(suite.T(), err)
+
 }
 
 /* NEED TO WRITE ENDPOINTS FOR THE FOLLOWING ENDPOINTS */
