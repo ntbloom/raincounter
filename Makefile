@@ -15,6 +15,11 @@ TESTFLAGS   = -p 1
 #TESTFLAGS  = -timeout 10s
 #TESTFLAGS += -v
 
+SQLFLAGS  = -h localhost
+SQLFLAGS += -U postgres
+SQLFLAGS += raincounter
+DUMMY_DATA = $(HOMEDIR)pkg/test/dummy.sql
+
 ### BUILD ###
 
 build:
@@ -57,7 +62,10 @@ docker-pglogs:
 	@$(COMPOSE) logs -f postgresql
 
 psql:
-	psql -U postgres -h localhost raincounter
+	psql $(SQLFLAGS)
+
+enter-data:
+	psql $(SQLFLAGS) -f $(DUMMY_DATA)
 
 # server
 test-server: test-webdb test-receiver test-rest

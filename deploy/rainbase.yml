@@ -1,4 +1,4 @@
-log.level: debug
+log.level: warn
 usb.connection.port: /dev/ttyACM99
 main.loop.duration: -10s
 

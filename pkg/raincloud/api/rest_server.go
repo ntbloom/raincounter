@@ -14,6 +14,13 @@ type RestServer struct {
 	state  chan int
 }
 
+const (
+	teapot   = "/v1.0/teapot"
+	hello    = "/v1.0/hello"
+	lastRain = "/v1.0/lastRain"
+	rain     = "/v1.0/rain"
+)
+
 // NewRestServer initializes a new rest API
 func NewRestServer() (*RestServer, error) {
 	mux := http.NewServeMux()
@@ -42,10 +49,11 @@ func NewRestServer() (*RestServer, error) {
 
 // Run launches the main loop
 func (rest *RestServer) Run() {
-	rest.mux.HandleFunc("/v1.0/teapot", handleTeapot)
-	rest.mux.HandleFunc("/v1.0/hello", handleHello)
-	rest.mux.HandleFunc("/v1.0/lastRain", handleLastRain)
-	rest.mux.HandleFunc("/v1.0/rain", handleRain)
+	handler := newRestHandler()
+	defer handler.close()
+
+	// divert all endpoints to the handler
+	rest.mux.Handle("/", handler)
 
 	go logrus.Fatalf("problem with ListenAndServe: %s", rest.server.ListenAndServe())
 	for {

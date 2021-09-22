@@ -15,6 +15,38 @@ const (
 	appJSON     = "application/json"
 )
 
+type restHandler struct {
+	db webdb.DBQuery
+}
+
+func newRestHandler() restHandler {
+	logrus.Debug("creating new restHandler")
+	var query webdb.DBQuery
+	db := webdb.NewPGConnector()
+	query = db
+	return restHandler{db: query}
+}
+
+func (rest restHandler) close() {
+	logrus.Info("closing handler struct")
+	rest.db.Close()
+}
+
+func (rest restHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		logrus.Errorf("attempted illegal request: %s", r.Method)
+		return
+	}
+	switch r.URL.Path {
+	case hello:
+		rest.handleHello(w, r)
+	case teapot:
+		rest.handleTeapot(w, r)
+	case lastRain:
+		rest.handleLastRain(w, r)
+	}
+}
+
 /* GENERIC AND TEST HANDLERS */
 
 // handles generic JSON messages. fails if the request does not specify application/json
@@ -32,7 +64,7 @@ func genericJSONHandler(payload []byte, w http.ResponseWriter, res *http.Request
 
 // return teapot messages as bellweather for general server and for bootstrapping
 // may be able to delete this later as the API is developed
-func handleTeapot(w http.ResponseWriter, res *http.Request) {
+func (rest restHandler) handleTeapot(w http.ResponseWriter, res *http.Request) {
 	var payload []byte
 	var err error
 
@@ -48,7 +80,7 @@ func handleTeapot(w http.ResponseWriter, res *http.Request) {
 }
 
 // template for json payload messages
-func handleHello(w http.ResponseWriter, res *http.Request) {
+func (rest restHandler) handleHello(w http.ResponseWriter, res *http.Request) {
 	payload, err := json.Marshal(map[string]string{"hello": "world"})
 	if err != nil {
 		logrus.Error(err)
@@ -61,10 +93,8 @@ func handleHello(w http.ResponseWriter, res *http.Request) {
 /* PRODUCTION ENDPOINT HANDLERS */
 
 // handle requests for the last rain
-func handleLastRain(w http.ResponseWriter, res *http.Request) {
-	db := webdb.NewPGConnector()
-	defer db.Close()
-	payload, err := db.GetLastRainTime()
+func (rest restHandler) handleLastRain(w http.ResponseWriter, res *http.Request) {
+	payload, err := rest.db.GetLastRainTime()
 	if err != nil {
 		logrus.Error(err)
 		return

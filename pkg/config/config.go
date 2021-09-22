@@ -58,6 +58,7 @@ func SetLogger(level ...string) {
 	default:
 		panic("specify a log level in config file")
 	}
+	logrus.SetReportCaller(true)
 	logrus.SetLevel(lev)
 	logrus.Infof("logger set to %s level", logrus.GetLevel())
 }
