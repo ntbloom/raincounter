@@ -172,7 +172,7 @@ func (suite *RestTest) TestHello() {
 	assert.Equal(suite.T(), expected, actual)
 }
 
-// get the last rain value as a timestamp, tests that we can connect to the database
+// get the last rain value as a timestamp
 func (suite *RestTest) TestGetLastRain() {
 	rain, status := suite.toJSON(suite.getEndpoint("/lastRain"))
 	var actual map[string]time.Time
@@ -180,9 +180,11 @@ func (suite *RestTest) TestGetLastRain() {
 
 	assert.Equal(suite.T(), http.StatusOK, status)
 	assert.NotNil(suite.T(), actual)
+	assert.Equal(suite.T(), 1, len(actual), "should only have 1 result")
 	assert.Nil(suite.T(), err)
 }
 
+// get the last temperature value as an integer
 func (suite *RestTest) TestGetLastTempC() {
 	temp, status := suite.toJSON(suite.getEndpoint("/lastTemp"))
 	var actual map[string]int
@@ -190,6 +192,7 @@ func (suite *RestTest) TestGetLastTempC() {
 
 	assert.Equal(suite.T(), http.StatusOK, status)
 	assert.NotNil(suite.T(), actual)
+	assert.Equal(suite.T(), 1, len(actual), "should only have 1 result")
 	assert.Nil(suite.T(), err)
 }
 
