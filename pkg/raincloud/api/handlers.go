@@ -3,6 +3,8 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/ntbloom/raincounter/pkg/raincloud/webdb"
@@ -68,7 +70,7 @@ func (handler restHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-/* GENERIC AND TEST HANDLERS */
+/* HELPER METHODS */
 
 // handles generic JSON messages. fails if the request does not specify application/json
 func genericJSONHandler(payload []byte, w http.ResponseWriter, res *http.Request) {
@@ -82,6 +84,16 @@ func genericJSONHandler(payload []byte, w http.ResponseWriter, res *http.Request
 		logrus.Error(err)
 	}
 }
+
+// ParseQuery breaks the restful part of the API into a map
+func ParseQuery(raw string) (map[string]interface{}, error) {
+	result := make(map[string]interface{})
+	args := strings.Split(raw, "=")
+	result[args[0]] = args[1]
+	return result, nil
+}
+
+/* GENERIC AND TEST HANDLERS */
 
 // return teapot messages as bellweather for general server and for bootstrapping
 // may be able to delete this later as the API is developed
@@ -118,6 +130,7 @@ func (handler restHandler) handleLastRain(w http.ResponseWriter, res *http.Reque
 	payload, err := handler.db.GetLastRainTime()
 	if err != nil {
 		logrus.Error(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	resp, err := json.Marshal(map[string]time.Time{"timestamp": payload})
@@ -132,6 +145,7 @@ func (handler restHandler) handleLastTemp(w http.ResponseWriter, res *http.Reque
 	payload, err := handler.db.GetLastTempC()
 	if err != nil {
 		logrus.Error(err)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	resp, err := json.Marshal(map[string]int{"last_temp_c": payload})
@@ -143,10 +157,27 @@ func (handler restHandler) handleLastTemp(w http.ResponseWriter, res *http.Reque
 
 // handle requests for sensor status
 func (handler restHandler) handleSensorStatus(w http.ResponseWriter, res *http.Request) {
-	duration := time.Second * 100
-	isUp, err := handler.db.IsSensorUp(duration)
+	raw := res.URL.RawQuery
+	args, err := ParseQuery(raw)
 	if err != nil {
 		logrus.Error(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if _, ok := args["since"]; !ok {
+		logrus.Errorf("illegal arguments: %s", raw)
+		w.WriteHeader(http.StatusBadRequest)
+	}
+	duration, err := strconv.Atoi(args["since"].(string))
+	if err != nil {
+		logrus.Errorf("illegal arguments: %s", raw)
+		w.WriteHeader(http.StatusBadRequest)
+	}
+
+	isUp, err := handler.db.IsSensorUp(time.Second * (time.Duration(duration)))
+	if err != nil {
+		logrus.Error(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	resp, err := json.Marshal(map[string]interface{}{"sensor_active": isUp})

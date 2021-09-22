@@ -202,6 +202,20 @@ func (suite *RestTest) TestGetLastTempC() {
 	assert.Nil(suite.T(), err)
 }
 
+// test the rest API parser
+func (suite *RestTest) TestParseQuery() {
+	args := map[string]map[string]interface{}{
+		"since=300": {"since": "300"},
+	}
+	for k, v := range args {
+		expected, err := api.ParseQuery(k)
+		if err != nil {
+			suite.Fail("error parsing query", err)
+		}
+		assert.Equal(suite.T(), v, expected)
+	}
+}
+
 func (suite *RestTest) TestGetStatus() {
 	// we expect there to not be anything at the beginning since the dummy data are old
 	var actual map[string]interface{}
@@ -234,7 +248,6 @@ func (suite *RestTest) TestGetStatus() {
 	assert.Equal(suite.T(), http.StatusOK, status)
 	assert.True(suite.T(), active, "should be picked up")
 	assert.Nil(suite.T(), err)
-
 }
 
 /* NEED TO WRITE ENDPOINTS FOR THE FOLLOWING ENDPOINTS */
@@ -246,6 +259,5 @@ func (suite *RestTest) TestGetStatus() {
 //GetTempDataCSince(since time.Time) (*TempEntriesC, error)
 //GetTempDataCFrom(from time.Time, to time.Time) (*TempEntriesC, error)
 //IsGatewayUp(since time.Duration) (bool, error)
-//IsSensorUp(since time.Duration) (bool, error)
 //GetEventMessagesSince(tag int, since time.Time) (*EventEntries, error)
 //GetEventMessagesFrom(tag int, from time.Time, to time.Time) (*EventEntries, error)
