@@ -13,7 +13,7 @@ COMPOSEFLAGS += -d
 
 TESTFLAGS   = -p 1
 #TESTFLAGS  = -timeout 10s
-#TESTFLAGS += -v
+TESTFLAGS += -v
 
 SQLFLAGS  = -h localhost
 SQLFLAGS += -U postgres
