@@ -28,7 +28,7 @@ func newRestHandler() restHandler {
 }
 
 func (rest restHandler) close() {
-	logrus.Info("closing handler struct")
+	logrus.Debug("closing handler struct")
 	rest.db.Close()
 }
 
@@ -44,6 +44,8 @@ func (rest restHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		rest.handleTeapot(w, r)
 	case lastRain:
 		rest.handleLastRain(w, r)
+	default:
+		w.WriteHeader(http.StatusNotFound)
 	}
 }
 

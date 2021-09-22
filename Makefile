@@ -13,7 +13,7 @@ COMPOSEFLAGS += -d
 
 TESTFLAGS   = -p 1
 #TESTFLAGS  = -timeout 10s
-TESTFLAGS += -v
+#TESTFLAGS += -v
 
 SQLFLAGS  = -h localhost
 SQLFLAGS += -U postgres
@@ -50,6 +50,8 @@ test-gateway-race: clean-test test-common-race
 	@go clean -testcache
 	@go test $(TESTFLAGS) -race $(RAINBASE)/...
 
+# docker control
+
 docker-up:
 	@$(COMPOSE) up $(COMPOSEFLAGS)
 
@@ -61,11 +63,13 @@ docker-cycle: docker-down docker-up
 docker-pglogs:
 	@$(COMPOSE) logs -f postgresql
 
+# postgresql control
+
 psql:
 	psql $(SQLFLAGS)
 
 enter-data:
-	psql $(SQLFLAGS) -f $(DUMMY_DATA)
+	@psql $(SQLFLAGS) -f $(DUMMY_DATA) > /dev/null
 
 # server
 test-server: test-webdb test-receiver test-rest
@@ -81,13 +85,13 @@ test-webdb-race:
 test-receiver:
 	@-go test $(TESTFLAGS) $(RAINCLOUD)/receiver/
 
-test-receiver-race:
+test-receiver-race: enter-data
 	@-go test -race $(TESTFLAGS) $(RAINCLOUD)/receiver/
 
-test-rest:
+test-rest: enter-data
 	@-go test $(TESTFLAGS) $(RAINCLOUD)/api/
 
-test-rest-race:
+test-rest-race: enter-data
 	@-go test -race $(TESTFLAGS) $(RAINCLOUD)/api/
 
 ### RUN ###
