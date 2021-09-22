@@ -182,3 +182,26 @@ func (suite *RestTest) TestGetLastRain() {
 	assert.NotNil(suite.T(), actual)
 	assert.Nil(suite.T(), err)
 }
+
+func (suite *RestTest) TestGetLastTempC() {
+	temp, status := suite.toJSON(suite.getEndpoint("/lastTemp"))
+	var actual map[string]int
+	err := json.Unmarshal(temp, &actual)
+
+	assert.Equal(suite.T(), http.StatusOK, status)
+	assert.NotNil(suite.T(), actual)
+	assert.Nil(suite.T(), err)
+}
+
+/* NEED TO WRITE ENDPOINTS FOR THE FOLLOWING ENDPOINTS */
+
+//TotalRainMMSince(since time.Time) (float64, error)
+//TotalRainMMFrom(from time.Time, to time.Time) (float64, error)
+//GetRainMMSince(since time.Time) (*RainEntriesMm, error)
+//GetRainMMFrom(from time.Time, to time.Time) (*RainEntriesMm, error)
+//GetTempDataCSince(since time.Time) (*TempEntriesC, error)
+//GetTempDataCFrom(from time.Time, to time.Time) (*TempEntriesC, error)
+//IsGatewayUp(since time.Duration) (bool, error)
+//IsSensorUp(since time.Duration) (bool, error)
+//GetEventMessagesSince(tag int, since time.Time) (*EventEntries, error)
+//GetEventMessagesFrom(tag int, from time.Time, to time.Time) (*EventEntries, error)

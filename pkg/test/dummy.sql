@@ -591,7 +591,7 @@ INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2020-11
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2020-11-23T19:49:30-05:00','2021-09-20T22:16:41-04:00',-32);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2020-11-24T10:45:53-05:00','2021-09-20T22:16:41-04:00',-36);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2020-11-25T05:01:12-05:00','2021-09-20T22:16:41-04:00',-12);
-INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2020-11-26T01:32:11-05:00','2021-09-20T22:16:41-04:00',-1);
+INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2020-11-26T01:32:11-05:00','2021-09-20T22:16:41-04:00',-10);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2020-11-26T13:55:28-05:00','2021-09-20T22:16:41-04:00',-4);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2020-11-26T16:13:19-05:00','2021-09-20T22:16:41-04:00',31);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2020-11-27T15:54:08-05:00','2021-09-20T22:16:41-04:00',35);
@@ -653,7 +653,7 @@ INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2020-12
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2020-12-25T21:10:31-05:00','2021-09-20T22:16:42-04:00',0);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2020-12-25T23:35:56-05:00','2021-09-20T22:16:42-04:00',-36);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2020-12-26T11:45:28-05:00','2021-09-20T22:16:42-04:00',-10);
-INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2020-12-27T18:57:07-05:00','2021-09-20T22:16:42-04:00',-1);
+INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2020-12-27T18:57:07-05:00','2021-09-20T22:16:42-04:00',-12);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2020-12-27T21:17:59-05:00','2021-09-20T22:16:42-04:00',22);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2020-12-31T22:38:24-05:00','2021-09-20T22:16:42-04:00',5);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2020-12-31T22:47:45-05:00','2021-09-20T22:16:42-04:00',27);
@@ -664,7 +664,7 @@ INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-01
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-01-03T08:13:16-05:00','2021-09-20T22:16:42-04:00',28);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-01-03T16:34:53-05:00','2021-09-20T22:16:42-04:00',-37);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-01-04T18:17:55-05:00','2021-09-20T22:16:42-04:00',-22);
-INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-01-05T11:42:09-05:00','2021-09-20T22:16:42-04:00',-1);
+INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-01-05T11:42:09-05:00','2021-09-20T22:16:42-04:00',-11);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-01-06T08:08:06-05:00','2021-09-20T22:16:42-04:00',-17);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-01-06T16:31:28-05:00','2021-09-20T22:16:42-04:00',-15);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-01-07T05:28:39-05:00','2021-09-20T22:16:42-04:00',-15);
@@ -685,7 +685,7 @@ INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-01
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-01-17T17:00:36-05:00','2021-09-20T22:16:43-04:00',4);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-01-17T20:49:03-05:00','2021-09-20T22:16:43-04:00',-24);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-01-18T00:39:46-05:00','2021-09-20T22:16:43-04:00',-2);
-INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-01-18T11:47:25-05:00','2021-09-20T22:16:43-04:00',-1);
+INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-01-18T11:47:25-05:00','2021-09-20T22:16:43-04:00',-13);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-01-20T18:12:37-05:00','2021-09-20T22:16:43-04:00',-31);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-01-21T04:10:17-05:00','2021-09-20T22:16:43-04:00',9);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-01-21T05:40:57-05:00','2021-09-20T22:16:43-04:00',7);
@@ -769,7 +769,7 @@ INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-03
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-03-24T21:06:01-04:00','2021-09-20T22:16:44-04:00',32);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-03-27T06:35:52-04:00','2021-09-20T22:16:44-04:00',13);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-03-28T13:20:12-04:00','2021-09-20T22:16:44-04:00',-6);
-INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-03-28T18:06:48-04:00','2021-09-20T22:16:44-04:00',-1);
+INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-03-28T18:06:48-04:00','2021-09-20T22:16:44-04:00',-11);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-03-29T04:16:04-04:00','2021-09-20T22:16:44-04:00',38);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-03-29T19:48:16-04:00','2021-09-20T22:16:44-04:00',13);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-03-29T20:29:02-04:00','2021-09-20T22:16:44-04:00',17);
@@ -819,7 +819,7 @@ INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-05
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-05-02T11:21:59-04:00','2021-09-20T22:16:44-04:00',2);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-05-02T20:19:10-04:00','2021-09-20T22:16:44-04:00',-38);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-05-03T11:16:55-04:00','2021-09-20T22:16:44-04:00',0);
-INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-05-03T22:33:48-04:00','2021-09-20T22:16:44-04:00',-1);
+INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-05-03T22:33:48-04:00','2021-09-20T22:16:44-04:00',-11);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-05-03T23:33:06-04:00','2021-09-20T22:16:44-04:00',2);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-05-05T03:36:15-04:00','2021-09-20T22:16:44-04:00',-4);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-05-07T02:17:48-04:00','2021-09-20T22:16:44-04:00',4);
@@ -1003,11 +1003,11 @@ INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-09
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-09-15T13:58:13-04:00','2021-09-20T22:16:47-04:00',39);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-09-16T21:55:36-04:00','2021-09-20T22:16:47-04:00',33);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-09-17T06:06:33-04:00','2021-09-20T22:16:47-04:00',-21);
-INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-09-18T02:44:55-04:00','2021-09-20T22:16:47-04:00',-1);
+INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-09-18T02:44:55-04:00','2021-09-20T22:16:47-04:00',-14);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-09-18T10:17:02-04:00','2021-09-20T22:16:47-04:00',27);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-09-19T07:06:51-04:00','2021-09-20T22:16:47-04:00',-17);
 INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-09-20T02:53:42-04:00','2021-09-20T22:16:47-04:00',24);
-INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-09-20T18:39:02-04:00','2021-09-20T22:16:47-04:00',-1);
+INSERT INTO temperature (gw_timestamp, server_timestamp, value) VALUES ('2021-09-20T18:39:02-04:00','2021-09-20T22:16:47-04:00',-10);
 INSERT INTO status_log (gw_timestamp, server_timestamp, asset) VALUES ('2020-09-21T07:43:42-04:00','2021-09-20T22:16:47-04:00',1);
 INSERT INTO status_log (gw_timestamp, server_timestamp, asset) VALUES ('2020-09-21T07:43:42-04:00','2021-09-20T22:16:47-04:00',2);
 INSERT INTO status_log (gw_timestamp, server_timestamp, asset) VALUES ('2020-09-21T11:34:22-04:00','2021-09-20T22:16:47-04:00',1);

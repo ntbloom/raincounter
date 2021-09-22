@@ -14,13 +14,6 @@ type RestServer struct {
 	state  chan int
 }
 
-const (
-	teapot   = "/v1.0/teapot"
-	hello    = "/v1.0/hello"
-	lastRain = "/v1.0/lastRain"
-	rain     = "/v1.0/rain"
-)
-
 // NewRestServer initializes a new rest API
 func NewRestServer() (*RestServer, error) {
 	mux := http.NewServeMux()
@@ -52,7 +45,7 @@ func (rest *RestServer) Run() {
 	handler := newRestHandler()
 	defer handler.close()
 
-	// divert all endpoints to the handler
+	// divert all endpoints to the custom handler
 	rest.mux.Handle("/", handler)
 
 	go logrus.Fatalf("problem with ListenAndServe: %s", rest.server.ListenAndServe())

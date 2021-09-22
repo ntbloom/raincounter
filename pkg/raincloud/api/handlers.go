@@ -15,10 +15,26 @@ const (
 	appJSON     = "application/json"
 )
 
+// URLS for handler switch statement
+const (
+	urlTeapot       = "/v1.0/teapot"
+	urlHello        = "/v1.0/hello"
+	urlRain         = "/v1.0/rain"
+	urlLastRain     = "/v1.0/lastRain"
+	urlTemp         = "/v1.0/temp"
+	urlLastTemp     = "/v1.0/lastTemp"
+	urlSensorStatus = "/v1.0/sensorStatus"
+	urlGwStatus     = "/v1.0/gatewayStatus"
+)
+
+// restHandler has a connection to the database. Since we're using a read-only
+// postgresql connection pool with only GET methods, we don't need a mutex or
+// any additional handling. This could change as the application develops.
 type restHandler struct {
 	db webdb.DBQuery
 }
 
+// newRestHandler makes a new rest handler with read-only access to the database
 func newRestHandler() restHandler {
 	logrus.Debug("creating new restHandler")
 	var query webdb.DBQuery
@@ -27,23 +43,27 @@ func newRestHandler() restHandler {
 	return restHandler{db: query}
 }
 
-func (rest restHandler) close() {
+// close frees any resources needed by the handler
+func (handler restHandler) close() {
 	logrus.Debug("closing handler struct")
-	rest.db.Close()
+	handler.db.Close()
 }
 
-func (rest restHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+// implement the Handler interface so we can use this as a handler
+func (handler restHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		logrus.Errorf("attempted illegal request: %s", r.Method)
 		return
 	}
 	switch r.URL.Path {
-	case hello:
-		rest.handleHello(w, r)
-	case teapot:
-		rest.handleTeapot(w, r)
-	case lastRain:
-		rest.handleLastRain(w, r)
+	case urlHello:
+		handler.handleHello(w, r)
+	case urlTeapot:
+		handler.handleTeapot(w, r)
+	case urlLastRain:
+		handler.handleLastRain(w, r)
+	case urlLastTemp:
+		handler.handleLastTemp(w, r)
 	default:
 		w.WriteHeader(http.StatusNotFound)
 	}
@@ -66,7 +86,7 @@ func genericJSONHandler(payload []byte, w http.ResponseWriter, res *http.Request
 
 // return teapot messages as bellweather for general server and for bootstrapping
 // may be able to delete this later as the API is developed
-func (rest restHandler) handleTeapot(w http.ResponseWriter, res *http.Request) {
+func (handler restHandler) handleTeapot(w http.ResponseWriter, res *http.Request) {
 	var payload []byte
 	var err error
 
@@ -82,7 +102,7 @@ func (rest restHandler) handleTeapot(w http.ResponseWriter, res *http.Request) {
 }
 
 // template for json payload messages
-func (rest restHandler) handleHello(w http.ResponseWriter, res *http.Request) {
+func (handler restHandler) handleHello(w http.ResponseWriter, res *http.Request) {
 	payload, err := json.Marshal(map[string]string{"hello": "world"})
 	if err != nil {
 		logrus.Error(err)
@@ -95,13 +115,27 @@ func (rest restHandler) handleHello(w http.ResponseWriter, res *http.Request) {
 /* PRODUCTION ENDPOINT HANDLERS */
 
 // handle requests for the last rain
-func (rest restHandler) handleLastRain(w http.ResponseWriter, res *http.Request) {
-	payload, err := rest.db.GetLastRainTime()
+func (handler restHandler) handleLastRain(w http.ResponseWriter, res *http.Request) {
+	payload, err := handler.db.GetLastRainTime()
 	if err != nil {
 		logrus.Error(err)
 		return
 	}
 	resp, err := json.Marshal(map[string]time.Time{"timestamp": payload})
+	if err != nil {
+		logrus.Error(err)
+	}
+	genericJSONHandler(resp, w, res)
+}
+
+// handle requests for the last temp
+func (handler restHandler) handleLastTemp(w http.ResponseWriter, res *http.Request) {
+	payload, err := handler.db.GetLastTempC()
+	if err != nil {
+		logrus.Error(err)
+		return
+	}
+	resp, err := json.Marshal(map[string]int{"last_temp_c": payload})
 	if err != nil {
 		logrus.Error(err)
 	}
