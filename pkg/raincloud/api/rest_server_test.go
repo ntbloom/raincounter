@@ -207,6 +207,10 @@ func (suite *RestTest) TestParseQuery() {
 	// we can afford to be slapdash and only support the patterns we are actually coding
 	args := map[string]map[string]interface{}{
 		"since=300": {"since": "300"},
+		"from=2021-09-23T01:22:18+00:00&to=2021-09-23T01:22:18+00:00": {
+			"from": "2021-09-23T01:22:18+00:00",
+			"to":   "2021-09-23T01:22:18+00:00",
+		},
 	}
 	for k, v := range args {
 		expected, err := api.ParseQuery(k)
@@ -264,6 +268,21 @@ func (suite *RestTest) TestGetStatus() {
 	}
 }
 
+func (suite *RestTest) TestGetTemperatureData() {
+	sampleSince := "/temp?since=2021-09-23T01:47:30+00:00"
+	//sampleFrom := "/temp?from=2021-05-23T01:22:18+00:00&to=2021-09-23T01:22:18+00:00"
+
+	var tempResults []map[string]interface{}
+
+	since, statusSince := suite.toJSON(suite.getEndpoint(sampleSince))
+	if err := json.Unmarshal(since, &tempResults); err != nil {
+		suite.Fail("unable to unmarshal json", err)
+	}
+	assert.Equal(suite.T(), http.StatusOK, statusSince)
+	assert.NotNil(suite.T(), since)
+	assert.Greater(suite.T(), len(since), 0, "results are empty")
+}
+
 /* NEED TO WRITE ENDPOINTS FOR THE FOLLOWING ENDPOINTS */
 
 //TotalRainMMSince(since time.Time) (float64, error)
@@ -272,6 +291,5 @@ func (suite *RestTest) TestGetStatus() {
 //GetRainMMFrom(from time.Time, to time.Time) (*RainEntriesMm, error)
 //GetTempDataCSince(since time.Time) (*TempEntriesC, error)
 //GetTempDataCFrom(from time.Time, to time.Time) (*TempEntriesC, error)
-//IsGatewayUp(since time.Duration) (bool, error)
 //GetEventMessagesSince(tag int, since time.Time) (*EventEntries, error)
 //GetEventMessagesFrom(tag int, from time.Time, to time.Time) (*EventEntries, error)

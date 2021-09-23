@@ -7,6 +7,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ntbloom/raincounter/pkg/config/configkey"
+	"github.com/spf13/viper"
+
 	"github.com/ntbloom/raincounter/pkg/raincloud/webdb"
 
 	"github.com/sirupsen/logrus"
@@ -35,13 +38,17 @@ const (
 // postgresql connection pool with only GET methods, we don't need a mutex or
 // any additional handling. This could change as the application develops.
 type restHandler struct {
-	db webdb.DBQuery
+	db             webdb.DBQuery
+	statusDuration time.Duration
 }
 
 // newRestHandler makes a new rest handler with read-only access to the database
 func newRestHandler() restHandler {
 	logrus.Debug("creating new restHandler")
-	return restHandler{db: webdb.NewPGConnector()}
+	return restHandler{
+		db:             webdb.NewPGConnector(),
+		statusDuration: viper.GetDuration(configkey.AssetStatusDuration),
+	}
 }
 
 // close frees any resources needed by the handler
@@ -69,7 +76,10 @@ func (handler restHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		handler.handleAssetStatus(sensorStatusKey, w, r)
 	case urlGwStatus:
 		handler.handleAssetStatus(gatewayStatusKey, w, r)
+	case urlTemp:
+		handler.handleTemp(w, r)
 	default:
+		logrus.Errorf("received unsupported request on `%s`", r.URL.Path)
 		w.WriteHeader(http.StatusNotFound)
 	}
 }
@@ -92,8 +102,11 @@ func genericJSONHandler(payload []byte, w http.ResponseWriter, res *http.Request
 // ParseQuery breaks the restful part of the API into a map
 func ParseQuery(raw string) (map[string]interface{}, error) {
 	result := make(map[string]interface{})
-	args := strings.Split(raw, "=")
-	result[args[0]] = args[1]
+	args := strings.Split(raw, "&")
+	for _, arg := range args {
+		keys := strings.Split(arg, "=")
+		result[keys[0]] = keys[1]
+	}
 	return result, nil
 }
 
@@ -179,17 +192,16 @@ func (handler restHandler) handleAssetStatus(asset string, w http.ResponseWriter
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	if _, ok := args["since"]; !ok {
-		logrus.Errorf("illegal arguments: %s", raw)
-		w.WriteHeader(http.StatusBadRequest)
+	since := handler.statusDuration
+	_, ok := args["since"]
+	if ok {
+		asNum, err := strconv.Atoi(args["since"].(string))
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+		}
+		since = time.Second * time.Duration(asNum)
 	}
-	duration, err := strconv.Atoi(args["since"].(string))
-	if err != nil {
-		logrus.Errorf("illegal arguments: %s", raw)
-		w.WriteHeader(http.StatusBadRequest)
-	}
-
-	isUp, err := dbQuery(time.Second * (time.Duration(duration)))
+	isUp, err := dbQuery(since)
 	if err != nil {
 		logrus.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -200,4 +212,10 @@ func (handler restHandler) handleAssetStatus(asset string, w http.ResponseWriter
 		logrus.Error(err)
 	}
 	genericJSONHandler(resp, w, res)
+}
+
+// handle request for temperature data
+func (handler restHandler) handleTemp(w http.ResponseWriter, res *http.Request) {
+	//args, err := ParseQuery(res.URL.RawQuery)
+	panic("implement me!")
 }

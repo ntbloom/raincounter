@@ -18,10 +18,11 @@ var defaultConfig = map[string]interface{}{ //nolint:gochecknoglobals
 	configkey.MQTTCaCert:              "/etc/raincounter/ssl/client/ca.pem",
 	configkey.MQTTClientCert:          "/etc/raincounter/ssl/client/client.crt",
 	configkey.MQTTClientKey:           "/etc/raincounter/ssl/client/client.key",
-	configkey.MQTTConnectionTimeout:   time.Second * 5, //nolint:gomnd
-	configkey.MQTTQuiescence:          1000,            //nolint:gomnd
-	configkey.MQTTQos:                 1,               //nolint:gomnd
-	configkey.SensorRainMm:            0.2794,          //nolint:gomnd
+	configkey.MQTTConnectionTimeout:   time.Second * 5,   //nolint:gomnd
+	configkey.MQTTQuiescence:          1000,              //nolint:gomnd
+	configkey.MQTTQos:                 1,                 //nolint:gomnd
+	configkey.SensorRainMm:            0.2794,            //nolint:gomnd
+	configkey.AssetStatusDuration:     time.Second * 300, //nolint:gomnd
 	configkey.DatabaseLocalFile:       "/etc/raincounter/rainbase.db",
 	configkey.PGDatabaseName:          "raincounter",
 	configkey.PGPassword:              "password",

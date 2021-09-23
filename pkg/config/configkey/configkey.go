@@ -20,7 +20,8 @@ const (
 	MQTTQuiescence        = "mqtt.connection.quiescence"
 	MQTTQos               = "mqtt.qos"
 
-	SensorRainMm = "sensor.mm"
+	SensorRainMm        = "sensor.mm"
+	AssetStatusDuration = "asset.status.duration"
 
 	DatabaseLocalFile = "database.local.file"
 
