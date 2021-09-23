@@ -270,13 +270,14 @@ func (suite *RestTest) TestGetStatus() {
 }
 
 func (suite *RestTest) TestGetTemperatureData() {
-	sampleSince := "/temp?from=2021-05-23T01:47:30+00:00"
-	//sampleFrom := "/temp?from=2021-05-23T01:22:18+00:00&to=2021-09-23T01:22:18+00:00"
+	// two random timestamps
+	sampleSince := "/temp?from=2020-05-23T01:47:30+00:00"
+	sampleFrom := "/temp?from=2021-07-23T01:22:18+00:00&to=2021-09-23T01:22:18+00:00"
 
 	testTemp := func(endpoint string) []map[string]interface{} {
 		var tempResults []map[string]interface{}
 
-		since, statusSince := suite.toJSONBytes(suite.getEndpoint(sampleSince))
+		since, statusSince := suite.toJSONBytes(suite.getEndpoint(endpoint))
 		if err := json.Unmarshal(since, &tempResults); err != nil {
 			suite.Fail("unable to unmarshal json", err)
 		}
@@ -285,9 +286,9 @@ func (suite *RestTest) TestGetTemperatureData() {
 		assert.NotEqual(suite.T(), len(tempResults), 0, "results are empty")
 		return tempResults
 	}
-	_ = testTemp(sampleSince)
-	//from := testTemp(sampleFrom)
-	//assert.NotEqual(suite.T(), since, from)
+	since := testTemp(sampleSince)
+	from := testTemp(sampleFrom)
+	assert.NotEqual(suite.T(), since, from)
 }
 
 /* NEED TO WRITE ENDPOINTS FOR THE FOLLOWING ENDPOINTS */
@@ -296,7 +297,5 @@ func (suite *RestTest) TestGetTemperatureData() {
 //TotalRainMMFrom(from time.Time, to time.Time) (float64, error)
 //GetRainMMSince(since time.Time) (*RainEntriesMm, error)
 //GetRainMMFrom(from time.Time, to time.Time) (*RainEntriesMm, error)
-//GetTempDataCSince(since time.Time) (*TempEntriesC, error)
-//GetTempDataCFrom(from time.Time, to time.Time) (*TempEntriesC, error)
 //GetEventMessagesSince(tag int, since time.Time) (*EventEntries, error)
 //GetEventMessagesFrom(tag int, from time.Time, to time.Time) (*EventEntries, error)
