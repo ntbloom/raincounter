@@ -217,15 +217,16 @@ func (suite *RestTest) TestParseQuery() {
 	}
 }
 
+// test receiving OK for sensor and gateway status, first with a false and then a true
 func (suite *RestTest) TestGetStatus() {
-	statusTest := func(endpoint string, statusNum int) {
+	statusTest := func(endpoint string, activeKey string, statusNum int) {
 		// we expect there to not be anything at the beginning since the dummy data are old
 		var actual map[string]interface{}
 		var err error
 
 		beforeStatus, status := suite.toJSON(suite.getEndpoint(endpoint))
 		err = json.Unmarshal(beforeStatus, &actual)
-		inactive := actual["sensor_active"].(bool)
+		inactive := actual[activeKey].(bool)
 
 		assert.Equal(suite.T(), http.StatusOK, status)
 		assert.False(suite.T(), inactive, "shouldn't be an entry yet")
@@ -244,7 +245,7 @@ func (suite *RestTest) TestGetStatus() {
 
 		afterStatus, status := suite.toJSON(suite.getEndpoint(endpoint))
 		err = json.Unmarshal(afterStatus, &actual)
-		active := actual["sensor_active"].(bool)
+		active := actual[activeKey].(bool)
 
 		assert.Equal(suite.T(), http.StatusOK, status)
 		assert.True(suite.T(), active, "should be picked up")
@@ -252,11 +253,14 @@ func (suite *RestTest) TestGetStatus() {
 	}
 
 	// run the test for the gateway and sensor test
-	for k, v := range map[string]int{
-		"/sensorStatus?since=300":  configkey.SensorStatus,
-		"/gatewayStatus?since=300": configkey.GatewayStatus,
+	for _, v := range map[string]map[string]interface{}{
+		"sensor":  {"endpoint": "/sensorStatus?since=300", "activeKey": "sensor_active", "status": configkey.SensorStatus},
+		"gateway": {"endpoint": "/gatewayStatus?since=300", "activeKey": "gateway_active", "status": configkey.GatewayStatus},
 	} {
-		statusTest(k, v)
+		endpoint := v["endpoint"].(string)
+		activeKey := v["activeKey"].(string)
+		status := v["status"].(int)
+		statusTest(endpoint, activeKey, status)
 	}
 }
 

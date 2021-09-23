@@ -13,8 +13,10 @@ import (
 )
 
 const (
-	contentType = "Content-Type"
-	appJSON     = "application/json"
+	contentType      = "Content-Type"
+	appJSON          = "application/json"
+	sensorStatusKey  = "sensor"
+	gatewayStatusKey = "gateway"
 )
 
 // URLS for handler switch statement
@@ -64,7 +66,9 @@ func (handler restHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case urlLastTemp:
 		handler.handleLastTemp(w, r)
 	case urlSensorStatus:
-		handler.handleSensorStatus(w, r)
+		handler.handleAssetStatus(sensorStatusKey, w, r)
+	case urlGwStatus:
+		handler.handleAssetStatus(gatewayStatusKey, w, r)
 	default:
 		w.WriteHeader(http.StatusNotFound)
 	}
@@ -156,7 +160,18 @@ func (handler restHandler) handleLastTemp(w http.ResponseWriter, res *http.Reque
 }
 
 // handle requests for sensor status
-func (handler restHandler) handleSensorStatus(w http.ResponseWriter, res *http.Request) {
+func (handler restHandler) handleAssetStatus(asset string, w http.ResponseWriter, res *http.Request) {
+	var dbQuery func(duration time.Duration) (bool, error)
+	var responseKey string
+	switch asset {
+	case sensorStatusKey:
+		dbQuery = handler.db.IsSensorUp
+		responseKey = "sensor_active"
+	case gatewayStatusKey:
+		dbQuery = handler.db.IsGatewayUp
+		responseKey = "gateway_active"
+	}
+
 	raw := res.URL.RawQuery
 	args, err := ParseQuery(raw)
 	if err != nil {
@@ -174,13 +189,13 @@ func (handler restHandler) handleSensorStatus(w http.ResponseWriter, res *http.R
 		w.WriteHeader(http.StatusBadRequest)
 	}
 
-	isUp, err := handler.db.IsSensorUp(time.Second * (time.Duration(duration)))
+	isUp, err := dbQuery(time.Second * (time.Duration(duration)))
 	if err != nil {
 		logrus.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	resp, err := json.Marshal(map[string]interface{}{"sensor_active": isUp})
+	resp, err := json.Marshal(map[string]interface{}{responseKey: isUp})
 	if err != nil {
 		logrus.Error(err)
 	}
