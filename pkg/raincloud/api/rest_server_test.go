@@ -202,8 +202,9 @@ func (suite *RestTest) TestGetLastTempC() {
 	assert.Nil(suite.T(), err)
 }
 
-// test the rest API parser
+// test the rest API argument parser
 func (suite *RestTest) TestParseQuery() {
+	// we can afford to be slapdash and only support the patterns we are actually coding
 	args := map[string]map[string]interface{}{
 		"since=300": {"since": "300"},
 	}
@@ -217,37 +218,46 @@ func (suite *RestTest) TestParseQuery() {
 }
 
 func (suite *RestTest) TestGetStatus() {
-	// we expect there to not be anything at the beginning since the dummy data are old
-	var actual map[string]interface{}
-	var err error
-	endpoint := "/sensorStatus?since=300"
+	statusTest := func(endpoint string, statusNum int) {
+		// we expect there to not be anything at the beginning since the dummy data are old
+		var actual map[string]interface{}
+		var err error
 
-	beforeStatus, status := suite.toJSON(suite.getEndpoint(endpoint))
-	err = json.Unmarshal(beforeStatus, &actual)
-	inactive := actual["sensor_active"].(bool)
+		beforeStatus, status := suite.toJSON(suite.getEndpoint(endpoint))
+		err = json.Unmarshal(beforeStatus, &actual)
+		inactive := actual["sensor_active"].(bool)
 
-	assert.Equal(suite.T(), http.StatusOK, status)
-	assert.False(suite.T(), inactive, "shouldn't be an entry yet")
-	assert.Nil(suite.T(), err)
+		assert.Equal(suite.T(), http.StatusOK, status)
+		assert.False(suite.T(), inactive, "shouldn't be an entry yet")
+		assert.Nil(suite.T(), err)
 
-	// add a more updated entry, remove it when we're done
-	if err = suite.entry.AddStatusUpdate(configkey.SensorStatus, time.Now()); err != nil {
-		suite.Fail("problem entering status message", err)
-	}
-	defer func() {
-		cmd := `DELETE FROM status_log WHERE id=(SELECT id FROM status_log ORDER BY gw_timestamp DESC LIMIT 1);`
-		if err = suite.entry.Insert(cmd); err != nil {
-			logrus.Warning("did not erase last sensor entry")
+		// add a more updated entry, remove it when we're done
+		if err = suite.entry.AddStatusUpdate(statusNum, time.Now()); err != nil {
+			suite.Fail("problem entering status message", err)
 		}
-	}()
+		defer func() {
+			cmd := `DELETE FROM status_log WHERE id=(SELECT id FROM status_log ORDER BY gw_timestamp DESC LIMIT 1);`
+			if err = suite.entry.Insert(cmd); err != nil {
+				logrus.Warning("did not erase last sensor entry")
+			}
+		}()
 
-	afterStatus, status := suite.toJSON(suite.getEndpoint(endpoint))
-	err = json.Unmarshal(afterStatus, &actual)
-	active := actual["sensor_active"].(bool)
+		afterStatus, status := suite.toJSON(suite.getEndpoint(endpoint))
+		err = json.Unmarshal(afterStatus, &actual)
+		active := actual["sensor_active"].(bool)
 
-	assert.Equal(suite.T(), http.StatusOK, status)
-	assert.True(suite.T(), active, "should be picked up")
-	assert.Nil(suite.T(), err)
+		assert.Equal(suite.T(), http.StatusOK, status)
+		assert.True(suite.T(), active, "should be picked up")
+		assert.Nil(suite.T(), err)
+	}
+
+	// run the test for the gateway and sensor test
+	for k, v := range map[string]int{
+		"/sensorStatus?since=300":  configkey.SensorStatus,
+		"/gatewayStatus?since=300": configkey.GatewayStatus,
+	} {
+		statusTest(k, v)
+	}
 }
 
 /* NEED TO WRITE ENDPOINTS FOR THE FOLLOWING ENDPOINTS */
