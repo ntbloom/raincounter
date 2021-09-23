@@ -38,16 +38,16 @@ const (
 // postgresql connection pool with only GET methods, we don't need a mutex or
 // any additional handling. This could change as the application develops.
 type restHandler struct {
-	db             webdb.DBQuery
-	statusDuration time.Duration
+	db                    webdb.DBQuery
+	statusDurationDefault time.Duration
 }
 
 // newRestHandler makes a new rest handler with read-only access to the database
 func newRestHandler() restHandler {
 	logrus.Debug("creating new restHandler")
 	return restHandler{
-		db:             webdb.NewPGConnector(),
-		statusDuration: viper.GetDuration(configkey.AssetStatusDuration),
+		db:                    webdb.NewPGConnector(),
+		statusDurationDefault: viper.GetDuration(configkey.AssetStatusDuration),
 	}
 }
 
@@ -192,7 +192,7 @@ func (handler restHandler) handleAssetStatus(asset string, w http.ResponseWriter
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	since := handler.statusDuration
+	since := handler.statusDurationDefault
 	_, ok := args["since"]
 	if ok {
 		asNum, err := strconv.Atoi(args["since"].(string))
@@ -216,6 +216,54 @@ func (handler restHandler) handleAssetStatus(asset string, w http.ResponseWriter
 
 // handle request for temperature data
 func (handler restHandler) handleTemp(w http.ResponseWriter, res *http.Request) {
-	//args, err := ParseQuery(res.URL.RawQuery)
-	panic("implement me!")
+	args, err := ParseQuery(res.URL.RawQuery)
+	if err != nil {
+		logrus.Error(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if _, fromOk := args["from"]; !fromOk {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	var from time.Time
+	if from, err = time.Parse(configkey.TimestampFormat, args["from"].(string)); err != nil {
+		logrus.Error(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	var to time.Time
+	_, toOk := args["to"]
+	if toOk {
+		to, err = time.Parse(configkey.TimestampFormat, args["to"].(string))
+		if err != nil {
+			logrus.Error(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+	}
+	var entries *webdb.TempEntriesC
+	if toOk {
+		entries, err = handler.db.GetTempDataCFrom(from, to)
+		if err != nil {
+			logrus.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	} else {
+		entries, err = handler.db.GetTempDataCSince(from)
+		if err != nil {
+			logrus.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
+	resp, err := json.Marshal(entries)
+	if err != nil {
+		logrus.Error(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	genericJSONHandler(resp, w, res)
 }

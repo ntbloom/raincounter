@@ -92,7 +92,7 @@ func (suite *RestTest) getEndpoint(endpoint string) (*http.Response, error) {
 }
 
 // read
-func (suite *RestTest) toJSON(resp *http.Response, passedErr error) ([]byte, int) {
+func (suite *RestTest) toJSONBytes(resp *http.Response, passedErr error) ([]byte, int) {
 	status := resp.StatusCode
 	if passedErr != nil {
 		suite.Fail("error getting response", passedErr)
@@ -169,7 +169,7 @@ func (suite *RestTest) TestNoJsonHeaders() {
 
 // make sure we can connect to the API
 func (suite *RestTest) TestHello() {
-	body, status := suite.toJSON(suite.getEndpoint("/hello"))
+	body, status := suite.toJSONBytes(suite.getEndpoint("/hello"))
 
 	expected := `{"hello":"world"}`
 	actual := string(body)
@@ -180,7 +180,7 @@ func (suite *RestTest) TestHello() {
 
 // get the last rain value as a timestamp
 func (suite *RestTest) TestGetLastRain() {
-	rain, status := suite.toJSON(suite.getEndpoint("/lastRain"))
+	rain, status := suite.toJSONBytes(suite.getEndpoint("/lastRain"))
 	var actual map[string]time.Time
 	err := json.Unmarshal(rain, &actual)
 
@@ -192,7 +192,7 @@ func (suite *RestTest) TestGetLastRain() {
 
 // get the last temperature value as an integer
 func (suite *RestTest) TestGetLastTempC() {
-	temp, status := suite.toJSON(suite.getEndpoint("/lastTemp"))
+	temp, status := suite.toJSONBytes(suite.getEndpoint("/lastTemp"))
 	var actual map[string]int
 	err := json.Unmarshal(temp, &actual)
 
@@ -207,9 +207,10 @@ func (suite *RestTest) TestParseQuery() {
 	// we can afford to be slapdash and only support the patterns we are actually coding
 	args := map[string]map[string]interface{}{
 		"since=300": {"since": "300"},
-		"from=2021-09-23T01:22:18+00:00&to=2021-09-23T01:22:18+00:00": {
-			"from": "2021-09-23T01:22:18+00:00",
-			"to":   "2021-09-23T01:22:18+00:00",
+		"from=2021-09-23T01:22:18+00:00&to=2021-09-23T01:22:18+00:00&limit=100": {
+			"from":  "2021-09-23T01:22:18+00:00",
+			"to":    "2021-09-23T01:22:18+00:00",
+			"limit": "100",
 		},
 	}
 	for k, v := range args {
@@ -228,7 +229,7 @@ func (suite *RestTest) TestGetStatus() {
 		var actual map[string]interface{}
 		var err error
 
-		beforeStatus, status := suite.toJSON(suite.getEndpoint(endpoint))
+		beforeStatus, status := suite.toJSONBytes(suite.getEndpoint(endpoint))
 		err = json.Unmarshal(beforeStatus, &actual)
 		inactive := actual[activeKey].(bool)
 
@@ -247,7 +248,7 @@ func (suite *RestTest) TestGetStatus() {
 			}
 		}()
 
-		afterStatus, status := suite.toJSON(suite.getEndpoint(endpoint))
+		afterStatus, status := suite.toJSONBytes(suite.getEndpoint(endpoint))
 		err = json.Unmarshal(afterStatus, &actual)
 		active := actual[activeKey].(bool)
 
@@ -269,18 +270,24 @@ func (suite *RestTest) TestGetStatus() {
 }
 
 func (suite *RestTest) TestGetTemperatureData() {
-	sampleSince := "/temp?since=2021-09-23T01:47:30+00:00"
+	sampleSince := "/temp?from=2021-05-23T01:47:30+00:00"
 	//sampleFrom := "/temp?from=2021-05-23T01:22:18+00:00&to=2021-09-23T01:22:18+00:00"
 
-	var tempResults []map[string]interface{}
+	testTemp := func(endpoint string) []map[string]interface{} {
+		var tempResults []map[string]interface{}
 
-	since, statusSince := suite.toJSON(suite.getEndpoint(sampleSince))
-	if err := json.Unmarshal(since, &tempResults); err != nil {
-		suite.Fail("unable to unmarshal json", err)
+		since, statusSince := suite.toJSONBytes(suite.getEndpoint(sampleSince))
+		if err := json.Unmarshal(since, &tempResults); err != nil {
+			suite.Fail("unable to unmarshal json", err)
+		}
+		assert.Equal(suite.T(), http.StatusOK, statusSince)
+		assert.NotNil(suite.T(), tempResults)
+		assert.NotEqual(suite.T(), len(tempResults), 0, "results are empty")
+		return tempResults
 	}
-	assert.Equal(suite.T(), http.StatusOK, statusSince)
-	assert.NotNil(suite.T(), since)
-	assert.Greater(suite.T(), len(since), 0, "results are empty")
+	_ = testTemp(sampleSince)
+	//from := testTemp(sampleFrom)
+	//assert.NotEqual(suite.T(), since, from)
 }
 
 /* NEED TO WRITE ENDPOINTS FOR THE FOLLOWING ENDPOINTS */
