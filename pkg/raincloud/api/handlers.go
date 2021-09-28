@@ -59,6 +59,7 @@ func (handler restHandler) close() {
 
 // implement the Handler interface so we can use this as a handler
 func (handler restHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// only serve GET requests, all data come in through MQTT
 	if r.Method != http.MethodGet {
 		logrus.Errorf("attempted illegal request: %s", r.Method)
 		return
@@ -78,6 +79,8 @@ func (handler restHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		handler.handleAssetStatus(gatewayStatusKey, w, r)
 	case urlTemp:
 		handler.handleTemp(w, r)
+	case urlRain:
+		handler.handleRain(w, r)
 	default:
 		logrus.Errorf("received unsupported request on `%s`", r.URL.Path)
 		w.WriteHeader(http.StatusNotFound)
@@ -256,31 +259,55 @@ func (handler restHandler) handleAssetStatus(asset string, w http.ResponseWriter
 
 // handle request for temperature data
 func (handler restHandler) handleTemp(w http.ResponseWriter, res *http.Request) {
-	dates, err := getToFrom(res)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+	var dates *dateRange
+	var err error
+	var entries *webdb.TempEntriesC
+	var resp []byte
+
+	if dates, err = getToFrom(res); err != nil {
+		handler.badRequest(w, err)
 		return
 	}
-	var entries *webdb.TempEntriesC
 	if dates.toOk {
-		entries, err = handler.db.GetTempDataCFrom(dates.from, dates.to)
-		if err != nil {
-			logrus.Error(err)
-			w.WriteHeader(http.StatusInternalServerError)
+		if entries, err = handler.db.GetTempDataCFrom(dates.from, dates.to); err != nil {
+			handler.internalServiceError(w, err)
 			return
 		}
 	} else {
-		entries, err = handler.db.GetTempDataCSince(dates.from)
-		if err != nil {
-			logrus.Error(err)
-			w.WriteHeader(http.StatusInternalServerError)
+		if entries, err = handler.db.GetTempDataCSince(dates.from); err != nil {
+			handler.internalServiceError(w, err)
 			return
 		}
 	}
-	resp, err := json.Marshal(entries)
-	if err != nil {
-		logrus.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
+	if resp, err = json.Marshal(entries); err != nil {
+		handler.internalServiceError(w, err)
+		return
+	}
+	genericJSONHandler(resp, w, res)
+}
+
+// handle request for rain data
+func (handler restHandler) handleRain(w http.ResponseWriter, res *http.Request) {
+	var dates *dateRange
+	var err error
+	var entries *webdb.RainEntriesMm
+	var resp []byte
+
+	if dates, err = getToFrom(res); err != nil {
+		handler.badRequest(w, err)
+		return
+	}
+	if dates.toOk {
+		if entries, err = handler.db.GetRainMMFrom(dates.from, dates.to); err != nil {
+			handler.internalServiceError(w, err)
+		}
+	} else {
+		if entries, err = handler.db.GetRainMMSince(dates.from); err != nil {
+			handler.internalServiceError(w, err)
+		}
+	}
+	if resp, err = json.Marshal(entries); err != nil {
+		handler.internalServiceError(w, err)
 		return
 	}
 	genericJSONHandler(resp, w, res)
