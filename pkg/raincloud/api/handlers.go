@@ -99,6 +99,46 @@ func genericJSONHandler(payload []byte, w http.ResponseWriter, res *http.Request
 	}
 }
 
+// dateRange is a parsed struct of JSON data with to and from timestamp
+type dateRange struct {
+	toOk   bool
+	fromOk bool
+	to     time.Time
+	from   time.Time
+}
+
+func getToFrom(res *http.Request) (*dateRange, error) {
+	args, err := ParseQuery(res.URL.RawQuery)
+	if err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
+	_, fromOk := args["from"]
+	if !fromOk {
+		return nil, err
+	}
+	var from time.Time
+	if from, err = time.Parse(configkey.TimestampFormat, args["from"].(string)); err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
+	var to time.Time
+	_, toOk := args["to"]
+	if toOk {
+		to, err = time.Parse(configkey.TimestampFormat, args["to"].(string))
+		if err != nil {
+			logrus.Error(err)
+			return nil, err
+		}
+	}
+	return &dateRange{
+		toOk:   toOk,
+		to:     to,
+		fromOk: fromOk,
+		from:   from,
+	}, nil
+}
+
 // ParseQuery breaks the restful part of the API into a map
 func ParseQuery(raw string) (map[string]interface{}, error) {
 	result := make(map[string]interface{})
@@ -114,7 +154,7 @@ func ParseQuery(raw string) (map[string]interface{}, error) {
 
 // return teapot messages as bellweather for general server and for bootstrapping
 // may be able to delete this later as the API is developed
-func (handler restHandler) handleTeapot(w http.ResponseWriter, res *http.Request) {
+func (handler restHandler) handleTeapot(w http.ResponseWriter, _ *http.Request) {
 	var payload []byte
 	var err error
 
@@ -216,43 +256,21 @@ func (handler restHandler) handleAssetStatus(asset string, w http.ResponseWriter
 
 // handle request for temperature data
 func (handler restHandler) handleTemp(w http.ResponseWriter, res *http.Request) {
-	args, err := ParseQuery(res.URL.RawQuery)
+	dates, err := getToFrom(res)
 	if err != nil {
-		logrus.Error(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
-	}
-
-	if _, fromOk := args["from"]; !fromOk {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	var from time.Time
-	if from, err = time.Parse(configkey.TimestampFormat, args["from"].(string)); err != nil {
-		logrus.Error(err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	var to time.Time
-	_, toOk := args["to"]
-	if toOk {
-		to, err = time.Parse(configkey.TimestampFormat, args["to"].(string))
-		if err != nil {
-			logrus.Error(err)
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
 	}
 	var entries *webdb.TempEntriesC
-	if toOk {
-		entries, err = handler.db.GetTempDataCFrom(from, to)
+	if dates.toOk {
+		entries, err = handler.db.GetTempDataCFrom(dates.from, dates.to)
 		if err != nil {
 			logrus.Error(err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 	} else {
-		entries, err = handler.db.GetTempDataCSince(from)
+		entries, err = handler.db.GetTempDataCSince(dates.from)
 		if err != nil {
 			logrus.Error(err)
 			w.WriteHeader(http.StatusInternalServerError)
