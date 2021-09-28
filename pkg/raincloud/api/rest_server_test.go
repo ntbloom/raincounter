@@ -315,7 +315,9 @@ func (suite *RestTest) TestGetTemperatureData() {
 func (suite *RestTest) TestGetRainData() {
 	sampleSince := fmt.Sprintf("/rain?%s", timeSince)
 	sampleFrom := fmt.Sprintf("/rain?%s&%s", timeFrom, timeTo)
-	assert.True(suite.T(), suite.validateTimeData(sampleSince, sampleFrom))
+	totalsSince := fmt.Sprintf("/rain?%s&format=total", timeSince)
+	totalsFrom := fmt.Sprintf("/rain?%s&%s&format=total", timeFrom, timeTo)
+	assert.True(suite.T(), suite.validateTimeData(sampleSince, sampleFrom, totalsSince, totalsFrom))
 }
 
 /* NEED TO WRITE ENDPOINTS FOR THE FOLLOWING ENDPOINTS */
