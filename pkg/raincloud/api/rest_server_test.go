@@ -23,12 +23,6 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-const (
-	// two random timestamps
-	sampleSince = "/temp?from=2020-05-23T01:47:30+00:00"
-	sampleFrom  = "/temp?from=2021-07-23T01:22:18+00:00&to=2021-09-23T01:22:18+00:00"
-)
-
 /* TESTING FIXTURES */
 
 type RestTest struct {
@@ -133,6 +127,25 @@ func (suite *RestTest) connectToServer() bool {
 	}()
 	assert.Nil(suite.T(), err, fmt.Sprintf("error retreiving teapot: %s", err))
 	assert.Equal(suite.T(), http.StatusTeapot, resp.StatusCode)
+	return true
+}
+
+func (suite *RestTest) validateTimeData(sinceURL, fromURL string) bool {
+	testTemp := func(endpoint string) []map[string]interface{} {
+		var tempResults []map[string]interface{}
+
+		since, statusSince := suite.toJSONBytes(suite.getEndpoint(endpoint))
+		if err := json.Unmarshal(since, &tempResults); err != nil {
+			suite.Fail("unable to unmarshal json", err)
+		}
+		assert.Equal(suite.T(), http.StatusOK, statusSince)
+		assert.NotNil(suite.T(), tempResults)
+		assert.NotEqual(suite.T(), len(tempResults), 0, "results are empty")
+		return tempResults
+	}
+	since := testTemp(sinceURL)
+	from := testTemp(fromURL)
+	assert.NotEqual(suite.T(), since, from)
 	return true
 }
 
@@ -275,26 +288,19 @@ func (suite *RestTest) TestGetStatus() {
 	}
 }
 
+// can we get temperature data as a json blob
 func (suite *RestTest) TestGetTemperatureData() {
-	testTemp := func(endpoint string) []map[string]interface{} {
-		var tempResults []map[string]interface{}
-
-		since, statusSince := suite.toJSONBytes(suite.getEndpoint(endpoint))
-		if err := json.Unmarshal(since, &tempResults); err != nil {
-			suite.Fail("unable to unmarshal json", err)
-		}
-		assert.Equal(suite.T(), http.StatusOK, statusSince)
-		assert.NotNil(suite.T(), tempResults)
-		assert.NotEqual(suite.T(), len(tempResults), 0, "results are empty")
-		return tempResults
-	}
-	since := testTemp(sampleSince)
-	from := testTemp(sampleFrom)
-	assert.NotEqual(suite.T(), since, from)
+	// two random timestamps
+	sampleSince := "/temp?from=2020-05-23T01:47:30+00:00"
+	sampleFrom := "/temp?from=2021-07-23T01:22:18+00:00&to=2021-09-23T01:22:18+00:00"
+	assert.True(suite.T(), suite.validateTimeData(sampleSince, sampleFrom))
 }
 
+// can we get rain data as a json blob
 func (suite *RestTest) TestGetRainData() {
-
+	sampleSince := "/rain?from=2020-05-23T01:47:30+00:00"
+	sampleFrom := "/rain?from=2021-07-23T01:22:18+00:00&to=2021-09-23T01:22:18+00:00"
+	assert.True(suite.T(), suite.validateTimeData(sampleSince, sampleFrom))
 }
 
 /* NEED TO WRITE ENDPOINTS FOR THE FOLLOWING ENDPOINTS */
