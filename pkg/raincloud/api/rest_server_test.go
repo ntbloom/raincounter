@@ -23,6 +23,12 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+const (
+	timeSince = "from=2020-05-23T01:47:30+00:00"
+	timeFrom  = "from=2021-07-23T01:22:18+00:00"
+	timeTo    = "to=2021-09-23T01:22:18+00:00"
+)
+
 /* TESTING FIXTURES */
 
 type RestTest struct {
@@ -130,6 +136,7 @@ func (suite *RestTest) connectToServer() bool {
 	return true
 }
 
+// validateTimeData parametrizes tests using from and to params in the query
 func (suite *RestTest) validateTimeData(sinceURL, fromURL string) bool {
 	testData := func(endpoint string) []map[string]interface{} {
 		var results []map[string]interface{}
@@ -291,18 +298,15 @@ func (suite *RestTest) TestGetStatus() {
 // can we get temperature data as a json blob
 func (suite *RestTest) TestGetTemperatureData() {
 	// two random timestamps
-	sampleSince := "/temp?from=2020-05-23T01:47:30+00:00"
-	sampleFrom := "/temp?from=2021-07-23T01:22:18+00:00&to=2021-09-23T01:22:18+00:00"
+	sampleSince := fmt.Sprintf("/temp?%s", timeSince)
+	sampleFrom := fmt.Sprintf("/temp?%s&%s", timeFrom, timeTo)
 	assert.True(suite.T(), suite.validateTimeData(sampleSince, sampleFrom))
 }
 
 // can we get rain data as a json blob
 func (suite *RestTest) TestGetRainData() {
-	since := "from=2020-05-23T01:47:30+00:00"
-	from := "from=2021-07-23T01:22:18+00:00"
-	to := "to=2021-09-23T01:22:18+00:00"
-	sampleSince := fmt.Sprintf("/rain?%s", since)
-	sampleFrom := fmt.Sprintf("/rain?%s&%s", from, to)
+	sampleSince := fmt.Sprintf("/rain?%s", timeSince)
+	sampleFrom := fmt.Sprintf("/rain?%s&%s", timeFrom, timeTo)
 	assert.True(suite.T(), suite.validateTimeData(sampleSince, sampleFrom))
 }
 
