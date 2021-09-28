@@ -90,10 +90,10 @@ func (handler restHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 /* HELPER METHODS */
 
 // handles generic JSON messages. fails if the request does not specify application/json
-func genericJSONHandler(payload []byte, w http.ResponseWriter, res *http.Request) {
+func (handler restHandler) genericJSONHandler(payload []byte, w http.ResponseWriter, res *http.Request) {
 	encoding := res.Header.Get(contentType)
 	if encoding != appJSON {
-		w.WriteHeader(http.StatusUnsupportedMediaType)
+		handler.unsupportedMedia(w)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -180,7 +180,7 @@ func (handler restHandler) handleHello(w http.ResponseWriter, res *http.Request)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	genericJSONHandler(payload, w, res)
+	handler.genericJSONHandler(payload, w, res)
 }
 
 /* PRODUCTION ENDPOINT HANDLERS */
@@ -197,7 +197,7 @@ func (handler restHandler) handleLastRain(w http.ResponseWriter, res *http.Reque
 	if err != nil {
 		logrus.Error(err)
 	}
-	genericJSONHandler(resp, w, res)
+	handler.genericJSONHandler(resp, w, res)
 }
 
 // handle requests for the last temp
@@ -212,7 +212,7 @@ func (handler restHandler) handleLastTemp(w http.ResponseWriter, res *http.Reque
 	if err != nil {
 		logrus.Error(err)
 	}
-	genericJSONHandler(resp, w, res)
+	handler.genericJSONHandler(resp, w, res)
 }
 
 // handle requests for sensor status
@@ -254,7 +254,7 @@ func (handler restHandler) handleAssetStatus(asset string, w http.ResponseWriter
 	if err != nil {
 		logrus.Error(err)
 	}
-	genericJSONHandler(resp, w, res)
+	handler.genericJSONHandler(resp, w, res)
 }
 
 // handle request for temperature data
@@ -283,7 +283,7 @@ func (handler restHandler) handleTemp(w http.ResponseWriter, res *http.Request) 
 		handler.internalServiceError(w, err)
 		return
 	}
-	genericJSONHandler(resp, w, res)
+	handler.genericJSONHandler(resp, w, res)
 }
 
 // handle request for rain data
@@ -310,5 +310,5 @@ func (handler restHandler) handleRain(w http.ResponseWriter, res *http.Request) 
 		handler.internalServiceError(w, err)
 		return
 	}
-	genericJSONHandler(resp, w, res)
+	handler.genericJSONHandler(resp, w, res)
 }
