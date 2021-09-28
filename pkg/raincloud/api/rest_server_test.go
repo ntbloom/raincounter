@@ -131,21 +131,21 @@ func (suite *RestTest) connectToServer() bool {
 }
 
 func (suite *RestTest) validateTimeData(sinceURL, fromURL string) bool {
-	testTemp := func(endpoint string) []map[string]interface{} {
-		var tempResults []map[string]interface{}
+	testData := func(endpoint string) []map[string]interface{} {
+		var results []map[string]interface{}
 
 		since, statusSince := suite.toJSONBytes(suite.getEndpoint(endpoint))
-		if err := json.Unmarshal(since, &tempResults); err != nil {
+		if err := json.Unmarshal(since, &results); err != nil {
 			suite.Fail("unable to unmarshal json", err)
 		}
-		assert.Equal(suite.T(), http.StatusOK, statusSince)
-		assert.NotNil(suite.T(), tempResults)
-		assert.NotEqual(suite.T(), len(tempResults), 0, "results are empty")
-		return tempResults
+		assert.Equal(suite.T(), http.StatusOK, statusSince, "should be status 200")
+		assert.NotNil(suite.T(), results, "results should not be nil")
+		assert.NotEqual(suite.T(), len(results), 0, "length of results are empty")
+		return results
 	}
-	since := testTemp(sinceURL)
-	from := testTemp(fromURL)
-	assert.NotEqual(suite.T(), since, from)
+	since := testData(sinceURL)
+	from := testData(fromURL)
+	assert.NotEqual(suite.T(), since, from, "from and since should not be equal")
 	return true
 }
 
@@ -271,9 +271,9 @@ func (suite *RestTest) TestGetStatus() {
 		err = json.Unmarshal(afterStatus, &actual)
 		active := actual[activeKey].(bool)
 
-		assert.Equal(suite.T(), http.StatusOK, status)
+		assert.Equal(suite.T(), http.StatusOK, status, "did not return 200")
 		assert.True(suite.T(), active, "should be picked up")
-		assert.Nil(suite.T(), err)
+		assert.Nil(suite.T(), err, "should not have an error")
 	}
 
 	// run the test for the gateway and sensor test
@@ -298,8 +298,11 @@ func (suite *RestTest) TestGetTemperatureData() {
 
 // can we get rain data as a json blob
 func (suite *RestTest) TestGetRainData() {
-	sampleSince := "/rain?from=2020-05-23T01:47:30+00:00"
-	sampleFrom := "/rain?from=2021-07-23T01:22:18+00:00&to=2021-09-23T01:22:18+00:00"
+	since := "from=2020-05-23T01:47:30+00:00"
+	from := "from=2021-07-23T01:22:18+00:00"
+	to := "to=2021-09-23T01:22:18+00:00"
+	sampleSince := fmt.Sprintf("/rain?%s", since)
+	sampleFrom := fmt.Sprintf("/rain?%s&%s", from, to)
 	assert.True(suite.T(), suite.validateTimeData(sampleSince, sampleFrom))
 }
 
@@ -307,7 +310,5 @@ func (suite *RestTest) TestGetRainData() {
 
 //TotalRainMMSince(since time.Time) (float64, error)
 //TotalRainMMFrom(from time.Time, to time.Time) (float64, error)
-//GetRainMMSince(since time.Time) (*RainEntriesMm, error)
-//GetRainMMFrom(from time.Time, to time.Time) (*RainEntriesMm, error)
 //GetEventMessagesSince(tag int, since time.Time) (*EventEntries, error)
 //GetEventMessagesFrom(tag int, from time.Time, to time.Time) (*EventEntries, error)
