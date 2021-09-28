@@ -137,7 +137,8 @@ func (suite *RestTest) connectToServer() bool {
 }
 
 // validateTimeData parametrizes tests using from and to params in the query
-func (suite *RestTest) validateTimeData(sinceURL, fromURL string) bool {
+func (suite *RestTest) validateTimeData(endpoints ...string) bool {
+	// generic testing function
 	testData := func(endpoint string) []map[string]interface{} {
 		var results []map[string]interface{}
 
@@ -150,9 +151,16 @@ func (suite *RestTest) validateTimeData(sinceURL, fromURL string) bool {
 		assert.NotEqual(suite.T(), len(results), 0, "length of results are empty")
 		return results
 	}
-	since := testData(sinceURL)
-	from := testData(fromURL)
-	assert.NotEqual(suite.T(), since, from, "from and since should not be equal")
+
+	queries := make([][]map[string]interface{}, len(endpoints))
+	for _, endpoint := range endpoints {
+		res := testData(endpoint)
+		// make sure there's no equal results
+		for _, entry := range queries {
+			assert.NotEqual(suite.T(), entry, res, "results should not be equal")
+		}
+		queries = append(queries, res)
+	}
 	return true
 }
 
