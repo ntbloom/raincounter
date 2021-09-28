@@ -23,6 +23,12 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+const (
+	// two random timestamps
+	sampleSince = "/temp?from=2020-05-23T01:47:30+00:00"
+	sampleFrom  = "/temp?from=2021-07-23T01:22:18+00:00&to=2021-09-23T01:22:18+00:00"
+)
+
 /* TESTING FIXTURES */
 
 type RestTest struct {
@@ -270,10 +276,6 @@ func (suite *RestTest) TestGetStatus() {
 }
 
 func (suite *RestTest) TestGetTemperatureData() {
-	// two random timestamps
-	sampleSince := "/temp?from=2020-05-23T01:47:30+00:00"
-	sampleFrom := "/temp?from=2021-07-23T01:22:18+00:00&to=2021-09-23T01:22:18+00:00"
-
 	testTemp := func(endpoint string) []map[string]interface{} {
 		var tempResults []map[string]interface{}
 
@@ -289,6 +291,10 @@ func (suite *RestTest) TestGetTemperatureData() {
 	since := testTemp(sampleSince)
 	from := testTemp(sampleFrom)
 	assert.NotEqual(suite.T(), since, from)
+}
+
+func (suite *RestTest) TestGetRainData() {
+
 }
 
 /* NEED TO WRITE ENDPOINTS FOR THE FOLLOWING ENDPOINTS */
