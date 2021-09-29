@@ -25,12 +25,8 @@ func (handler restHandler) handleAssetStatus(asset string, w http.ResponseWriter
 	}
 
 	raw := res.URL.RawQuery
-	args, err := ParseQuery(raw)
-	if err != nil {
-		logrus.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	args := ParseQuery(raw)
+
 	since := handler.statusDurationDefault
 	_, ok := args["since"]
 	if ok {

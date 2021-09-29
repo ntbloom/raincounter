@@ -63,6 +63,7 @@ func (handler restHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		logrus.Errorf("attempted illegal request: %s", r.Method)
 		return
 	}
+	logrus.Infof("received request: %s", r.URL.RawQuery)
 	switch r.URL.Path {
 	case urlHello:
 		handler.handleHello(w, r)
@@ -87,14 +88,17 @@ func (handler restHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // ParseQuery breaks the restful part of the API into a map
-func ParseQuery(raw string) (map[string]interface{}, error) {
+func ParseQuery(raw string) map[string]interface{} {
+	if raw == "" {
+		return nil
+	}
 	result := make(map[string]interface{})
 	args := strings.Split(raw, "&")
 	for _, arg := range args {
 		keys := strings.Split(arg, "=")
 		result[keys[0]] = keys[1]
 	}
-	return result, nil
+	return result
 }
 
 // handles generic JSON messages. fails if the request does not specify application/json
@@ -122,11 +126,8 @@ type dateRange struct {
 
 // get args from the rest API
 func getToFromTotal(res *http.Request) (*dateRange, error) {
-	args, err := ParseQuery(res.URL.RawQuery)
-	if err != nil {
-		logrus.Error(err)
-		return nil, err
-	}
+	var err error
+	args := ParseQuery(res.URL.RawQuery)
 	_, fromOk := args["from"]
 	if !fromOk {
 		return nil, err

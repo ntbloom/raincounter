@@ -273,17 +273,16 @@ func (suite *RestTest) TestParseQuery() {
 	// we can afford to be slapdash and only support the patterns we are actually coding
 	args := map[string]map[string]interface{}{
 		"since=300": {"since": "300"},
-		"from=2021-09-23T01:22:18+00:00&to=2021-09-23T01:22:18+00:00&limit=100": {
+		"from=2021-09-23T01:22:18+00:00&to=2021-09-23T01:22:18+00:00&total=true": {
 			"from":  "2021-09-23T01:22:18+00:00",
 			"to":    "2021-09-23T01:22:18+00:00",
-			"limit": "100",
+			"total": "true",
 		},
+		// check for the empty case where there are no args
+		"": nil,
 	}
 	for k, v := range args {
-		expected, err := api.ParseQuery(k)
-		if err != nil {
-			suite.Fail("error parsing query", err)
-		}
+		expected := api.ParseQuery(k)
 		assert.Equal(suite.T(), v, expected)
 	}
 }
