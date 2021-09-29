@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/json"
 	"net/http"
 	"strconv"
 	"strings"
@@ -87,7 +86,16 @@ func (handler restHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-/* HELPER METHODS */
+// ParseQuery breaks the restful part of the API into a map
+func ParseQuery(raw string) (map[string]interface{}, error) {
+	result := make(map[string]interface{})
+	args := strings.Split(raw, "&")
+	for _, arg := range args {
+		keys := strings.Split(arg, "=")
+		result[keys[0]] = keys[1]
+	}
+	return result, nil
+}
 
 // handles generic JSON messages. fails if the request does not specify application/json
 func (handler restHandler) genericJSONHandler(payload []byte, w http.ResponseWriter, res *http.Request) {
@@ -104,13 +112,16 @@ func (handler restHandler) genericJSONHandler(payload []byte, w http.ResponseWri
 
 // dateRange is a parsed struct of JSON data with to and from timestamp
 type dateRange struct {
-	toOk   bool
-	fromOk bool
-	to     time.Time
-	from   time.Time
+	toOk    bool
+	fromOk  bool
+	totalOk bool
+	to      time.Time
+	from    time.Time
+	total   bool
 }
 
-func getToFrom(res *http.Request) (*dateRange, error) {
+// get args from the rest API
+func getToFromTotal(res *http.Request) (*dateRange, error) {
 	args, err := ParseQuery(res.URL.RawQuery)
 	if err != nil {
 		logrus.Error(err)
@@ -134,181 +145,20 @@ func getToFrom(res *http.Request) (*dateRange, error) {
 			return nil, err
 		}
 	}
-	return &dateRange{
-		toOk:   toOk,
-		to:     to,
-		fromOk: fromOk,
-		from:   from,
-	}, nil
-}
-
-// ParseQuery breaks the restful part of the API into a map
-func ParseQuery(raw string) (map[string]interface{}, error) {
-	result := make(map[string]interface{})
-	args := strings.Split(raw, "&")
-	for _, arg := range args {
-		keys := strings.Split(arg, "=")
-		result[keys[0]] = keys[1]
-	}
-	return result, nil
-}
-
-/* GENERIC AND TEST HANDLERS */
-
-// return teapot messages as bellweather for general server and for bootstrapping
-// may be able to delete this later as the API is developed
-func (handler restHandler) handleTeapot(w http.ResponseWriter, _ *http.Request) {
-	var payload []byte
-	var err error
-
-	if payload, err = json.Marshal(map[string]string{"hello": "teapot"}); err != nil {
-		logrus.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-	} else {
-		w.WriteHeader(http.StatusTeapot)
-		if _, err = w.Write(payload); err != nil {
+	total := false
+	_, totalOk := args["total"]
+	if totalOk {
+		if total, err = strconv.ParseBool(args["total"].(string)); err != nil {
 			logrus.Error(err)
+			return nil, err
 		}
 	}
-}
-
-// template for json payload messages
-func (handler restHandler) handleHello(w http.ResponseWriter, res *http.Request) {
-	payload, err := json.Marshal(map[string]string{"hello": "world"})
-	if err != nil {
-		logrus.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	handler.genericJSONHandler(payload, w, res)
-}
-
-/* PRODUCTION ENDPOINT HANDLERS */
-
-// handle requests for the last rain
-func (handler restHandler) handleLastRain(w http.ResponseWriter, res *http.Request) {
-	payload, err := handler.db.GetLastRainTime()
-	if err != nil {
-		logrus.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	resp, err := json.Marshal(map[string]time.Time{"timestamp": payload})
-	if err != nil {
-		logrus.Error(err)
-	}
-	handler.genericJSONHandler(resp, w, res)
-}
-
-// handle requests for the last temp
-func (handler restHandler) handleLastTemp(w http.ResponseWriter, res *http.Request) {
-	payload, err := handler.db.GetLastTempC()
-	if err != nil {
-		logrus.Error(err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	resp, err := json.Marshal(map[string]int{"last_temp_c": payload})
-	if err != nil {
-		logrus.Error(err)
-	}
-	handler.genericJSONHandler(resp, w, res)
-}
-
-// handle requests for sensor status
-func (handler restHandler) handleAssetStatus(asset string, w http.ResponseWriter, res *http.Request) {
-	var dbQuery func(duration time.Duration) (bool, error)
-	var responseKey string
-	switch asset {
-	case sensorStatusKey:
-		dbQuery = handler.db.IsSensorUp
-		responseKey = "sensor_active"
-	case gatewayStatusKey:
-		dbQuery = handler.db.IsGatewayUp
-		responseKey = "gateway_active"
-	}
-
-	raw := res.URL.RawQuery
-	args, err := ParseQuery(raw)
-	if err != nil {
-		logrus.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	since := handler.statusDurationDefault
-	_, ok := args["since"]
-	if ok {
-		asNum, err := strconv.Atoi(args["since"].(string))
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-		}
-		since = time.Second * time.Duration(asNum)
-	}
-	isUp, err := dbQuery(since)
-	if err != nil {
-		logrus.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	resp, err := json.Marshal(map[string]interface{}{responseKey: isUp})
-	if err != nil {
-		logrus.Error(err)
-	}
-	handler.genericJSONHandler(resp, w, res)
-}
-
-// handle request for temperature data
-func (handler restHandler) handleTemp(w http.ResponseWriter, res *http.Request) {
-	var dates *dateRange
-	var err error
-	var entries *webdb.TempEntriesC
-	var resp []byte
-
-	if dates, err = getToFrom(res); err != nil {
-		handler.badRequest(w, err)
-		return
-	}
-	if dates.toOk {
-		if entries, err = handler.db.GetTempDataCFrom(dates.from, dates.to); err != nil {
-			handler.internalServiceError(w, err)
-			return
-		}
-	} else {
-		if entries, err = handler.db.GetTempDataCSince(dates.from); err != nil {
-			handler.internalServiceError(w, err)
-			return
-		}
-	}
-	if resp, err = json.Marshal(entries); err != nil {
-		handler.internalServiceError(w, err)
-		return
-	}
-	handler.genericJSONHandler(resp, w, res)
-}
-
-// handle request for rain data
-func (handler restHandler) handleRain(w http.ResponseWriter, res *http.Request) {
-	var dates *dateRange
-	var err error
-	var entries *webdb.RainEntriesMm
-	var resp []byte
-
-	if dates, err = getToFrom(res); err != nil {
-		handler.badRequest(w, err)
-		return
-	}
-	if dates.toOk {
-		if entries, err = handler.db.GetRainMMFrom(dates.from, dates.to); err != nil {
-			handler.internalServiceError(w, err)
-		}
-	} else {
-		if entries, err = handler.db.GetRainMMSince(dates.from); err != nil {
-			handler.internalServiceError(w, err)
-		}
-	}
-	if resp, err = json.Marshal(entries); err != nil {
-		handler.internalServiceError(w, err)
-		return
-	}
-	handler.genericJSONHandler(resp, w, res)
+	return &dateRange{
+		toOk:    toOk,
+		to:      to,
+		fromOk:  fromOk,
+		from:    from,
+		totalOk: totalOk,
+		total:   total,
+	}, nil
 }
