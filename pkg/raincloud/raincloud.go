@@ -12,14 +12,8 @@ import (
 	"github.com/ntbloom/raincounter/pkg/raincloud/receiver"
 )
 
-// Receive runs the main receiver loop
-func Receive() {
-	recv, err := receiver.NewReceiver()
-	if err != nil {
-		panic(err)
-	}
-	defer recv.Stop()
-	go recv.Start()
+// wait for sigint or sigterm before quitting
+func waitForSignal() {
 	terminalSignals := make(chan os.Signal, 1)
 	signal.Notify(terminalSignals, syscall.SIGINT, syscall.SIGTERM)
 
@@ -28,17 +22,26 @@ func Receive() {
 	logrus.Info("Done!")
 }
 
+// Receive runs the main receiver loop
+func Receive() {
+	recv, err := receiver.NewReceiver()
+	if err != nil {
+		panic(err)
+	}
+	defer recv.Stop()
+	go recv.Start()
+
+	waitForSignal()
+}
+
 // Serve serves the web server
 func Serve() {
 	rest, err := api.NewRestServer()
 	if err != nil {
-		logrus.Fatal("unable to run the rest API")
 		panic(err)
 	}
-	rest.Run()
-	//var duration time.Duration = 15
-	//logrus.Infof("In debug mode, running for %d seconds", duration)
-	//go rest.Run()
-	//time.Sleep(time.Second * duration)
-	//rest.Stop()
+	go rest.Run()
+	defer rest.Stop()
+
+	waitForSignal()
 }
