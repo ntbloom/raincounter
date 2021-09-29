@@ -73,6 +73,9 @@ define enter_data
 endef
 
 # server
+enter-data:
+	@$(call enter_data)
+
 test-server: test-webdb test-receiver test-rest
 
 test-server-race: clean-test test-common-race test-webdb-race test-receiver-race test-rest-race

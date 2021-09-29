@@ -335,21 +335,17 @@ func (suite *RestTest) TestGetStatus() {
 	}
 }
 
-// can we get temperature data as a json blob
-func (suite *RestTest) TestGetTemperatureData() {
+// can we get temperature and rain data with timestamps as a json blob
+func (suite *RestTest) TestGetRainTemperatureTimeData() {
 	// two random timestamps
-	sampleSince := fmt.Sprintf("/temp?%s", timeSince)
-	sampleFrom := fmt.Sprintf("/temp?%s&%s", timeFrom, timeTo)
-	assert.True(suite.T(), suite.validateTimeData(sampleSince, sampleFrom))
+	tempSampleSince := fmt.Sprintf("/temp?%s", timeSince)
+	tempSampleFrom := fmt.Sprintf("/temp?%s&%s", timeFrom, timeTo)
+	rainSampleSince := fmt.Sprintf("/rain?%s", timeSince)
+	rainSampleFrom := fmt.Sprintf("/rain?%s&%s", timeFrom, timeTo)
+	assert.True(suite.T(), suite.validateTimeData(tempSampleSince, tempSampleFrom, rainSampleSince, rainSampleFrom))
 }
 
-// can we get rain data as a json blob
-func (suite *RestTest) TestGetRainData() {
-	sampleSince := fmt.Sprintf("/rain?%s", timeSince)
-	sampleFrom := fmt.Sprintf("/rain?%s&%s", timeFrom, timeTo)
-	assert.True(suite.T(), suite.validateTimeData(sampleSince, sampleFrom))
-}
-
+// can we get a total amount of rain
 func (suite *RestTest) TestGetRainTotals() {
 	totalsSince := fmt.Sprintf("/rain?%s&total=true", timeSince)
 	totalsFrom := fmt.Sprintf("/rain?%s&%s&total=true", timeFrom, timeTo)
