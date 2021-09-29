@@ -144,6 +144,7 @@ func (suite *RestTest) validateTimeData(endpoints ...string) bool {
 
 		since, statusSince := suite.toJSONBytes(suite.getEndpoint(endpoint))
 		if err := json.Unmarshal(since, &results); err != nil {
+			logrus.Error(err)
 			suite.Fail("unable to unmarshal json", err)
 		}
 		assert.Equal(suite.T(), http.StatusOK, statusSince, "should be status 200")
@@ -160,6 +161,37 @@ func (suite *RestTest) validateTimeData(endpoints ...string) bool {
 			assert.NotEqual(suite.T(), entry, res, "results should not be equal")
 		}
 		queries = append(queries, res)
+	}
+	return true
+}
+
+// validateTotalRain parametrizes tests using from and to params in the query
+func (suite *RestTest) validateTotalRain(endpoints ...string) bool {
+	// generic testing function
+	testData := func(endpoint string) map[string]float64 {
+		var results map[string]float64
+
+		since, statusSince := suite.toJSONBytes(suite.getEndpoint(endpoint))
+		if err := json.Unmarshal(since, &results); err != nil {
+			logrus.Error(err)
+			suite.Fail("unable to unmarshal json", err)
+		}
+		assert.Equal(suite.T(), http.StatusOK, statusSince, "should be status 200")
+		assert.NotNil(suite.T(), results, "results should not be nil")
+		assert.NotEqual(suite.T(), len(results), 0, "length of results are empty")
+		return results
+	}
+
+	queries := make([]float64, len(endpoints))
+	for _, endpoint := range endpoints {
+		res := testData(endpoint)
+		amount := res["amount"]
+		assert.True(suite.T(), amount > 0.0, "expected positive amount of rain")
+		// make sure there's no equal results
+		for _, entry := range queries {
+			assert.NotEqual(suite.T(), entry, amount, "results should not be equal")
+		}
+		queries = append(queries, amount)
 	}
 	return true
 }
@@ -315,14 +347,16 @@ func (suite *RestTest) TestGetTemperatureData() {
 func (suite *RestTest) TestGetRainData() {
 	sampleSince := fmt.Sprintf("/rain?%s", timeSince)
 	sampleFrom := fmt.Sprintf("/rain?%s&%s", timeFrom, timeTo)
-	//totalsSince := fmt.Sprintf("/rain?%s&total=true", timeSince)
-	//totalsFrom := fmt.Sprintf("/rain?%s&%s&total=true", timeFrom, timeTo)
-	assert.True(suite.T(), suite.validateTimeData(sampleSince, sampleFrom)) //, totalsSince, totalsFrom))
+	assert.True(suite.T(), suite.validateTimeData(sampleSince, sampleFrom))
 }
 
-/* NEED TO WRITE ENDPOINTS FOR THE FOLLOWING ENDPOINTS */
+func (suite *RestTest) TestGetRainTotals() {
+	totalsSince := fmt.Sprintf("/rain?%s&total=true", timeSince)
+	totalsFrom := fmt.Sprintf("/rain?%s&%s&total=true", timeFrom, timeTo)
+	assert.True(suite.T(), suite.validateTotalRain(totalsSince, totalsFrom))
+}
 
-//TotalRainMMSince(since time.Time) (float64, error)
-//TotalRainMMFrom(from time.Time, to time.Time) (float64, error)
-//GetEventMessagesSince(tag int, since time.Time) (*EventEntries, error)
-//GetEventMessagesFrom(tag int, from time.Time, to time.Time) (*EventEntries, error)
+/* TODO: WRITE ENDPOINTS FOR THE FOLLOWING ENDPOINTS
+suite.db.GetEventMessagesSince(tag int, since time.Time) (*EventEntries, error)
+suite.db.GetEventMessagesFrom(tag int, from time.Time, to time.Time) (*EventEntries, error)
+*/
