@@ -68,8 +68,9 @@ docker-pglogs:
 psql:
 	psql $(SQLFLAGS)
 
-enter-data:
+define enter_data
 	@psql $(SQLFLAGS) -f $(DUMMY_DATA) > /dev/null
+endef
 
 # server
 test-server: test-webdb test-receiver test-rest
@@ -83,15 +84,19 @@ test-webdb-race:
 	@-go test -race $(TESTFLAGS) $(RAINCLOUD)/webdb/
 
 test-receiver:
+	$(call enter_data)
 	@-go test $(TESTFLAGS) $(RAINCLOUD)/receiver/
 
-test-receiver-race: enter-data
+test-receiver-race:
+	$(call enter_data)
 	@-go test -race $(TESTFLAGS) $(RAINCLOUD)/receiver/
 
-test-rest: enter-data
+test-rest:
+	$(call enter_data)
 	@-go test $(TESTFLAGS) $(RAINCLOUD)/api/
 
-test-rest-race: enter-data
+test-rest-race:
+	$(call enter_data)
 	@-go test -race $(TESTFLAGS) $(RAINCLOUD)/api/
 
 ### RUN ###
