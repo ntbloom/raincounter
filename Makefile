@@ -123,11 +123,11 @@ lint:
 ### CLEAN ###
 
 clean-test:
-	go clean -testcache
-	- rm /tmp/rainbase.db /tmp/raincloud.db
+	@go clean -testcache
+	@- rm /tmp/rainbase.db /tmp/raincloud.db
 
 clean-files:
-	- rm raincounter raincounter-race
+	@- rm raincounter raincounter-race
 
 clean-docker:
 	- $(COMPOSE) down
