@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -34,6 +35,12 @@ func (handler restHandler) handleRain(w http.ResponseWriter, res *http.Request) 
 		handler.badRequest(w, err)
 		return
 	}
+	badRequest := dates == nil || !dates.fromOk
+	if badRequest {
+		handler.badRequest(w, fmt.Errorf("no arguments provided"))
+		return
+	}
+
 	if dates.total {
 		// only show the total rain from the period
 		var amt float64

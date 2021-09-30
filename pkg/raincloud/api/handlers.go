@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -88,17 +89,23 @@ func (handler restHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // ParseQuery breaks the restful part of the API into a map
-func ParseQuery(raw string) map[string]interface{} {
+func ParseQuery(raw string) (map[string]interface{}, error) {
+	var err error
 	if raw == "" {
-		return nil
+		err = fmt.Errorf("empty arguments")
+		return nil, err
 	}
 	result := make(map[string]interface{})
 	args := strings.Split(raw, "&")
 	for _, arg := range args {
 		keys := strings.Split(arg, "=")
+		if len(keys) < 2 {
+			err = fmt.Errorf("illegal REST argument: %s", arg)
+			return nil, err
+		}
 		result[keys[0]] = keys[1]
 	}
-	return result
+	return result, nil
 }
 
 // handles generic JSON messages. fails if the request does not specify application/json
@@ -127,7 +134,12 @@ type dateRange struct {
 // get args from the rest API
 func getToFromTotal(res *http.Request) (*dateRange, error) {
 	var err error
-	args := ParseQuery(res.URL.RawQuery)
+	var args map[string]interface{}
+
+	if args, err = ParseQuery(res.URL.RawQuery); err != nil {
+		return nil, fmt.Errorf("unparseable arguments")
+	}
+
 	_, fromOk := args["from"]
 	if !fromOk {
 		return nil, err

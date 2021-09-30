@@ -25,21 +25,24 @@ func (handler restHandler) handleAssetStatus(asset string, w http.ResponseWriter
 	}
 
 	raw := res.URL.RawQuery
-	args := ParseQuery(raw)
+	args, err := ParseQuery(raw)
+	if err != nil {
+		handler.badRequest(w, err)
+	}
 
 	since := handler.statusDurationDefault
 	_, ok := args["since"]
 	if ok {
-		asNum, err := strconv.Atoi(args["since"].(string))
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
+		var asNum int
+		if asNum, err = strconv.Atoi(args["since"].(string)); err != nil {
+			handler.badRequest(w, err)
+			return
 		}
 		since = time.Second * time.Duration(asNum)
 	}
-	isUp, err := dbQuery(since)
-	if err != nil {
-		logrus.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
+	var isUp bool
+	if isUp, err = dbQuery(since); err != nil {
+		handler.internalServiceError(w, err)
 		return
 	}
 	resp, err := json.Marshal(map[string]interface{}{responseKey: isUp})

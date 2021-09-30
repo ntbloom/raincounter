@@ -282,8 +282,16 @@ func (suite *RestTest) TestParseQuery() {
 		"": nil,
 	}
 	for k, v := range args {
-		expected := api.ParseQuery(k)
-		assert.Equal(suite.T(), v, expected)
+		expected, err := api.ParseQuery(k)
+		// check the fail point, we should not be calling ParseArgs with empty args
+		if k == "" {
+			assert.NotNil(suite.T(), err, "should not be parsing args on empty case")
+		} else {
+			if err != nil {
+				suite.Fail("error parsing query", err)
+			}
+			assert.Equal(suite.T(), v, expected)
+		}
 	}
 }
 
@@ -349,6 +357,26 @@ func (suite *RestTest) TestGetRainTotals() {
 	totalsSince := fmt.Sprintf("/rain?%s&total=true", timeSince)
 	totalsFrom := fmt.Sprintf("/rain?%s&%s&total=true", timeFrom, timeTo)
 	assert.True(suite.T(), suite.validateTotalRain(totalsSince, totalsFrom))
+}
+
+func (suite *RestTest) TestHandlingBadRequests() {
+	badRequests := []string{
+		"/rain",
+		"/rain?blah",
+		"/rain?",
+		"/rain?validformat=butbadvalue",
+		"/temp",
+		"/temp?blah",
+		"/temp?",
+		"/temp?validformat=butbadvalue",
+	}
+	for _, v := range badRequests {
+		res, err := suite.getEndpoint(v)
+		_ = res.Body.Close()
+		assert.Nil(suite.T(), err, fmt.Sprintf("no error should be returned: %s", err))
+		assert.Equal(suite.T(), http.StatusBadRequest, res.StatusCode, fmt.Sprintf("wrong response code for %s", v))
+	}
+
 }
 
 /* TODO: WRITE ENDPOINTS FOR THE FOLLOWING ENDPOINTS
