@@ -1,0 +1,10 @@
+log.level: info
+usb.connection.port: /dev/ttyACM99
+main.loop.duration: -10s
+
+mqtt:
+  tls: false
+
+database:
+  local.file: /tmp/rainbase.db
+  remote.name: raincounter
