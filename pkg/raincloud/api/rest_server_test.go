@@ -370,13 +370,27 @@ func (suite *RestTest) TestHandlingBadRequests() {
 		"/temp?",
 		"/temp?validformat=butbadvalue",
 	}
-	for _, v := range badRequests {
-		res, err := suite.getEndpoint(v)
-		_ = res.Body.Close()
-		assert.Nil(suite.T(), err, fmt.Sprintf("no error should be returned: %s", err))
-		assert.Equal(suite.T(), http.StatusBadRequest, res.StatusCode, fmt.Sprintf("wrong response code for %s", v))
+	notFounds := []string{
+		"",
+		"/",
+		"/rain/",
+		"/rain/somethingelse?",
+		"/notfound",
+		"forgottheslash",
+		"another/one/",
+		"/temp/",
+		"/temp/somethingelse?",
 	}
-
+	statusCheck := func(list []string, expectedStatus int) {
+		for _, v := range list {
+			res, err := suite.getEndpoint(v)
+			_ = res.Body.Close()
+			assert.Nil(suite.T(), err, fmt.Sprintf("no error should be returned: %s", err))
+			assert.Equal(suite.T(), expectedStatus, res.StatusCode, fmt.Sprintf("wrong response code for %s", v))
+		}
+	}
+	statusCheck(badRequests, http.StatusBadRequest)
+	statusCheck(notFounds, http.StatusNotFound)
 }
 
 /* TODO: WRITE ENDPOINTS FOR THE FOLLOWING ENDPOINTS
