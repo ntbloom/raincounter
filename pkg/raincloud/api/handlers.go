@@ -145,16 +145,14 @@ func getToFromTotal(res *http.Request) (*dateRange, error) {
 		return nil, err
 	}
 	var from time.Time
-	if from, err = time.Parse(configkey.TimestampFormat, args["from"].(string)); err != nil {
-		logrus.Error(err)
+	if from, err = parseTimestamp(args["from"].(string)); err != nil {
 		return nil, err
 	}
+
 	var to time.Time
 	_, toOk := args["to"]
 	if toOk {
-		to, err = time.Parse(configkey.TimestampFormat, args["to"].(string))
-		if err != nil {
-			logrus.Error(err)
+		if to, err = parseTimestamp(args["to"].(string)); err != nil {
 			return nil, err
 		}
 	}
@@ -174,4 +172,22 @@ func getToFromTotal(res *http.Request) (*dateRange, error) {
 		totalOk: totalOk,
 		total:   total,
 	}, nil
+}
+
+// parseTimestamp gets a timestamp from the raw interface
+func parseTimestamp(raw string) (time.Time, error) {
+	var stamp time.Time
+	var err error
+
+	attempt := func(format string) time.Time {
+		var parsed time.Time
+		if parsed, err = time.Parse(format, raw); err != nil {
+			logrus.Errorf("doesn't match %s: %s", format, err)
+			return time.Time{}
+		}
+		return parsed
+	}
+	stamp = attempt(configkey.TimestampFormat)
+
+	return stamp, nil
 }
