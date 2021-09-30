@@ -34,6 +34,12 @@ func (handler restHandler) handleTemp(w http.ResponseWriter, res *http.Request) 
 		handler.badRequest(w, err)
 		return
 	}
+	badRequest := dates == nil || !dates.fromOk
+	if badRequest {
+		handler.badRequest(w, err)
+		return
+	}
+
 	if dates.toOk {
 		if entries, err = handler.db.GetTempDataCFrom(dates.from, dates.to); err != nil {
 			handler.internalServiceError(w, err)
