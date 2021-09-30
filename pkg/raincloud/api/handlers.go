@@ -189,5 +189,5 @@ func parseTimestamp(raw string) (time.Time, error) {
 	}
 	stamp = attempt(configkey.TimestampFormat)
 
-	return stamp, nil
+	return stamp, err
 }
