@@ -1,3 +1,7 @@
+/* schema.sql
+   schema for the production database
+ */
+
 BEGIN;
 DROP TABLE IF EXISTS rain CASCADE;
 CREATE TABLE rain

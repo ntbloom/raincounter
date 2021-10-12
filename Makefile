@@ -19,6 +19,7 @@ SQLFLAGS  = -h localhost
 SQLFLAGS += -U postgres
 SQLFLAGS += raincounter
 DUMMY_DATA = $(HOMEDIR)pkg/test/dummy.sql
+CLEAR_SQL = $(HOMEDIR)pkg/test/clear.sql
 
 ### BUILD ###
 
@@ -71,6 +72,9 @@ psql:
 define enter_data
 	@psql $(SQLFLAGS) -f $(DUMMY_DATA) > /dev/null
 endef
+
+remove-data:
+	psql $(SQLFLAGS) -f $(CLEAR_SQL)
 
 # server
 enter-data:
