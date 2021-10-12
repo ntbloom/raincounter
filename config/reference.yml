@@ -6,7 +6,7 @@ usb:
     length:
       max: 7
   connection:
-    port: /dev/ttyACM99
+    port: /dev/ttyACM95
     timeout: 10s
 
 mqtt:
