@@ -1,0 +1,15 @@
+log.level: info
+usb.connection.port: /dev/ttyACM99
+mqtt:
+  tls:
+  broker.ip: 1.2.3.4 # change to actual IP address
+  port: 8883
+  certs:
+    ca: /etc/raincounter/ssl/client/ca.pem
+    client: /etc/raincounter/ssl/client/client.crt
+    key: /etc/raincounter/ssl/client/client.key
+  username: raincounter
+
+database:
+  local.file: /etc/raincounter/rainbase.db
+  remote.name: raincounter
