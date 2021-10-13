@@ -1,4 +1,4 @@
-import ip from './ipaddress';
+import ip from './ipAddress';
 
 // get the payload from the API for a url
 async function getUrl(url: string): Promise<object> {
@@ -25,9 +25,10 @@ class GetData {
      }
 
      // get last rain value
-     getLastRain(): object {
+     async getLastRain(): Promise<object> {
           const url = `${this.baseUrl}/lastRain`;
-          return getUrl(url);
+          const data = await getUrl(url);
+          return data;
      }
 }
 

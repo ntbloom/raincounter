@@ -15,6 +15,7 @@
           "padded-blocks": "off",
           "import/no-unresolved": "off",
           "import/extensions": "off",
-          "class-methods-use-this": "off"
+          "class-methods-use-this": "off",
+          "no-console": "off"
      }
 }

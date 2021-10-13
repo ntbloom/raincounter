@@ -4,6 +4,7 @@
   "description": "front end for raingauge and weather app",
   "main": "index.js",
   "scripts": {
+    "lint": "./node_modules/.bin/eslint 'src/**/*.ts'",
     "build": "babel --out-file build/bundle.js  src/index.ts",
     "test": "test"
   },
