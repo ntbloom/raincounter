@@ -1,2 +1,4 @@
-let hello: string = 'hello, rainbase!';
+import ip from './ipaddress';
+
+const hello: string = 'hello, rainbase!';
 console.log(hello);

@@ -21,6 +21,22 @@ SQLFLAGS += raincounter
 DUMMY_DATA = $(HOMEDIR)pkg/test/dummy.sql
 CLEAR_SQL = $(HOMEDIR)pkg/test/clear.sql
 
+### DEPLOY ###
+
+DEVCFG = $(HOMEDIR)config/insecure.yml
+DEVFLAGS = --config $(DEVCFG)
+
+DEVRUN = $(EXE) $(DEVFLAGS)
+
+dev-server:
+	@$(DEVRUN) server
+
+dev-receiver:
+	@$(DEVRUN) receiver
+
+dev-rainbase:
+	@$(DEVRUN) rainbase
+
 ### BUILD ###
 
 build:
