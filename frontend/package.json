@@ -4,7 +4,7 @@
   "description": "front end for raingauge and weather app",
   "main": "index.js",
   "scripts": {
-    "build": "node_modules/.bin/babel --out-file build/bundle.js  src/index.ts",
+    "build": "babel --out-file build/bundle.js  src/index.ts",
     "test": "test"
   },
   "repository": {
