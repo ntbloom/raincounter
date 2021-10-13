@@ -12,3 +12,6 @@ secrets.yml
 # binaries
 raincounter
 raincounter-race
+
+# frontend
+node_modules/
