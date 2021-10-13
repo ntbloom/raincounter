@@ -1,18 +1,18 @@
 import ip from './ipAddress';
 
 // get the payload from the API for a url
-async function getUrl(url: string): Promise<object> {
+async function getUrl(url: string): Promise<Response> {
      const args = {
           method: 'GET',
           headers: {
                'content-type': 'application/json',
           },
      };
-     const val = await fetch(url, args).then((response: Response) => {
-          if (!response.ok) {
-               throw new Error('bad response');
+     const val = await fetch(url, args).then((res: Response) => {
+          if (!res.ok) {
+               throw new Error(`bad response, error code ${res.status}`);
           }
-          return response.json();
+          return res.json();
      });
      return val;
 }
