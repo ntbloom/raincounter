@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "lint": "./node_modules/.bin/eslint 'src/**/*.ts'",
-    "build": "babel --out-file build/bundle.js  src/index.ts",
+    "build": "babel --out-file build/bundle.js  src/**/*.ts",
     "test": "test"
   },
   "repository": {

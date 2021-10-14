@@ -1,5 +1,4 @@
 import ip from './ipAddress';
-import fetch from 'node-fetch';
 
 // get the payload from the API for a url
 async function getUrl(url: string): Promise<Response> {
