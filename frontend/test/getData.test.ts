@@ -1,10 +1,10 @@
 import GetData from '../src/lib/getData';
+import fetch from 'node-fetch';
 
 describe('GetData', () => {
+     let g = new GetData();
      it('get last rain returns data', async () => {
-          let g = new GetData();
-          const data = g.getLastRain();
-          console.log(data);
-          expect(data).toBeInstanceOf('string');
+          const data = await g.getLastRain();
+          expect(data).toBe(1234);
      });
 });

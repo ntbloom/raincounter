@@ -1,6 +1,7 @@
 *.swp
 .idea/
 *.db
+.vscode
 
 # sensitive data
 *.crt
