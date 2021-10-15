@@ -1,6 +1,7 @@
 # bring data from sensor to mqtt
 FROM fedora:latest
 RUN dnf upgrade -y
+ENV TZ=America/New_York
 
 COPY  ./raincounter /bin/rainreceiver
 COPY ./receiver.yml /etc/rainreceiver/receiver.yml

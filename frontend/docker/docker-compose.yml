@@ -4,6 +4,9 @@
 services:
   # MQTT service
   mosquitto:
+    environment:
+      - TZ=America/New_York
+      - PGTZ=America/New_York
     depends_on:
       - postgresql
     image: eclipse-mosquitto:latest
@@ -11,6 +14,8 @@ services:
 
   # database layer
   postgresql:
+    environment:
+      - TZ=America/New_York
     image: postgres:latest
     network_mode: host
     environment:

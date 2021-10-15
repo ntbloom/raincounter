@@ -1,6 +1,7 @@
 ## run the web server
 FROM fedora:latest
 RUN dnf upgrade -y
+ENV TZ=America/New_York
 
 COPY  ./raincounter /bin/rainserver
 COPY ./server.yml /etc/rainserver/server.yml

@@ -21,6 +21,9 @@ SQLFLAGS += raincounter
 DUMMY_DATA = $(HOMEDIR)pkg/test/dummy.sql
 CLEAR_SQL = $(HOMEDIR)pkg/test/clear.sql
 
+# for the front end
+FRONTEND = $(HOMEDIR)frontend
+
 ### DEPLOY ###
 
 DEVCFG = $(HOMEDIR)config/insecure.yml
@@ -41,6 +44,9 @@ dev-rainbase:
 
 build:
 	@go build -v
+	# add the build dependencies to the front-end docker toolchain
+	@cp $(EXE) $(FRONTEND)/docker
+	@cp $(HOMEDIR)pkg/test/pgschema/schema.sql $(FRONTEND)/docker/pgschema
 
 build-race: clean
 	@go build -race -o $(EXE)-race
