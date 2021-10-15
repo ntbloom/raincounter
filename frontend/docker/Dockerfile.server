@@ -1,0 +1,13 @@
+## run the web server
+FROM fedora:latest
+RUN dnf upgrade -y
+
+COPY  ./raincounter /bin/rainserver
+COPY ./server.yml /etc/rainserver/server.yml
+
+ENTRYPOINT [ \
+    "/bin/rainserver", \
+    "server", \
+    "--config", \
+    "/etc/rainserver/server.yml" \
+    ]

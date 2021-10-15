@@ -6,7 +6,10 @@
   "scripts": {
     "lint": "./node_modules/.bin/eslint 'src/**/*.ts'",
     "build": "babel --out-file build/bundle.js  src/**/*.ts",
-    "test": "test"
+    "test": "test",
+    "docker-up": "docker-compose up --build --remove-orphans -f docker/docker-compose.yml",
+    "docker-down": "docker-compose down -f docker/docker-compose.yml",
+    "psql": "psql -h localhost -U postgres raincounter"
   },
   "repository": {
     "type": "git",
