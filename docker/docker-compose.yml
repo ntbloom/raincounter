@@ -14,11 +14,10 @@ services:
 
   # database layer
   postgresql:
-    environment:
-      - TZ=America/New_York
     image: postgres:latest
     network_mode: host
     environment:
+      - TZ=America/New_York
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=raincounter
     volumes:
@@ -28,7 +27,7 @@ services:
   server:
     depends_on:
       - mosquitto
-      - rainbase
+#      - rainbase
       - receiver
     build:
       context: ./
@@ -40,21 +39,21 @@ services:
   receiver:
     depends_on:
       - mosquitto
-      - rainbase
+#      - rainbase
     build:
       context: ./
       dockerfile: Dockerfile
     network_mode: host
     entrypoint: ["/bin/raincounter", "receiver", "--config", "/etc/rainbase/receiver.yml"]
 
-  # sends data from sensor to MQTT
-  rainbase:
-    depends_on:
-      - mosquitto
-    build:
-      context: ./
-      dockerfile: Dockerfile
-    network_mode: host
-    devices:
-      - '/dev/ttyACM99:/dev/ttyACM99'
-    entrypoint: ["/bin/raincounter", "rainbase", "--config", "/etc/rainbase/rainbase.yml"]
+#  # sends data from sensor to MQTT
+#  rainbase:
+#    depends_on:
+#      - mosquitto
+#    build:
+#      context: ./
+#      dockerfile: Dockerfile
+#    network_mode: host
+#    devices:
+#      - '/dev/ttyACM99:/dev/ttyACM99'
+#    entrypoint: ["/bin/raincounter", "rainbase", "--config", "/etc/rainbase/rainbase.yml"]

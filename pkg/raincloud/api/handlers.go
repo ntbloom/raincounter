@@ -110,15 +110,20 @@ func ParseQuery(raw string) (map[string]interface{}, error) {
 
 // handles generic JSON messages. fails if the request does not specify application/json
 func (handler restHandler) genericJSONHandler(payload []byte, w http.ResponseWriter, res *http.Request) {
+	// allow CORS responses
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	encoding := res.Header.Get(contentType)
 	if encoding != appJSON {
 		handler.unsupportedMedia(w)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	if _, err := w.Write(payload); err != nil {
 		logrus.Error(err)
 	}
+	logrus.Infof("headers sent=%s", w.Header())
 }
 
 // dateRange is a parsed struct of JSON data with to and from timestamp

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "lint": "./node_modules/.bin/eslint 'src/**/*.ts'",
-    "build": "babel --out-file build/bundle.js  src/**/*.ts",
+    "build": "babel --out-file build/bundle.js  src",
     "test": "test",
     "docker-up": "cd $INIT_CWD && cd ../docker && docker-compose up --build --remove-orphans",
     "docker-down": "cd $INIT_CWD && cd ../docker && docker-compose down",
