@@ -1,7 +1,10 @@
 import GetData from './lib/getData';
 
 async function lastRain() {
-     const g: GetData = new GetData();
-     const rain = await g.getLastRain();
-     console.log(rain);
+  const g: GetData = new GetData();
+  const rain = await g.getLastRain();
+  console.log(rain);
 }
+
+console.log('second try');
+lastRain();

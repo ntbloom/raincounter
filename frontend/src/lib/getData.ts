@@ -2,8 +2,9 @@ import ip from './ipAddress';
 
 // get the payload from the API for a url
 async function getUrl(url: string): Promise<Response> {
+  let cors: RequestMode = 'cors';
   const args = {
-    mode: 'cors',
+    mode: cors,
     method: 'GET',
     headers: {
       'content-type': 'application/json',
