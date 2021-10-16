@@ -7,8 +7,8 @@
     "lint": "./node_modules/.bin/eslint 'src/**/*.ts'",
     "build": "babel --out-file build/bundle.js  src/**/*.ts",
     "test": "test",
-    "docker-up": "docker-compose up --build --remove-orphans -f docker/docker-compose.yml",
-    "docker-down": "docker-compose down -f docker/docker-compose.yml",
+    "docker-up": "cd $INIT_CWD && cd ../docker && docker-compose up --build --remove-orphans",
+    "docker-down": "cd $INIT_CWD && cd ../docker && docker-compose down",
     "psql": "psql -h localhost -U postgres raincounter"
   },
   "repository": {

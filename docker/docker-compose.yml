@@ -32,8 +32,9 @@ services:
       - receiver
     build:
       context: ./
-      dockerfile: Dockerfile.server
+      dockerfile: Dockerfile
     network_mode: host
+    entrypoint: ["/bin/raincounter", "server", "--config", "/etc/rainbase/server.yml"]
 
   # sends data to database from MQTT
   receiver:
@@ -42,8 +43,9 @@ services:
       - rainbase
     build:
       context: ./
-      dockerfile: Dockerfile.receiver
+      dockerfile: Dockerfile
     network_mode: host
+    entrypoint: ["/bin/raincounter", "receiver", "--config", "/etc/rainbase/receiver.yml"]
 
   # sends data from sensor to MQTT
   rainbase:
@@ -51,7 +53,8 @@ services:
       - mosquitto
     build:
       context: ./
-      dockerfile: Dockerfile.rainbase
+      dockerfile: Dockerfile
     network_mode: host
     devices:
       - '/dev/ttyACM99:/dev/ttyACM99'
+    entrypoint: ["/bin/raincounter", "rainbase", "--config", "/etc/rainbase/rainbase.yml"]

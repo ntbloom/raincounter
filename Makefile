@@ -22,7 +22,7 @@ DUMMY_DATA = $(HOMEDIR)pkg/test/dummy.sql
 CLEAR_SQL = $(HOMEDIR)pkg/test/clear.sql
 
 # for the front end
-FRONTEND = $(HOMEDIR)frontend
+DOCKERDIR = $(HOMEDIR)docker
 
 ### DEPLOY ###
 
@@ -44,9 +44,9 @@ dev-rainbase:
 
 build:
 	@go build -v
-	# add the build dependencies to the front-end docker toolchain
-	@cp $(EXE) $(FRONTEND)/docker
-	@cp $(HOMEDIR)pkg/test/pgschema/schema.sql $(FRONTEND)/docker/pgschema
+	@# add the build dependencies to the front-end docker toolchain
+	@cp $(EXE) $(DOCKERDIR)
+	@cp $(HOMEDIR)pkg/test/pgschema/schema.sql $(DOCKERDIR)/pgschema
 
 build-race: clean
 	@go build -race -o $(EXE)-race
