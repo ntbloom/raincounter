@@ -56,31 +56,12 @@ func (handler restHandler) close() {
 
 // implement the Handler interface so we can use this as a handler
 func (handler restHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	// only serve GET requests, all data come in through MQTT
-	if r.Method != http.MethodGet {
-		logrus.Errorf("attempted illegal request: %s", r.Method)
-		return
-	}
-	logrus.Infof("received request: %s", r.URL.RawQuery)
-	switch r.URL.Path {
-	case urlHello:
-		handler.handleHello(w, r)
-	case urlTeapot:
-		handler.handleTeapot(w, r)
-	case urlLastRain:
-		handler.handleLastRain(w, r)
-	case urlLastTemp:
-		handler.handleLastTemp(w, r)
-	case urlSensorStatus:
-		handler.handleAssetStatus(sensorStatusKey, w, r)
-	case urlGwStatus:
-		handler.handleAssetStatus(gatewayStatusKey, w, r)
-	case urlTemp:
-		handler.handleTemp(w, r)
-	case urlRain:
-		handler.handleRain(w, r)
+	switch r.Method {
+	case http.MethodGet:
+		handler.serveGet(w, r)
 	default:
-		logrus.Errorf("received unsupported request on `%s`", r.URL.Path)
-		w.WriteHeader(http.StatusNotFound)
+		// only serve GET requests, all data come in through MQTT
+		logrus.Errorf("attempted illegal request: %s", r.Method)
+		handler.methodNotAllowed(w)
 	}
 }

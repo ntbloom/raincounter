@@ -393,6 +393,26 @@ func (suite *RestTest) TestHandlingBadRequests() {
 	statusCheck(notFounds, http.StatusNotFound)
 }
 
+func (suite *RestTest) TestOptions() {
+	var err error
+	var req *http.Request
+	var resp *http.Response
+
+	if req, err = http.NewRequestWithContext(context.Background(), http.MethodOptions, suite.url, nil); err != nil {
+		suite.Fail("unable send OPTIONS request", err)
+	}
+	if resp, err = http.DefaultClient.Do(req); err != nil {
+		suite.Fail("error retrieving OPTIONS response", err)
+	}
+	defer func() {
+		if err = resp.Body.Close(); err != nil {
+			suite.Fail("error closing response body", err)
+		}
+	}()
+	assert.Equal(suite.T(), resp.StatusCode, http.StatusOK, "didn't get 200 code for OPTIONS")
+	logrus.Errorf("options=%s", resp.Body)
+}
+
 /* TODO: WRITE ENDPOINTS FOR THE FOLLOWING ENDPOINTS
 suite.db.GetEventMessagesSince(tag int, since time.Time) (*EventEntries, error)
 suite.db.GetEventMessagesFrom(tag int, from time.Time, to time.Time) (*EventEntries, error)

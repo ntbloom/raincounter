@@ -15,8 +15,36 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// serveGet handles GET requests
+func (handler restHandler) serveGet(w http.ResponseWriter, r *http.Request) {
+	logrus.Infof("received get request: %s", r.URL.RawQuery)
+	switch r.URL.Path {
+	case urlHello:
+		handler.handleGetHello(w, r)
+	case urlTeapot:
+		handler.handleGetTeapot(w, r)
+	case urlLastRain:
+		handler.handleGetLastRain(w, r)
+	case urlLastTemp:
+		handler.handleGetLastTemp(w, r)
+	case urlSensorStatus:
+		handler.handleGetAssetStatus(sensorStatusKey, w, r)
+	case urlGwStatus:
+		handler.handleGetAssetStatus(gatewayStatusKey, w, r)
+	case urlTemp:
+		handler.handleGetTemp(w, r)
+	case urlRain:
+		handler.handleGetRain(w, r)
+	default:
+		logrus.Errorf("received unsupported request on `%s`", r.URL.Path)
+		w.WriteHeader(http.StatusNotFound)
+	}
+}
+
+/* ACTUAL HANDLERS FOR EACH GET REQUEST */
+
 // handle requests for the last rain
-func (handler restHandler) handleLastRain(w http.ResponseWriter, res *http.Request) {
+func (handler restHandler) handleGetLastRain(w http.ResponseWriter, res *http.Request) {
 	payload, err := handler.db.GetLastRainTime()
 	if err != nil {
 		logrus.Error(err)
@@ -31,7 +59,7 @@ func (handler restHandler) handleLastRain(w http.ResponseWriter, res *http.Reque
 }
 
 // handle request for rain data
-func (handler restHandler) handleRain(w http.ResponseWriter, res *http.Request) {
+func (handler restHandler) handleGetRain(w http.ResponseWriter, res *http.Request) {
 	var dates *dateRange
 	var err error
 	var resp []byte
@@ -88,7 +116,7 @@ func (handler restHandler) handleRain(w http.ResponseWriter, res *http.Request) 
 }
 
 // handle requests for the last temp
-func (handler restHandler) handleLastTemp(w http.ResponseWriter, res *http.Request) {
+func (handler restHandler) handleGetLastTemp(w http.ResponseWriter, res *http.Request) {
 	payload, err := handler.db.GetLastTempC()
 	if err != nil {
 		logrus.Error(err)
@@ -103,7 +131,7 @@ func (handler restHandler) handleLastTemp(w http.ResponseWriter, res *http.Reque
 }
 
 // handle request for temperature data
-func (handler restHandler) handleTemp(w http.ResponseWriter, res *http.Request) {
+func (handler restHandler) handleGetTemp(w http.ResponseWriter, res *http.Request) {
 	var dates *dateRange
 	var err error
 	var entries *webdb.TempEntriesC
@@ -138,7 +166,7 @@ func (handler restHandler) handleTemp(w http.ResponseWriter, res *http.Request) 
 }
 
 // handle requests for sensor status
-func (handler restHandler) handleAssetStatus(asset string, w http.ResponseWriter, res *http.Request) {
+func (handler restHandler) handleGetAssetStatus(asset string, w http.ResponseWriter, res *http.Request) {
 	var dbQuery func(duration time.Duration) (bool, error)
 	var responseKey string
 	switch asset {
@@ -182,7 +210,7 @@ func (handler restHandler) handleAssetStatus(asset string, w http.ResponseWriter
 
 // return teapot messages as bellweather for general server and for bootstrapping
 // may be able to delete this later as the API is developed
-func (handler restHandler) handleTeapot(w http.ResponseWriter, _ *http.Request) {
+func (handler restHandler) handleGetTeapot(w http.ResponseWriter, _ *http.Request) {
 	var payload []byte
 	var err error
 
@@ -198,7 +226,7 @@ func (handler restHandler) handleTeapot(w http.ResponseWriter, _ *http.Request) 
 }
 
 // template for json payload messages
-func (handler restHandler) handleHello(w http.ResponseWriter, res *http.Request) {
+func (handler restHandler) handleGetHello(w http.ResponseWriter, res *http.Request) {
 	payload, err := json.Marshal(map[string]string{"hello": "world"})
 	if err != nil {
 		logrus.Error(err)
