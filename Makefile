@@ -46,7 +46,8 @@ build:
 	@go build -v
 	@# add the build dependencies to the front-end docker toolchain
 	@cp $(EXE) $(DOCKERDIR)
-	@cp $(HOMEDIR)pkg/test/pgschema/schema.sql $(DOCKERDIR)/pgschema
+	@cp $(HOMEDIR)pkg/test/pgschema/schema.sql $(DOCKERDIR)/pgschema/00-schema.sql
+	@cp $(HOMEDIR)pkg/test/dummy.sql $(DOCKERDIR)/pgschema/99-dummy.sql
 
 build-race: clean
 	@go build -race -o $(EXE)-race
