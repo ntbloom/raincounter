@@ -282,7 +282,7 @@ func (suite *RestTest) TestParseQuery() {
 		"": nil,
 	}
 	for k, v := range args {
-		expected, err := api.ParseQuery(k)
+		expected, err := api.ParseRestQuery(k)
 		// check the fail point, we should not be calling ParseArgs with empty args
 		if k == "" {
 			assert.NotNil(suite.T(), err, "should not be parsing args on empty case")
