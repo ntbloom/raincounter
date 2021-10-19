@@ -410,7 +410,8 @@ func (suite *RestTest) TestOptions() {
 		}
 	}()
 	assert.Equal(suite.T(), resp.StatusCode, http.StatusOK, "didn't get 200 code for OPTIONS")
-	logrus.Errorf("options=%s", resp.Body)
+	logrus.Infof("OPTIONS body=%s", resp.Body)
+	logrus.Infof("OPTIONS headers=%s", resp.Header)
 }
 
 /* TODO: WRITE ENDPOINTS FOR THE FOLLOWING ENDPOINTS

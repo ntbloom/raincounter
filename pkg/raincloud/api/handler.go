@@ -58,7 +58,9 @@ func (handler restHandler) close() {
 func (handler restHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		handler.serveGet(w, r)
+		handler.handleGet(w, r)
+	case http.MethodOptions:
+		handler.handleOptions(w)
 	default:
 		// only serve GET requests, all data come in through MQTT
 		logrus.Errorf("attempted illegal request: %s", r.Method)

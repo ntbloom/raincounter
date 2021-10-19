@@ -15,8 +15,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// serveGet handles GET requests
-func (handler restHandler) serveGet(w http.ResponseWriter, r *http.Request) {
+// handleGet handles GET requests
+func (handler restHandler) handleGet(w http.ResponseWriter, r *http.Request) {
 	logrus.Infof("received get request: %s", r.URL.RawQuery)
 	switch r.URL.Path {
 	case urlHello:
