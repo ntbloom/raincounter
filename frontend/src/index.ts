@@ -1,10 +1,6 @@
-import GetData from './lib/getData';
+import React from 'react';
+import ReactDOM, { Container } from 'react-dom';
+import hello from './components/Main';
 
-async function lastRain() {
-  const g: GetData = new GetData();
-  const rain = await g.getLastRain();
-  console.log(rain);
-}
-
-console.log('second try');
-lastRain();
+const container: Container = document.getElementById('root');
+ReactDOM.render(hello, container);
