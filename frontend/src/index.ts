@@ -1,6 +1,4 @@
-import React from 'react';
-import ReactDOM, { Container } from 'react-dom';
-import hello from './components/Main';
+import ReactDOM from 'react-dom';
+import main from './components/Main';
 
-const container: Container = document.getElementById('root');
-ReactDOM.render(hello, container);
+ReactDOM.render(main, document.getElementById('root'));

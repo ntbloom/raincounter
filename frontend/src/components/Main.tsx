@@ -1,3 +1,9 @@
-const hello: JSX.Element = <div>hello world</div>;
+import React from 'react';
 
-export default hello;
+const main: JSX.Element = (
+  <div>
+    <h1>hello world</h1>
+  </div>
+);
+
+export default main;
