@@ -6,7 +6,7 @@ module.exports = {
   module: {
     rules: [
       {
-        use: 'babel-loader',
+        use: 'ts-loader',
         exclude: /node_modules/,
       },
     ],
@@ -24,5 +24,6 @@ module.exports = {
     },
     compress: false,
     port: 9000,
+    hot: false,
   },
 };
