@@ -19,19 +19,23 @@ async function getUrl(url: string): Promise<Response> {
   return val;
 }
 
-class GetData {
+class DataGetter {
   baseUrl: string;
+  lastRainURL: string;
 
   constructor() {
     this.baseUrl = ip;
+    this.lastRainURL = `${this.baseUrl}/lastRain`;
   }
 
   // get last rain value
   async getLastRain(): Promise<object> {
     const url = `${this.baseUrl}/lastRain`;
+    console.log(`url=${url}`);
     const data = await getUrl(url);
+    console.log(data);
     return data;
   }
 }
 
-export default GetData;
+export default DataGetter;
