@@ -12,7 +12,7 @@ interface LastRainProps {
 
 interface LastRainState {
   date: Date | string;
-  timeSince: string;
+  //   timeSince: string;
 }
 
 class LastRain extends React.Component<LastRainProps, LastRainState> {
@@ -20,6 +20,7 @@ class LastRain extends React.Component<LastRainProps, LastRainState> {
     super(props);
     this.state = {
       date: 'no rain recorded',
+      //   timeSince: ""
     };
   }
   componentDidMount() {
