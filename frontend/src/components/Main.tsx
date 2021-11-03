@@ -1,9 +1,9 @@
 import React from 'react';
-import DataGetter from '../lib/data/getData';
+import UrlBuilder from '../lib/data/urlBuilder';
 
 import { LastRain, LastRainProps } from './lastRain';
 
-const data = new DataGetter();
+const data = new UrlBuilder();
 
 const main: JSX.Element = (
   <div>

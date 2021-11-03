@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React from 'react';
 
 type lastRainData = {
   timestamp: Date;
@@ -12,13 +12,14 @@ interface LastRainProps {
 
 interface LastRainState {
   date: Date | string;
+  timeSince: string;
 }
 
 class LastRain extends React.Component<LastRainProps, LastRainState> {
   constructor(props: LastRainProps) {
     super(props);
     this.state = {
-      date: 'waiting',
+      date: 'no rain recorded',
     };
   }
   componentDidMount() {
