@@ -3,22 +3,27 @@ const HOUR = MINUTE * 60;
 const DAY = HOUR * 24;
 
 class TimeUtils {
-  // how many days/months/years since an event occurred
   static timeSince(date: Date): string {
-    let duration = new Date().getUTCSeconds() - date.getUTCSeconds();
-
-    return '';
+    return this.secondsToString(Date.now() / 1000 - date.getUTCSeconds());
   }
 
+  // parse seconds into human-readable string
   static secondsToString(seconds: number): string {
-    if (seconds < MINUTE * 2) {
-      return '1 minute';
-    }
+    // just return "hour" for small increments
     if (seconds < HOUR) {
-      const minutes = Math.floor(seconds / 60);
-      return `${minutes} minutes`;
+      return `<1 hour`;
     }
-    return '';
+    // return "hours" for less than 1 day
+    let unit: string;
+    if (seconds < DAY) {
+      const hours = Math.floor(seconds / HOUR);
+      hours == 1 ? (unit = 'hour') : (unit = 'hours');
+      return `${hours} ${unit}`;
+    }
+    // return days for the rest
+    const days = Math.floor(seconds / DAY);
+    days == 1 ? (unit = 'day') : (unit = 'days');
+    return `${days} ${unit}`;
   }
 }
 export default TimeUtils;
