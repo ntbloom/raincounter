@@ -15,6 +15,7 @@ describe.each([
   [86400, '1 day'],
   [172801, '2 days'],
   [701299, '8 days'],
+  [3024001, '35 days'],
 ])('test parsing seconds into clean string', (input, exp) => {
   test(`${input} -> ${exp}`, () => {
     expect(TimeUtils.secondsToString(input)).toBe(exp);

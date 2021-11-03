@@ -1,7 +1,8 @@
 import React from 'react';
+import TimeUtils from '../lib/data/timeUtils';
 
 type lastRainData = {
-  timestamp: Date;
+  timestamp: string;
 };
 
 interface LastRainProps {
@@ -11,8 +12,8 @@ interface LastRainProps {
 }
 
 interface LastRainState {
-  date: Date | string;
-  //   timeSince: string;
+  date: string;
+  timeSince: string;
 }
 
 class LastRain extends React.Component<LastRainProps, LastRainState> {
@@ -20,7 +21,7 @@ class LastRain extends React.Component<LastRainProps, LastRainState> {
     super(props);
     this.state = {
       date: 'no rain recorded',
-      //   timeSince: ""
+      timeSince: '',
     };
   }
   componentDidMount() {
@@ -41,7 +42,8 @@ class LastRain extends React.Component<LastRainProps, LastRainState> {
       .then((data) => {
         console.log(`data=${data}`);
         const val = (data as lastRainData).timestamp;
-        this.setState({ date: val });
+        const since = TimeUtils.timeSince(val);
+        this.setState({ date: val, timeSince: since });
       })
       .catch((err) => {
         console.error(err);
@@ -51,7 +53,9 @@ class LastRain extends React.Component<LastRainProps, LastRainState> {
   render() {
     return (
       <div>
-        <p>Last Rain: {this.state.date}</p>
+        <p>
+          Last Rain Event: {this.state.date} ({this.state.timeSince} ago)
+        </p>
       </div>
     );
   }

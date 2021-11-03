@@ -3,8 +3,11 @@ const HOUR = MINUTE * 60;
 const DAY = HOUR * 24;
 
 class TimeUtils {
-  static timeSince(date: Date): string {
-    return this.secondsToString(Date.now() / 1000 - date.getUTCSeconds());
+  // gets a human-readable string of time passed since the date
+  static timeSince(timestamp: string): string {
+    const now = new Date().getTime();
+    const dateAsSeconds = Math.floor(Date.parse(timestamp));
+    return this.secondsToString((now - dateAsSeconds) / 1000);
   }
 
   // parse seconds into human-readable string
