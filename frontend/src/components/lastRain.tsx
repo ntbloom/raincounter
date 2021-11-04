@@ -1,5 +1,6 @@
 import React from 'react';
 import TimeUtils from '../lib/data/timeUtils';
+import UrlBuilder from '../lib/data/urlBuilder';
 
 type lastRainData = {
   timestamp: string;
@@ -19,23 +20,18 @@ interface LastRainState {
 class LastRain extends React.Component<LastRainProps, LastRainState> {
   constructor(props: LastRainProps) {
     super(props);
+    const date = new Date();
     this.state = {
-      date: 'no rain recorded',
+      date: '',
       timeSince: '',
     };
   }
+
   componentDidMount() {
-    let cors: RequestMode = 'cors';
-    const args = {
-      mode: cors,
-      method: 'GET',
-      headers: {
-        'content-type': 'application/json',
-      },
-    };
+    const init = UrlBuilder.getInit();
     const url = this.props.url;
     console.log(url);
-    fetch(url, args)
+    fetch(url, init)
       .then((response) => {
         return response.json();
       })
@@ -43,7 +39,16 @@ class LastRain extends React.Component<LastRainProps, LastRainState> {
         console.log(`data=${data}`);
         const val = (data as lastRainData).timestamp;
         const since = TimeUtils.timeSince(val);
-        this.setState({ date: val, timeSince: since });
+        const d = new Date(Date.parse(val));
+        this.setState({
+          date: `${d.toLocaleString('default', {
+            month: 'long',
+            day: '2-digit',
+            year: 'numeric',
+          })}`,
+
+          timeSince: since,
+        });
       })
       .catch((err) => {
         console.error(err);

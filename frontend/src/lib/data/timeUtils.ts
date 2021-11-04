@@ -28,5 +28,23 @@ class TimeUtils {
     days == 1 ? (unit = 'day') : (unit = 'days');
     return `${days} ${unit}`;
   }
+
+  static getMonth(idx: number) {
+    const months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    return months[idx];
+  }
 }
 export default TimeUtils;
