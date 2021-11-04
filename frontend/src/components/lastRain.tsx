@@ -12,6 +12,7 @@ interface LastRainProps {
 interface LastRainState {
   date: string;
   timeSince: string;
+  rawStamp: string;
 }
 
 interface LastRainData {
@@ -22,39 +23,34 @@ interface LastRainData {
 class LastRain extends React.Component<LastRainProps, LastRainState> {
   constructor(props: LastRainProps) {
     super(props);
-    const date = new Date();
     this.state = {
       date: '',
       timeSince: '',
+      rawStamp: '',
     };
   }
 
   // get last rain from API
   apiCall() {
-    fetch(this.props.url, UrlBuilder.getInit())
-      .then((response) => {
-        return response.json();
-      })
-
-      .then((data) => {
-        const timestamp = (data as LastRainData).timestamp;
-        this.setState({
-          date: TimeUtils.getMonthDayYear(timestamp),
-          timeSince: `(${TimeUtils.getTimeSince(timestamp)} ago)`,
-        });
-      })
-
-      .catch((err) => {
-        console.error(err);
+    const data = UrlBuilder.apiCall(this.props.url).then((data) => {
+      const timestamp = (data as LastRainData).timestamp;
+      console.log(`data=${data}, timestamp=${timestamp}`);
+      this.setState({
+        rawStamp: timestamp,
+        date: TimeUtils.getMonthDayYear(timestamp),
+        timeSince: `(${TimeUtils.getTimeSince(timestamp)} ago)`,
       });
+    });
   }
 
   componentDidMount() {
     this.apiCall();
   }
 
-  componentDidUpdate() {
-    this.apiCall();
+  componentDidUpdate(_: LastRainProps, prevState: LastRainState) {
+    if (prevState.rawStamp !== this.state.rawStamp) {
+      this.apiCall();
+    }
   }
 
   render() {

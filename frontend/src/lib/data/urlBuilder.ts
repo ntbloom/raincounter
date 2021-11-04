@@ -40,6 +40,17 @@ class UrlBuilder {
     };
     return args;
   }
+
+  static apiCall(url: string): Promise<any> {
+    const data = fetch(url, UrlBuilder.getInit()).then(async (response) => {
+      try {
+        return response.json();
+      } catch (err) {
+        console.log(err);
+      }
+    });
+    return data;
+  }
 }
 
 export default UrlBuilder;
