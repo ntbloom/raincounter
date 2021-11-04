@@ -2,10 +2,6 @@ import React from 'react';
 import TimeUtils from '../lib/data/timeUtils';
 import UrlBuilder from '../lib/data/urlBuilder';
 
-type lastRainData = {
-  timestamp: string;
-};
-
 interface LastRainProps {
   url: string;
   lastRainMM: number;
@@ -17,6 +13,11 @@ interface LastRainState {
   timeSince: string;
 }
 
+interface LastRainData {
+  timestamp: string;
+}
+
+// LastRain shows the last time it rained and how many hours or days ago it was
 class LastRain extends React.Component<LastRainProps, LastRainState> {
   constructor(props: LastRainProps) {
     super(props);
@@ -28,28 +29,19 @@ class LastRain extends React.Component<LastRainProps, LastRainState> {
   }
 
   componentDidMount() {
-    const init = UrlBuilder.getInit();
-    const url = this.props.url;
-    console.log(url);
-    fetch(url, init)
+    fetch(this.props.url, UrlBuilder.getInit())
       .then((response) => {
         return response.json();
       })
-      .then((data) => {
-        console.log(`data=${data}`);
-        const val = (data as lastRainData).timestamp;
-        const since = TimeUtils.timeSince(val);
-        const d = new Date(Date.parse(val));
-        this.setState({
-          date: `${d.toLocaleString('default', {
-            month: 'long',
-            day: '2-digit',
-            year: 'numeric',
-          })}`,
 
-          timeSince: since,
+      .then((data) => {
+        const timestamp = (data as LastRainData).timestamp;
+        this.setState({
+          date: TimeUtils.getMonthDayYear(timestamp),
+          timeSince: TimeUtils.getTimeSince(timestamp),
         });
       })
+
       .catch((err) => {
         console.error(err);
       });
@@ -57,11 +49,9 @@ class LastRain extends React.Component<LastRainProps, LastRainState> {
 
   render() {
     return (
-      <div>
-        <p>
-          Last Rain Event: {this.state.date} ({this.state.timeSince} ago)
-        </p>
-      </div>
+      <p id="lastRain">
+        Last Rain Event: {this.state.date} ({this.state.timeSince} ago)
+      </p>
     );
   }
 }

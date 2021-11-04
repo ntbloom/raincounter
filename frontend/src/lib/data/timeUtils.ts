@@ -3,13 +3,6 @@ const HOUR = MINUTE * 60;
 const DAY = HOUR * 24;
 
 class TimeUtils {
-  // gets a human-readable string of time passed since the date
-  static timeSince(timestamp: string): string {
-    const now = new Date().getTime();
-    const dateAsSeconds = Math.floor(Date.parse(timestamp));
-    return this.secondsToString((now - dateAsSeconds) / 1000);
-  }
-
   // parse seconds into human-readable string
   static secondsToString(seconds: number): string {
     // just return "hour" for small increments
@@ -29,22 +22,26 @@ class TimeUtils {
     return `${days} ${unit}`;
   }
 
-  static getMonth(idx: number) {
-    const months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-    return months[idx];
+  // gets a human-readable string of time passed since the date
+  static getTimeSince(timestamp: string): string {
+    const now = new Date().getTime();
+    const dateAsSeconds = Math.floor(Date.parse(timestamp));
+    return this.secondsToString((now - dateAsSeconds) / 1000);
+  }
+
+  // turn a timestamp string into `Month Day, Year`
+  static getMonthDayYear(timestamp: string): string {
+    const options: Intl.DateTimeFormatOptions = {
+      month: 'long',
+      day: '2-digit',
+      year: 'numeric',
+    };
+    const date = new Date(Date.parse(timestamp)).toLocaleString(
+      'default',
+      options
+    );
+    return date;
   }
 }
+
 export default TimeUtils;
