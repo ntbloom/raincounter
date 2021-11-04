@@ -9,8 +9,9 @@ const main: JSX.Element = (
   <div>
     <LastRain
       url={data.lastRainURL}
-      lastRainMM={0}
-      lastRainDuration={0}
+      //  // come back to these later?
+      // lastRainMM={0}
+      // lastRainDuration={0}
     ></LastRain>
   </div>
 );

@@ -4,8 +4,9 @@ import UrlBuilder from '../lib/data/urlBuilder';
 
 interface LastRainProps {
   url: string;
-  lastRainMM: number;
-  lastRainDuration: number;
+  //   // come back to these later?
+  //   lastRainMM: number;
+  //   lastRainDuration: number;
 }
 
 interface LastRainState {
@@ -28,7 +29,8 @@ class LastRain extends React.Component<LastRainProps, LastRainState> {
     };
   }
 
-  componentDidMount() {
+  // get last rain from API
+  apiCall() {
     fetch(this.props.url, UrlBuilder.getInit())
       .then((response) => {
         return response.json();
@@ -38,7 +40,7 @@ class LastRain extends React.Component<LastRainProps, LastRainState> {
         const timestamp = (data as LastRainData).timestamp;
         this.setState({
           date: TimeUtils.getMonthDayYear(timestamp),
-          timeSince: TimeUtils.getTimeSince(timestamp),
+          timeSince: `(${TimeUtils.getTimeSince(timestamp)} ago)`,
         });
       })
 
@@ -47,10 +49,18 @@ class LastRain extends React.Component<LastRainProps, LastRainState> {
       });
   }
 
+  componentDidMount() {
+    this.apiCall();
+  }
+
+  componentDidUpdate() {
+    this.apiCall();
+  }
+
   render() {
     return (
       <p id="lastRain">
-        Last Rain Event: {this.state.date} ({this.state.timeSince} ago)
+        Last Rain Event: {this.state.date} {this.state.timeSince}
       </p>
     );
   }
