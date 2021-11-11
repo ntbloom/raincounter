@@ -82,10 +82,10 @@ func (suite *RestTest) getEndpoint(endpoint string) (*http.Response, error) {
 	var resp *http.Response
 
 	url := fmt.Sprintf("%s%s", suite.url, endpoint)
+	logrus.Infof("calling get at `%s`", url)
 	var headers = map[string]string{
 		"content-type": "application/json",
 	}
-
 	if req, err = http.NewRequestWithContext(context.Background(), http.MethodGet, url, nil); err != nil {
 		return nil, err
 	}

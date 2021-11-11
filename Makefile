@@ -8,8 +8,11 @@ EXE = ./raincounter
 COMPOSEFILE = $(HOMEDIR)pkg/test/docker-compose.yaml
 COMPOSE = docker-compose -f $(COMPOSEFILE)
 COMPOSEWAIT = 10
-COMPOSEFLAGS  = --remove-orphans
+COMPOSEFLAGS  = --build --remove-orphans
 COMPOSEFLAGS += -d
+
+FRONTEND_COMPOSEFILE = $(HOMEDIR)docker/docker-compose.yml
+FRONTEND_COMPOSE = docker-compose -f $(FRONTEND_COMPOSEFILE)
 
 TESTFLAGS   = -p 1
 #TESTFLAGS  = -timeout 10s
@@ -86,6 +89,12 @@ docker-cycle: docker-down docker-up
 
 docker-pglogs:
 	@$(COMPOSE) logs -f postgresql
+
+frontend-up:
+	@$(FRONTEND_COMPOSE) up $(COMPOSEFLAGS)
+
+frontend-down:
+	@$(FRONTEND_COMPOSE) down
 
 # postgresql control
 
