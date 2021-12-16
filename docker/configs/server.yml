@@ -1,0 +1,7 @@
+# server.yml
+log.level: info
+mqtt:
+  tls: false
+
+database:
+  remote.name: raincounter

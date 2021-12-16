@@ -82,10 +82,10 @@ func (suite *RestTest) getEndpoint(endpoint string) (*http.Response, error) {
 	var resp *http.Response
 
 	url := fmt.Sprintf("%s%s", suite.url, endpoint)
+	logrus.Infof("calling get at `%s`", url)
 	var headers = map[string]string{
 		"content-type": "application/json",
 	}
-
 	if req, err = http.NewRequestWithContext(context.Background(), http.MethodGet, url, nil); err != nil {
 		return nil, err
 	}
@@ -282,7 +282,7 @@ func (suite *RestTest) TestParseQuery() {
 		"": nil,
 	}
 	for k, v := range args {
-		expected, err := api.ParseQuery(k)
+		expected, err := api.ParseRestQuery(k)
 		// check the fail point, we should not be calling ParseArgs with empty args
 		if k == "" {
 			assert.NotNil(suite.T(), err, "should not be parsing args on empty case")
@@ -391,6 +391,27 @@ func (suite *RestTest) TestHandlingBadRequests() {
 	}
 	statusCheck(badRequests, http.StatusBadRequest)
 	statusCheck(notFounds, http.StatusNotFound)
+}
+
+func (suite *RestTest) TestOptions() {
+	var err error
+	var req *http.Request
+	var resp *http.Response
+
+	if req, err = http.NewRequestWithContext(context.Background(), http.MethodOptions, suite.url, nil); err != nil {
+		suite.Fail("unable send OPTIONS request", err)
+	}
+	if resp, err = http.DefaultClient.Do(req); err != nil {
+		suite.Fail("error retrieving OPTIONS response", err)
+	}
+	defer func() {
+		if err = resp.Body.Close(); err != nil {
+			suite.Fail("error closing response body", err)
+		}
+	}()
+	assert.Equal(suite.T(), resp.StatusCode, http.StatusOK, "didn't get 200 code for OPTIONS")
+	logrus.Infof("OPTIONS body=%s", resp.Body)
+	logrus.Infof("OPTIONS headers=%s", resp.Header)
 }
 
 /* TODO: WRITE ENDPOINTS FOR THE FOLLOWING ENDPOINTS

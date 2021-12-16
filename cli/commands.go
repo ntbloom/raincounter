@@ -8,6 +8,7 @@ var RootCmd = &cobra.Command{} //nolint:gochecknoglobals
 // Configure sets global CLI configs
 func Configure() {
 	RootCmd.CompletionOptions.DisableDefaultCmd = true
+
 }
 
 // AddSubcommand adds a subcommand to the CLI

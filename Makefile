@@ -8,8 +8,11 @@ EXE = ./raincounter
 COMPOSEFILE = $(HOMEDIR)pkg/test/docker-compose.yaml
 COMPOSE = docker-compose -f $(COMPOSEFILE)
 COMPOSEWAIT = 10
-COMPOSEFLAGS  = --remove-orphans
+COMPOSEFLAGS  = --build --remove-orphans
 COMPOSEFLAGS += -d
+
+FRONTEND_COMPOSEFILE = $(HOMEDIR)docker/docker-compose.yml
+FRONTEND_COMPOSE = docker-compose -f $(FRONTEND_COMPOSEFILE)
 
 TESTFLAGS   = -p 1
 #TESTFLAGS  = -timeout 10s
@@ -19,11 +22,35 @@ SQLFLAGS  = -h localhost
 SQLFLAGS += -U postgres
 SQLFLAGS += raincounter
 DUMMY_DATA = $(HOMEDIR)pkg/test/dummy.sql
+CLEAR_SQL = $(HOMEDIR)pkg/test/clear.sql
+
+# for the front end
+DOCKERDIR = $(HOMEDIR)docker
+
+### DEPLOY ###
+
+DEVCFG = $(HOMEDIR)config/insecure.yml
+DEVFLAGS = --config $(DEVCFG)
+
+DEVRUN = $(EXE) $(DEVFLAGS)
+
+dev-server:
+	@$(DEVRUN) server
+
+dev-receiver:
+	@$(DEVRUN) receiver
+
+dev-rainbase:
+	@$(DEVRUN) rainbase
 
 ### BUILD ###
 
 build:
 	@go build -v
+	@# add the build dependencies to the front-end docker toolchain
+	@cp $(EXE) $(DOCKERDIR)
+	@cp $(HOMEDIR)pkg/test/pgschema/schema.sql $(DOCKERDIR)/pgschema/00-schema.sql
+	@cp $(HOMEDIR)pkg/test/dummy.sql $(DOCKERDIR)/pgschema/99-dummy.sql
 
 build-race: clean
 	@go build -race -o $(EXE)-race
@@ -63,6 +90,12 @@ docker-cycle: docker-down docker-up
 docker-pglogs:
 	@$(COMPOSE) logs -f postgresql
 
+frontend-up:
+	@$(FRONTEND_COMPOSE) up $(COMPOSEFLAGS)
+
+frontend-down:
+	@$(FRONTEND_COMPOSE) down
+
 # postgresql control
 
 psql:
@@ -71,6 +104,9 @@ psql:
 define enter_data
 	@psql $(SQLFLAGS) -f $(DUMMY_DATA) > /dev/null
 endef
+
+remove-data:
+	psql $(SQLFLAGS) -f $(CLEAR_SQL)
 
 # server
 enter-data:

@@ -25,3 +25,7 @@ func (handler restHandler) unsupportedMedia(w http.ResponseWriter) {
 func (handler restHandler) notFound(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusNotFound)
 }
+
+func (handler restHandler) methodNotAllowed(w http.ResponseWriter) {
+	w.WriteHeader(http.StatusMethodNotAllowed)
+}

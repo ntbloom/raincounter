@@ -1,0 +1,59 @@
+# Test docker-compose.yaml environment
+# Quickly spin up necessary services for use in test
+
+services:
+  # MQTT service
+  mosquitto:
+    environment:
+      - TZ=America/New_York
+      - PGTZ=America/New_York
+    depends_on:
+      - postgresql
+    image: eclipse-mosquitto:latest
+    network_mode: host
+
+  # database layer
+  postgresql:
+    image: postgres:latest
+    network_mode: host
+    environment:
+      - TZ=America/New_York
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=raincounter
+    volumes:
+      - './pgschema:/docker-entrypoint-initdb.d'
+
+  # REST API from database
+  server:
+    depends_on:
+      - mosquitto
+#      - rainbase
+      - receiver
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    network_mode: host
+    entrypoint: ["/bin/raincounter", "server", "--config", "/etc/rainbase/server.yml"]
+
+  # sends data to database from MQTT
+  receiver:
+    depends_on:
+      - mosquitto
+#      - rainbase
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    network_mode: host
+    entrypoint: ["/bin/raincounter", "receiver", "--config", "/etc/rainbase/receiver.yml"]
+
+#  # sends data from sensor to MQTT
+#  rainbase:
+#    depends_on:
+#      - mosquitto
+#    build:
+#      context: ./
+#      dockerfile: Dockerfile
+#    network_mode: host
+#    devices:
+#      - '/dev/ttyACM99:/dev/ttyACM99'
+#    entrypoint: ["/bin/raincounter", "rainbase", "--config", "/etc/rainbase/rainbase.yml"]
