@@ -38,6 +38,10 @@ const (
 	RestPort    = "rest.ip.port"
 	RestScheme  = "rest.scheme"
 	RestVersion = "rest.version"
+
+	WebEntrypoint    = "web.entrypoint"
+	WebDirectory     = "web.directory"
+	WebServerAddress = ":8080"
 )
 
 // random constants, not tied to config
@@ -47,6 +51,7 @@ const (
 	Kill              = 1
 	SendStatusMessage = 2
 	TimestampFormat   = time.RFC3339
+	PrettyTimeFormat  = "Mon Jan 2, 2006 15:04 EST"
 	SensorStatus      = 1
 	GatewayStatus     = 2
 	IntErrVal         = -99

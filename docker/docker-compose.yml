@@ -23,37 +23,25 @@ services:
     volumes:
       - './pgschema:/docker-entrypoint-initdb.d'
 
-  # REST API from database
-  server:
-    depends_on:
-      - mosquitto
-#      - rainbase
-      - receiver
-    build:
-      context: ./
-      dockerfile: Dockerfile
-    network_mode: host
-    entrypoint: ["/bin/raincounter", "server", "--config", "/etc/rainbase/server.yml"]
-
   # sends data to database from MQTT
   receiver:
     depends_on:
       - mosquitto
-#      - rainbase
+      - rainbase
     build:
       context: ./
       dockerfile: Dockerfile
     network_mode: host
     entrypoint: ["/bin/raincounter", "receiver", "--config", "/etc/rainbase/receiver.yml"]
 
-#  # sends data from sensor to MQTT
-#  rainbase:
-#    depends_on:
-#      - mosquitto
-#    build:
-#      context: ./
-#      dockerfile: Dockerfile
-#    network_mode: host
-#    devices:
-#      - '/dev/ttyACM99:/dev/ttyACM99'
-#    entrypoint: ["/bin/raincounter", "rainbase", "--config", "/etc/rainbase/rainbase.yml"]
+  # sends data from sensor to MQTT
+  rainbase:
+    depends_on:
+      - mosquitto
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    network_mode: host
+    devices:
+      - '/dev/ttyACM99:/dev/ttyACM99'
+    entrypoint: ["/bin/raincounter", "rainbase", "--config", "/etc/rainbase/rainbase.yml"]

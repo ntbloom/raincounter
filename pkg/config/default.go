@@ -34,4 +34,7 @@ var defaultConfig = map[string]interface{}{ //nolint:gochecknoglobals
 	configkey.RestIP:                  "127.0.0.1",
 	configkey.RestPort:                8080, //nolint:gomnd
 	configkey.RestVersion:             "v1.0",
+	configkey.WebEntrypoint:           "/etc/raincounter/src/index.html",
+	configkey.WebDirectory:            "/etc/raincounter/src",
+	configkey.WebServerAddress:        "localhost:8080",
 }

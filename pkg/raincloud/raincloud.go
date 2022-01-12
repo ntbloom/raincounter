@@ -5,7 +5,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/ntbloom/raincounter/pkg/raincloud/api"
+	"github.com/ntbloom/raincounter/pkg/raincloud/frontend"
 
 	"github.com/sirupsen/logrus"
 
@@ -36,12 +36,12 @@ func Receive() {
 
 // Serve serves the web server
 func Serve() {
-	rest, err := api.NewRestServer()
+	server, err := frontend.NewHTMLServer()
 	if err != nil {
 		panic(err)
 	}
-	go rest.Run()
-	defer rest.Stop()
+	go server.Run()
+	defer server.Stop()
 
 	waitForSignal()
 }

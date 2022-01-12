@@ -25,7 +25,6 @@ func Configure() {
 	for k, v := range defaultConfig {
 		viper.SetDefault(k, v)
 	}
-	logrus.Errorf("Regular=%s", RegularFile)
 
 	var (
 		regular   string

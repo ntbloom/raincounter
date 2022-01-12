@@ -3,6 +3,7 @@ RAINBASE = $(HOMEDIR)pkg/rainbase
 RAINCLOUD = $(HOMEDIR)pkg/raincloud
 COMMON = $(HOMEDIR)pkg/common
 EXE = ./raincounter
+EXERACE = $(EXE)-race
 
 # docker-compose, for testing
 COMPOSEFILE = $(HOMEDIR)pkg/test/docker-compose.yaml
@@ -144,19 +145,19 @@ run-gateway: build
 	@$(EXE) gateway
 
 run-gateway-race: build-race
-	@$(EXE)-race gateway
+	@$(EXERACE) gateway
 
 run-receiver: build
 	@$(EXE) receiver
 
 run-receiver-race: build-race
-	@$(EXE) race receiver
+	@$(EXERACE) race receiver
 
 run-server: build
 	@$(EXE) server
 
 run-server-race: build-race
-	@$(EXE) race server
+	@$(EXERACE) server
 
 ### LINT ###
 

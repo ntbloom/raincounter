@@ -1,0 +1,15 @@
+{
+  "name": "raincounter",
+  "version": "0.1.0",
+  "description": "front end for rain gauge",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "ntbloom <39017897+ntbloom@users.noreply.github.com> (https://github.com/ntbloom)",
+  "license": "GPL-3.0-or-later",
+  "devDependencies": {
+    "eslint": "^8.4.1",
+    "prettier": "^2.5.1"
+  }
+}

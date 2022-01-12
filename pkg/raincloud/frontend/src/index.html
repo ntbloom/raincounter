@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="raincounter" content="track rain over time" />
+    <link rel="icon" href="data:," />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap"
+      rel="stylesheet"
+    />
+    <title>raincounter</title>
+
+    <style>
+      :root {
+        --background: #000;
+        --wrapper-color: #333;
+        --text-color: #ccc;
+      }
+
+      body {
+        margin: 1em;
+        background-color: var(--background);
+        font-family: "Roboto", sans-serif;
+        color: var(--text-color);
+      }
+
+      @media (min-width: 600px) {
+        body {
+          font-size: 44px;
+        }
+      }
+
+      @media (min-width: 1024px) {
+        body {
+          font-size: 18px;
+        }
+      }
+
+      #subtitle {
+        font-size: 1em;
+        font-style: italic;
+      }
+
+      .headers {
+        font-weight: bold;
+        font-size: 1.2em;
+        text-indent: 1em;
+      }
+
+      .item-labels {
+        font-style: italic;
+      }
+
+      .items {
+        /* no changes for now */
+      }
+
+      table {
+        table-layout: fixed;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding-right: 1em;
+      }
+
+      .wrapper {
+        background-color: var(--wrapper-color);
+        border-radius: 0.4em;
+        padding: 1em;
+        display: grid;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      button {
+        margin: 1em;
+        font-size: 1em;
+        border-radius: 0.4em;
+        width: fit-content;
+        background-color: var(--text-color);
+      }
+
+      a,
+      a:visited,
+      a:hover,
+      a:active {
+        color: var(--text-color);
+      }
+
+      footer {
+        margin: 2em 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- title page -->
+    <h1 id="title">raincounter</h1>
+    <h2 id="subtitle">
+      weather info for albemarle county, virginia/usa as of {{.LastUpdate}}
+    </h2>
+    <div class="wrapper">
+      <!--***-->
+
+      <!--  the last time it rained  -->
+      <div class="dashboard">
+        <p class="headers">rain totals</p>
+        <table>
+          <tr>
+            <td>1{{.HourIndicator}}</td>
+            <td class="customary">{{.HourRainIn}}{{.InchIndicator}}</td>
+            <td class="metric">{{.HourRainMm}}{{.MillimeterIndicator}}</td>
+          </tr>
+          <tr>
+            <td>2{{.HourIndicator}}</td>
+            <td class="customary">{{.TwoHourRainIn}}{{.InchIndicator}}</td>
+            <td class="metric">{{.TwoHourRainMm}}{{.MillimeterIndicator}}</td>
+          </tr>
+          <tr>
+            <td>6{{.HourIndicator}}</td>
+            <td class="customary">{{.SixHourRainIn}}{{.InchIndicator}}</td>
+            <td class="metric">{{.SixHourRainMm}}{{.MillimeterIndicator}}</td>
+          </tr>
+          <tr>
+            <td>24{{.HourIndicator}}</td>
+            <td class="customary">
+              {{.TwentyFourHourRainIn}}{{.InchIndicator}}
+            </td>
+            <td class="metric">
+              {{.TwentyFourHourRainMm}}{{.MillimeterIndicator}}
+            </td>
+          </tr>
+          <tr>
+            <td>7{{.DayIndicator}}</td>
+            <td class="customary">{{.SevenDayRainIn}}{{.InchIndicator}}</td>
+            <td class="metric">{{.SevenDayRainMm}}{{.MillimeterIndicator}}</td>
+          </tr>
+          <tr>
+            <td>30{{.DayIndicator}}</td>
+            <td class="customary">{{.ThirtyDayRainIn}}{{.InchIndicator}}</td>
+            <td class="metric">{{.ThirtyDayRainMm}}{{.MillimeterIndicator}}</td>
+          </tr>
+          <tr>
+            <td>{{.YearIndicator}}</td>
+            <td class="customary">{{.YearlyRainIn}}{{.InchIndicator}}</td>
+            <td class="metric">{{.YearlyRainMm}}{{.MillimeterIndicator}}</td>
+          </tr>
+        </table>
+      </div>
+      <!--***-->
+
+      <!--  what's the current weather?  -->
+      <div class="dashboard">
+        <p class="headers">current weather</p>
+        <table>
+          <tr>
+            <td>temp:</td>
+            <td class="customary">{{.TempF}}&#x00B0;F</td>
+            <td class="metric">{{.TempC}}&#x00B0;C</td>
+          </tr>
+          <tr>
+            <td>last rain:</td>
+            <td>{{.LastRain}}</td>
+          </tr>
+        </table>
+      </div>
+      <!--***-->
+
+      <!--  gauge status  -->
+      <div class="dashboard">
+        <p class="headers">gauge status</p>
+        <table>
+          <tr>
+            <td>gateway:</td>
+            <td>{{.GatewayStatus}}</td>
+          </tr>
+          <tr>
+            <td>sensor:</td>
+            <td>{{.SensorStatus}}</td>
+          </tr>
+        </table>
+      </div>
+      <button id="toggle-units">show metric</button>
+      <!--***-->
+    </div>
+    <script>
+      const customary = "customary";
+      const metric = "metric";
+      const toggleButton = document.getElementById("toggle-units");
+      const displayNone = "none";
+      const displayInlineBlock = "inline-block";
+      const startingUnits = customary;
+
+      const writeButtonText = (name) => {
+        return `show\n${name}`;
+      };
+
+      const setClassDisplay = (className, display) => {
+        // set the display style for all elements in a class
+        const elems = Array.from(document.getElementsByClassName(className));
+        elems.forEach((elem) => {
+          elem.style.display = display;
+        });
+      };
+
+      const displayUnit = (unit) => {
+        // choose a unit (customary or metric) to display. sets the button text for the other one
+        if (unit.includes(customary)) {
+          setClassDisplay(metric, displayNone);
+          setClassDisplay(customary, displayInlineBlock);
+          toggleButton.innerText = writeButtonText(metric);
+        } else {
+          setClassDisplay(customary, displayNone);
+          setClassDisplay(metric, displayInlineBlock);
+          toggleButton.innerText = writeButtonText(customary);
+        }
+      };
+      const loadToggleButton = () => {
+        // load onclick handler for the toggle button
+        toggleButton.onclick = () => {
+          switchUnits();
+        };
+      };
+
+      const switchUnits = () => {
+        // switch the units to display
+        const current = toggleButton.innerText;
+        displayUnit(current);
+      };
+
+      displayUnit(startingUnits);
+      loadToggleButton();
+    </script>
+  </body>
+  <footer>
+    &#x00A9;{{.Year}}
+    <a href="https://github.com/ntbloom/raincounter">ntbloom</a>
+  </footer>
+</html>
