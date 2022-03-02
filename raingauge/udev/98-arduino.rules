@@ -1,0 +1,9 @@
+# Copy this file into /lib/udev/rules.d/
+# get `idVendor` and `idProduct` values by running `udevadm info --name=/dev/ttyACM<number> --attribute-walk`, where <number> is the ACM number currently being used
+# reset with `sudo udevadm control --reload`
+
+# Arduino MKR1000
+SUBSYSTEMS=="usb", KERNEL=="ttyACM[0-9]*", ATTRS{idVendor}=="2341", ATTRS{idProduct}=="804e", SYMLINK+="ttyACM99", MODE:="0666" 
+
+# Arduino NanoBLE
+SUBSYSTEMS=="usb", KERNEL=="ttyACM[0-9]*", ATTRS{idVendor}=="2341", ATTRS{idProduct}=="805a", SYMLINK+="ttyACM98", MODE:="0666" 
