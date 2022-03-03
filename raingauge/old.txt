@@ -1,9 +1,8 @@
 /* arduino_rain_gauge.ino
  *
- * Increment rain gauge counter on click, display on screen
+ * Increment rain gauge counter on click
  *
  */
-
 
 #include <Arduino.h>
 

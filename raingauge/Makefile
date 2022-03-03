@@ -17,8 +17,8 @@ VFLAGS += --undef-value-errors=yes
 VFLAGS += --track-origins=yes
 
 CLI  = arduino-cli
-FQBN = arduino:samd:mkr1000
-PORT = /dev/ttyACM99
+FQBN = arduino:mbed_nano:nano33ble
+PORT = /dev/ttyACM98
 INO  = raingauge.ino
 WARN = --warnings all
 BINDIR = bin
