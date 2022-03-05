@@ -1,3 +1,2 @@
 pkg/test/dummy.sql linguist-generated
-docker/pgschema/99-dummy.sql
-
+docker/pgschema/99-dummy.sql linguist-generated
