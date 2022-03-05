@@ -1,19 +1,49 @@
 #include "led_manager.hpp"
+#include "Arduino.h"
+#include "config.hpp"
 
 using namespace components;
 
-LED_State &operator++(LED_State &t)
+Light::Light(int pin)
+
 {
-    switch (t)
-    {
-        case LED_State::LED_ON:
-            return t = LED_State::LED_OFF;
-        case LED_State::LED_OFF:
-            return t = LED_State::LED_ON;
-    }
+    _pin = pin;
+    pinMode(_pin, OUTPUT);
+    _start = millis();
+    _permanentlyOn = false;
 }
 
-Led::Led(led_t pin, led_duration_t duration)
+void Light::flash(void)
 {
-    // do something!
+    _state = LED_ON;
+    digitalWrite(_pin, LED_ON);
+    _start = millis();
+}
+
+void Light::on(void)
+{
+    _state = LED_ON;
+    digitalWrite(_pin, LED_ON);
+    _permanentlyOn = true;
+}
+
+void Light::off(void)
+{
+    _state = LED_OFF;
+    digitalWrite(_pin, LED_OFF);
+    _permanentlyOn = false;
+}
+
+void Light::check(void)
+{
+    if (_state == LED_OFF || _permanentlyOn)
+    {
+        return;
+    }
+
+    if ((millis() - _start) >= LED_FLASH_DURATION_MS || (millis() < _start))
+    {
+        digitalWrite(_pin, LED_OFF);
+        _state = LED_OFF;
+    }
 }

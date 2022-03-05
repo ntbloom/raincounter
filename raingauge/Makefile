@@ -40,7 +40,7 @@ test: test_tlv.out
 
 clean: 
 	$(CLI) cache clean
-	rm $(BINDIR)/*.out
+	-rm $(BINDIR)/*.out
 
 all: build upload
 

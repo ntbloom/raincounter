@@ -9,18 +9,15 @@ namespace components
 class Raingauge : public Button
 {
   private:
-    float _mmPerCount, _inchPerCount;
+    float _mmPerCount;
     unsigned long _count;
-    float _inchTotal, _mmTotal;
-    String _inches, _millimeters;
+    float _mmTotal;
     void _updateValues();
 
   public:
-    Raingauge(int pin, unsigned long msDelay, float mmPerCount, float inchPerCount);
+    Raingauge(int pin, unsigned long msDelay, float mmPerCount);
     void addCount();
     void resetCount();
-    String inches();
-    String millimeters();
 };
 }; // namespace components
 

@@ -4,43 +4,35 @@
 namespace components
 {
 
-typedef int led_t;
-typedef int led_duration_t;
-
 /* is the LED turned on or off */
-enum class LED_State
-{
-    LED_ON = 1,
-    LED_OFF = 0
-};
+constexpr int LED_ON = 1;
+constexpr int LED_OFF = 0;
 
-/* control an individual LED */
-struct Led
-{
-  public:
-    /* initialize an LED at a GPIO pin to turn on for a given duration */
-    Led(led_t pin, led_duration_t duration);
-    void turnOn();
-
-  private:
-    led_t _pin;
-    int _start;
-    led_duration_t _duration;
-    LED_State _state;
-};
-
-struct LedManager
+class Light
 {
   private:
-    /* set pins for status, measurement, and pause LEDS */
-    Led _status, _measure, _pause;
+    unsigned long _duration;
+    int _pin;
+    unsigned long _start;
+    bool _permanentlyOn;
+    int _state;
 
   public:
-    LedManager(led_t status, led_t measure, led_t pause);
+    /* @param duration: how long to be on in milliseconds */
+    Light(int pin);
 
-    /* trigger the pin on */
-    void trigger(led_t pin);
+    /* turn on the LED  for duration */
+    void flash(void);
+
+    /* turn on the LED indefinitely */
+    void on(void);
+
+    /* turn off the LED indefinitely */
+    void off(void);
+
+    /* check if it's time to turn off the light */
+    void check(void);
 };
-} // namespace components
+}; // namespace components
 
 #endif
