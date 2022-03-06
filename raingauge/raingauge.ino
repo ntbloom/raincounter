@@ -31,6 +31,7 @@ static bool PAUSED = false;
 static components::Light greenLED(LED_TEMP_GREEN);
 static components::Light redLED(LED_PAUSE_RED);
 static components::Light blueLED(LED_RAIN_BLUE);
+static components::Light lights[]{greenLED, redLED, blueLED};
 
 /* check the LEDs to see if we need to turn any off */
 void checkLED(void)
@@ -80,8 +81,16 @@ void handlePause(void)
 
 void setup()
 {
-    // give a chance for the serial port to pick up
-    delay(1000);
+    // wait a bit for serial port to pick up, blink lights in the meantime
+    for (int i = 0; i < 3; i++)
+    {
+        for (auto &light : lights)
+        {
+            light.on();
+            delay(100);
+            light.off();
+        }
+    }
     serialTLV->sendHardReset();
 }
 
