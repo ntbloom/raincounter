@@ -8,7 +8,7 @@
 #include "src/config.hpp"
 #include "src/led_manager.hpp"
 #include "src/raingauge.hpp"
-#include "src/serial/static_serial_tlv.hpp"
+#include "src/serial/stateless_serial_tlv.hpp"
 #include "src/temp36.hpp"
 #include "src/timer.hpp"
 #include <Arduino.h>
@@ -21,7 +21,7 @@ static utilities::Timer tempTimer(TEMP_INTERVAL_SEC);
 static components::Raingauge raingauge(RAIN_PIN, RAINGAUGE_DEBOUNCE_MS, RAINGAUGE_AMT_MM);
 
 /* Serial line */
-tlv::StaticSerialTLV *serialTLV = new tlv::StaticSerialTLV();
+tlv::StatelessSerialTLV *serialTLV = new tlv::StatelessSerialTLV();
 
 /* Pause button */
 static components::Button pauseButton(PAUSE_PIN, BUTTON_DEBOUNCE_MS, HIGH);

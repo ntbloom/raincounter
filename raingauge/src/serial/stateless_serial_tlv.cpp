@@ -1,4 +1,4 @@
-#include "static_serial_tlv.hpp"
+#include "stateless_serial_tlv.hpp"
 
 #include "iserial_tlv.hpp"
 
@@ -9,7 +9,7 @@
 #define UNPAUSE 5
 
 using namespace tlv;
-StaticSerialTLV::StaticSerialTLV()
+StatelessSerialTLV::StatelessSerialTLV()
 {
     _rain = _makeTLV(RAIN_COUNTER);
     _softReset = _makeTLV(SOFT_RESET);
@@ -19,44 +19,44 @@ StaticSerialTLV::StaticSerialTLV()
 }
 
 /* preallocate a TLV packet */
-unsigned char *StaticSerialTLV::_makeTLV(unsigned char tag)
+unsigned char *StatelessSerialTLV::_makeTLV(unsigned char tag)
 {
     unsigned char val = 1;
-    TLV *tlv = new TLV(tag, val);
-    return tlv->encode();
+    static TLV tlv(tag, val);
+    return tlv.encode();
 }
 
 /* indicates a rain gauge tipper was incremented */
-void StaticSerialTLV::sendRainEvent()
+void StatelessSerialTLV::sendRainEvent()
 {
     _send(_rain, SERIALFMT);
 }
 
 /* indicate soft reset (rain counter reset) just happened */
-void StaticSerialTLV::sendSoftReset()
+void StatelessSerialTLV::sendSoftReset()
 {
     _send(_softReset, SERIALFMT);
 }
 
 /* send right after boot, indicating a hard reset happened */
-void StaticSerialTLV::sendHardReset()
+void StatelessSerialTLV::sendHardReset()
 {
     _send(_hardReset, SERIALFMT);
 }
 
 /* send when sensor is paused */
-void StaticSerialTLV::sendPause()
+void StatelessSerialTLV::sendPause()
 {
     _send(_pause, SERIALFMT);
 }
 
 /* send when sensor is unpaused */
-void StaticSerialTLV::sendUnpause()
+void StatelessSerialTLV::sendUnpause()
 {
     _send(_unpause, SERIALFMT);
 }
 
-StaticSerialTLV::~StaticSerialTLV()
+StatelessSerialTLV::~StatelessSerialTLV()
 {
     delete[] _softReset;
     delete[] _hardReset;
